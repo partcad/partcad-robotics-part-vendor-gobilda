@@ -1,10 +1,13 @@
 links:
-  - part: motion/shaft_8mmREX_72mm
+  # The gear shaft. The shafts are the ones goBILDA sells, with their E-clips on.
+  # Distances along a shaft ('moveZ') are measured from its clip-side end.
+  - assembly: motion/shaft_8mmREX_72mm_with_clip
     name: shaft
 
   - part: motion/hub_sonic_8mmREX
     name: gear-hub
     connect:
+      with: 8mmREX-thru-10
       withInstance: ledged
       name: shaft
       toInstance: clip-side
@@ -20,6 +23,7 @@ links:
       to: 4xM4-16mm-pattern-thru-8mm
       toInstance: ledged
 
+  # Through the hub, into the threads of the gear
   - part: hardware/screw_m4_0.7mm_12mm
     name: hub-screw-TL
     connect:
@@ -58,9 +62,11 @@ links:
       to: //pub/std/metric/m:m4-threaded-thru-4
       toInstance: inner-BR
 
+  # Held against the E-clip
   - part: motion/bearing_flanged_8mmREX
     name: bearing-gear-1
     connect:
+      with: 8mmREX-thru-5
       withInstance: flange-side
       name: shaft
       toInstance: clip
@@ -68,111 +74,119 @@ links:
   - part: structure/u_channel_2
     name: channel
     connect:
+      with: "//pub/std/metric/m:m14-thru-2.5"
       withInstance: left-outer-0
+      # Top up, the way it is drawn
+      withParams:
+        turnZ: 300
       name: bearing-gear-1
+      to: "//pub/std/metric/m:m14-shaft-4"
 
+  # In the other wall of the channel: 48mm further along the shaft than the
+  # first one, whose flange is 1mm past the clip
   - part: motion/bearing_flanged_8mmREX
     name: bearing-gear-2
     connect:
-      name: channel
-      toInstance: right-outer-0
+      with: 8mmREX-thru-5
+      withInstance: clean-side
+      name: shaft
+      toInstance: clip-side
+      toParams:
+        moveZ: 49
 
   - part: hardware/spacer_plastic_8mm_1mm
     name: spacer-drive
     connect:
+      with: "//pub/std/metric/m:m8-thru-1"
       withInstance: side0
       name: bearing-gear-2
+      to: 8mmREX-thru-5
       toInstance: flange-side
 
+  # Its ledge against that spacer, which keeps it clear of the head of the
+  # screw holding the mount below it
   - part: motion/hub_sonic_8mmREX
     name: gear-drive-hub
     connect:
-      withInstance: flat
-      name: spacer-drive
-      toInstance: side1
-
-  - part: motion/shaft_8mmREX_clip
-    name: gear-clip
-    connect:
-      withInstance: side0
+      with: 8mmREX-thru-10
+      withInstance: ledged
       name: shaft
-      toInstance: clip
+      toInstance: clip-side
+      toParams:
+        moveZ: 55
 
+  # The worm shaft, through the top of the channel
+  # Turned so that the worm, which is keyed to this bearing through its shaft,
+  # meshes with the gear
   - part: motion/bearing_flanged_8mmREX
     name: bearing-worm-1
     connect:
+      with: "//pub/std/metric/m:m14-shaft-4"
+      withParams:
+        turnZ: 296
       name: channel
+      to: "//pub/std/metric/m:m14-thru-2.5"
       toInstance: top-inner-1
 
-  - part: motion/shaft_8mmREX_72mm
+  - assembly: motion/shaft_8mmREX_72mm_with_clip
     name: worm-shaft
     connect:
+      with: 8mmREX-shaft
       withInstance: clip
       name: bearing-worm-1
+      to: 8mmREX-thru-5
       toInstance: clean-side
-
-  - part: motion/shaft_8mmREX_clip
-    name: worm-clip
-    connect:
-      withInstance: side0
-      name: worm-shaft
-      toInstance: clip
 
   - part: hardware/spacer_steel_8mm_4mm
     name: spacer-steel
     connect:
+      with: "//pub/std/metric/m:m8-thru-4"
       withInstance: side0
       name: bearing-worm-1
+      to: 8mmREX-thru-5
       toInstance: flange-side
 
+  # Against that spacer, which centres it on the gear
   - part: motion/worm_8mmREX
     name: worm
     connect:
+      with: 8mmREX-thru-32
       withInstance: side0
-      name: spacer-steel
-      toInstance: side1
+      name: worm-shaft
+      toInstance: clip-side
+      toParams:
+        moveZ: 13
+      # Meshing with the gear. The two models are not exact conjugates of each
+      # other, so their flanks share about 1mm^3 however the worm is turned.
+      interferes: gear
 
   - part: hardware/spacer_plastic_8mm_1mm
     name: spacer-plastic-1
     connect:
+      with: "//pub/std/metric/m:m8-thru-1"
       withInstance: side0
       name: worm
+      to: 8mmREX-thru-32
       toInstance: side1
 
   - part: hardware/spacer_plastic_8mm_1mm
     name: spacer-plastic-2
     connect:
+      with: "//pub/std/metric/m:m8-thru-1"
       withInstance: side0
       name: spacer-plastic-1
+      to: "//pub/std/metric/m:m8-thru-1"
       toInstance: side1
 
-  - part: hardware/spacer_plastic_8mm_1mm
-    name: spacer-plastic-3
-    connect:
-      withInstance: side0
-      name: spacer-plastic-2
-      toInstance: side1
-
-  - part: motion/bearing_flanged_8mmREX
-    name: bearing-worm-2
-    connect:
-      withInstance: flange-side
-      name: spacer-plastic-3
-      toInstance: side1
-
+  # Screwed to both walls of the channel, near the open side of it
   - part: structure/mount_quad_block
     name: mount
     connect:
-      withInstance: rear
-      withParams:
-        turnZ: 60
-      name: bearing-worm-2
-      # TODO(clairbee): Autodetect the angle by using a second port pair
-      # with: "//pub/std/metric/m:m4-threaded-8"
-      # withInstance: side0-1
-      # name: channel
-      # to: "//pub/std/metric/m:m4-thru-2.5"
-      # toInstance: left-inner-1-1-00
+      with: "//pub/std/metric/m:m-threaded-thru-depth;depth=8.5,size=4"
+      withInstance: side0-0
+      name: channel
+      to: "//pub/std/metric/m:m4-thru-2.5"
+      toInstance: left-inner-2-1-10
 
   - part: hardware/screw_m4_0.7mm_12mm
     name: screw-0-0
@@ -181,7 +195,7 @@ links:
         moveZ: 2.5
       name: mount
       # TODO(clairbee): Autodetect the interface by the instance name
-      to: "//pub/std/metric/m:m4-threaded-thru-8"
+      to: "//pub/std/metric/m:m-threaded-thru-depth;depth=8.5,size=4"
       toInstance: side0-0
 
   - part: hardware/screw_m4_0.7mm_12mm
@@ -190,7 +204,7 @@ links:
       withParams:
         moveZ: 2.5
       name: mount
-      to: "//pub/std/metric/m:m4-threaded-thru-8"
+      to: "//pub/std/metric/m:m-threaded-thru-depth;depth=8.5,size=4"
       toInstance: side0-1
 
   - part: hardware/screw_m4_0.7mm_12mm
@@ -199,7 +213,7 @@ links:
       withParams:
         moveZ: 2.5
       name: mount
-      to: "//pub/std/metric/m:m4-threaded-thru-8"
+      to: "//pub/std/metric/m:m-threaded-thru-depth;depth=8.5,size=4"
       toInstance: side2-0
 
   - part: hardware/screw_m4_0.7mm_12mm
@@ -208,19 +222,37 @@ links:
       withParams:
         moveZ: 2.5
       name: mount
-      to: "//pub/std/metric/m:m4-threaded-thru-8"
+      to: "//pub/std/metric/m:m-threaded-thru-depth;depth=8.5,size=4"
       toInstance: side2-1
+
+  # In the mount, flush with its front. That leaves 0.5mm between the flange
+  # and the second plastic spacer: a third one would not fit.
+  - part: motion/bearing_flanged_8mmREX
+    name: bearing-worm-2
+    connect:
+      with: 8mmREX-thru-5
+      withInstance: flange-side
+      name: worm-shaft
+      toInstance: clip-side
+      toParams:
+        moveZ: 48.5
 
   - part: hardware/spacer_plastic_8mm_1mm
     name: spacer-drive-worm
     connect:
+      with: "//pub/std/metric/m:m8-thru-1"
       withInstance: side0
       name: bearing-worm-2
+      to: 8mmREX-thru-5
       toInstance: clean-side
 
+  # Against that spacer
   - part: motion/hub_sonic_8mmREX
     name: gear-drive-worm-hub
     connect:
+      with: 8mmREX-thru-10
       withInstance: flat
-      name: spacer-drive-worm
-      toInstance: side1
+      name: worm-shaft
+      toInstance: clip-side
+      toParams:
+        moveZ: 54.5

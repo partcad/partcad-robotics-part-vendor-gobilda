@@ -1,0 +1,10 @@
+links:
+  - part: motion/shaft_8mmREX_{{ param_length }}mm
+    name: shaft
+
+  - part: motion/shaft_8mmREX_clip
+    name: clip
+    connect:
+      withInstance: side1
+      name: shaft
+      toInstance: groove
