@@ -1,8 +1,18 @@
 links:
-  # The gear shaft. The shafts are the ones goBILDA sells, with their E-clips on.
-  # Distances along a shaft ('moveZ') are measured from its clip-side end.
-  - assembly: motion/shaft_8mmREX_72mm_with_clip
+  # The gear shaft. Distances along a shaft ('moveZ') are measured from its
+  # clip-side end.
+  - part: motion/shaft_8mmREX_72mm
     name: shaft
+
+  # The E-clip that comes with it, in its groove
+  - part: motion/shaft_8mmREX_72mm_clip
+    name: shaft-clip
+    connect:
+      with: 8mmREX-thru-0.7
+      withInstance: side1
+      name: shaft
+      to: 8mmREX-shaft
+      toInstance: groove
 
   - part: motion/hub_sonic_8mmREX
     name: gear-hub
@@ -10,6 +20,7 @@ links:
       with: 8mmREX-thru-10
       withInstance: ledged
       name: shaft
+      to: 8mmREX-shaft
       toInstance: clip-side
       toParams:
         moveZ: 26.5
@@ -69,6 +80,7 @@ links:
       with: 8mmREX-thru-5
       withInstance: flange-side
       name: shaft
+      to: 8mmREX-shaft
       toInstance: clip
 
   - part: structure/u_channel_2
@@ -90,6 +102,7 @@ links:
       with: 8mmREX-thru-5
       withInstance: clean-side
       name: shaft
+      to: 8mmREX-shaft
       toInstance: clip-side
       toParams:
         moveZ: 49
@@ -111,6 +124,7 @@ links:
       with: 8mmREX-thru-10
       withInstance: ledged
       name: shaft
+      to: 8mmREX-shaft
       toInstance: clip-side
       toParams:
         moveZ: 55
@@ -128,7 +142,7 @@ links:
       to: "//pub/std/metric/m:m14-thru-2.5"
       toInstance: top-inner-1
 
-  - assembly: motion/shaft_8mmREX_72mm_with_clip
+  - part: motion/shaft_8mmREX_72mm
     name: worm-shaft
     connect:
       with: 8mmREX-shaft
@@ -136,6 +150,15 @@ links:
       name: bearing-worm-1
       to: 8mmREX-thru-5
       toInstance: clean-side
+
+  - part: motion/shaft_8mmREX_72mm_clip
+    name: worm-shaft-clip
+    connect:
+      with: 8mmREX-thru-0.7
+      withInstance: side1
+      name: worm-shaft
+      to: 8mmREX-shaft
+      toInstance: groove
 
   - part: hardware/spacer_steel_8mm_4mm
     name: spacer-steel
@@ -150,9 +173,10 @@ links:
   - part: motion/worm_8mmREX
     name: worm
     connect:
-      with: 8mmREX-thru-32
+      with: 8mmREX-thru-33
       withInstance: side0
       name: worm-shaft
+      to: 8mmREX-shaft
       toInstance: clip-side
       toParams:
         moveZ: 13
@@ -166,7 +190,7 @@ links:
       with: "//pub/std/metric/m:m8-thru-1"
       withInstance: side0
       name: worm
-      to: 8mmREX-thru-32
+      to: 8mmREX-thru-33
       toInstance: side1
 
   - part: hardware/spacer_plastic_8mm_1mm
@@ -225,17 +249,34 @@ links:
       to: "//pub/std/metric/m:m-threaded-thru-depth;depth=8.5,size=4"
       toInstance: side2-1
 
-  # In the mount, flush with its front. That leaves 0.5mm between the flange
-  # and the second plastic spacer: a third one would not fit.
+  # In the mount, flush with its front. That leaves 2.5mm between its flange
+  # and the worm, for three 1mm spacers: the third one is squeezed in, to
+  # press the stack together (see 'spacer-plastic-3' below).
   - part: motion/bearing_flanged_8mmREX
     name: bearing-worm-2
     connect:
       with: 8mmREX-thru-5
       withInstance: flange-side
       name: worm-shaft
+      to: 8mmREX-shaft
       toInstance: clip-side
       toParams:
         moveZ: 48.5
+
+  # Against the flange of the bearing, and pressed 0.5mm into the spacer below
+  # it: the stack is 0.5mm longer than the space it is in, on purpose, so that
+  # it holds the worm tight.
+  # TODO: say this with something better than 'interferes', once PartCAD has
+  # a way to say that a part is compressed.
+  - part: hardware/spacer_plastic_8mm_1mm
+    name: spacer-plastic-3
+    connect:
+      with: "//pub/std/metric/m:m8-thru-1"
+      withInstance: side0
+      name: bearing-worm-2
+      to: 8mmREX-thru-5
+      toInstance: flange-side
+      interferes: spacer-plastic-2
 
   - part: hardware/spacer_plastic_8mm_1mm
     name: spacer-drive-worm
@@ -253,6 +294,7 @@ links:
       with: 8mmREX-thru-10
       withInstance: flat
       name: worm-shaft
+      to: 8mmREX-shaft
       toInstance: clip-side
       toParams:
         moveZ: 54.5
