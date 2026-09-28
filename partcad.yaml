@@ -1,21 +1,122 @@
+name: //pub/robotics/parts/gobilda
 desc: goBILDA® is a modern build system designed for educators and students.
 url: "https://gobilda.com/"
-partcad: ">=0.7.2"
+partcad: ">=0.8.131"
+# Everything in this package can be bought from goBILDA (see 'suppliers'
+# below). Some SKUs are sets of more than one kind of item - a REX shaft comes
+# with its E-clip - and each item of a set is a part of its own, naming the
+# set's SKU and which item of it it is ('item_in_sku').
+manufacturable: true
 
 docs:
-  name: //pub/robotics/parts/gobilda
   intro: It’s metric, lightweight, and has an ever-growing library of parts.
 
-import:
+dependencies:
   pub:
-    onlyInRoot: True
+    onlyInRoot: true
     type: git
     url: https://github.com/partcad/partcad-index/
 
+# What every part here is bought from. The store answers for the 'vendor' and
+# 'sku' each part declares.
+suppliers:
+  - //pub/svc/commerce/gobilda:gobilda
+
+# How a port of this package is written down, so that it lands on the geometry:
+#
+# * An opening's port is on the face the opening starts at, and its +Z points
+#   into the material. A shaft's port is where it ends, and its +Z points away
+#   from the shaft's body. Connecting two ports turns one of them around, so
+#   that is what puts a shaft inside a bore rather than beside it.
+# * A slotted hole's port is the centre of one end of the slot, and its +X
+#   points along the slot towards the other end, which is how far 'moveX' lets
+#   the fastener travel.
+# * An 8mm REX(TM) port's +X points at a corner of the hex. See '8mmREX' below.
+#
+# The Jinja2 dictionary below is the orientation of a slot's port ([axis, angle]),
+# for every face a slot is cut in: the face is named the way the ports on it are, and
+# the direction is the sign of each of the two in-plane axes of that face
+# ("p", "m" or "0"): X then Y on the top face, Y then Z on the side walls, and
+# X then Z on the front and rear faces.
+{% set slot = {
+  "top-inner:pp": [[0, 0, 1], 45],
+  "top-inner:pm": [[0, 0, -1], 45],
+  "top-inner:mp": [[0, 0, 1], 135],
+  "top-inner:mm": [[0, 0, -1], 135],
+  "top-inner:p0": [[0, 0, 1], 0],
+  "top-inner:0p": [[0, 0, 1], 90],
+  "top-inner:m0": [[0, 0, 1], 180],
+  "top-inner:0m": [[0, 0, -1], 90],
+  "top-outer:pp": [[0.92388, 0.382683, 0], 180],
+  "top-outer:pm": [[0.92388, -0.382683, 0], 180],
+  "top-outer:mp": [[0.382683, 0.92388, 0], 180],
+  "top-outer:mm": [[0.382683, -0.92388, 0], 180],
+  "top-outer:p0": [[1, 0, 0], 180],
+  "top-outer:0p": [[0.707107, 0.707107, 0], 180],
+  "top-outer:m0": [[0, 1, 0], 180],
+  "top-outer:0m": [[0.707107, -0.707107, 0], 180],
+  "left-inner:pp": [[-0.357407, -0.862856, 0.357407], 98.421058],
+  "left-inner:pm": [[-0.678598, -0.281085, 0.678598], 148.600285],
+  "left-inner:mp": [[0.357407, -0.862856, -0.357407], 98.421058],
+  "left-inner:mm": [[0.678598, -0.281085, -0.678598], 148.600285],
+  "left-inner:p0": [[-0.57735, -0.57735, 0.57735], 120],
+  "left-inner:0p": [[0, -1, 0], 90],
+  "left-inner:m0": [[0.57735, -0.57735, -0.57735], 120],
+  "left-inner:0m": [[0.707107, 0, -0.707107], 180],
+  "left-outer:pp": [[0.678598, 0.281085, 0.678598], 148.600285],
+  "left-outer:pm": [[0.357407, 0.862856, 0.357407], 98.421058],
+  "left-outer:mp": [[-0.678598, 0.281085, -0.678598], 148.600285],
+  "left-outer:mm": [[-0.357407, 0.862856, -0.357407], 98.421058],
+  "left-outer:p0": [[0.57735, 0.57735, 0.57735], 120],
+  "left-outer:0p": [[0.707107, 0, 0.707107], 180],
+  "left-outer:m0": [[-0.57735, 0.57735, -0.57735], 120],
+  "left-outer:0m": [[0, 1, 0], 90],
+  "right-inner:pp": [[0.678598, 0.281085, 0.678598], 148.600285],
+  "right-inner:pm": [[0.357407, 0.862856, 0.357407], 98.421058],
+  "right-inner:mp": [[-0.678598, 0.281085, -0.678598], 148.600285],
+  "right-inner:mm": [[-0.357407, 0.862856, -0.357407], 98.421058],
+  "right-inner:p0": [[0.57735, 0.57735, 0.57735], 120],
+  "right-inner:0p": [[0.707107, 0, 0.707107], 180],
+  "right-inner:m0": [[-0.57735, 0.57735, -0.57735], 120],
+  "right-inner:0m": [[0, 1, 0], 90],
+  "right-outer:pp": [[-0.357407, -0.862856, 0.357407], 98.421058],
+  "right-outer:pm": [[-0.678598, -0.281085, 0.678598], 148.600285],
+  "right-outer:mp": [[0.357407, -0.862856, -0.357407], 98.421058],
+  "right-outer:mm": [[0.678598, -0.281085, -0.678598], 148.600285],
+  "right-outer:p0": [[-0.57735, -0.57735, 0.57735], 120],
+  "right-outer:0p": [[0, -1, 0], 90],
+  "right-outer:m0": [[0.57735, -0.57735, -0.57735], 120],
+  "right-outer:0m": [[0.707107, 0, -0.707107], 180],
+  "front:pp": [[-0.862856, -0.357407, -0.357407], 98.421058],
+  "front:pm": [[-0.862856, 0.357407, 0.357407], 98.421058],
+  "front:mp": [[-0.281085, -0.678598, -0.678598], 148.600285],
+  "front:mm": [[-0.281085, 0.678598, 0.678598], 148.600285],
+  "front:p0": [[-1, 0, 0], 90],
+  "front:0p": [[-0.57735, -0.57735, -0.57735], 120],
+  "front:m0": [[0, 0.707107, 0.707107], 180],
+  "front:0m": [[-0.57735, 0.57735, 0.57735], 120],
+  "rear:pp": [[0.862856, -0.357407, 0.357407], 98.421058],
+  "rear:pm": [[0.862856, 0.357407, -0.357407], 98.421058],
+  "rear:mp": [[0.281085, -0.678598, 0.678598], 148.600285],
+  "rear:mm": [[0.281085, 0.678598, -0.678598], 148.600285],
+  "rear:p0": [[1, 0, 0], 90],
+  "rear:0p": [[0.57735, -0.57735, 0.57735], 120],
+  "rear:m0": [[0, 0.707107, -0.707107], 180],
+  "rear:0m": [[0.57735, 0.57735, -0.57735], 120]
+} %}
+
+# How far a fastener can travel in each kind of slot in the goBILDA pattern,
+# on top of the 4mm the hole is anyway. A slot joins two holes: one on the 8mm
+# grid and one on the 24mm-diameter circle (or, for the "c" slot, the same
+# circle drawn around the next cell).
+{% set slot_diagonal = "%.3f" | format(4 + 12 - 8 * SQRT_2) %}
+{% set slot_center = "%.3f" | format(4 + 24 - 16 * SQRT_2) %}
+{% set slot_long = "%.3f" | format(4 + 16 - 8 * SQRT_2) %}
+
 sketches:
+  # https://www.gobilda.com/stainless-steel-rex-shafting
   8mmREX:
     desc: 8mm REX(TM) shafting
-    url: "https://www.gobilda.com/stainless-steel-rex-shafting"
     type: basic
     circle: 4
 
@@ -27,6 +128,13 @@ interfaces:
     abstract: True
     ports:
       8mmREX:
+        # A part implementing a REX interface points +X at a corner of the hex.
+        # The port turns that by 15 degrees, so that a flat of the hex is 15
+        # degrees off +X, and it is that angle that lets two REX ports meet:
+        # connecting two ports swaps their X and Y, which mirrors every angle
+        # about 45 degrees, and a hex (60 degree symmetry) only comes out of
+        # that mirror unchanged when its flats sit at 15 degrees off +X.
+        location: [[0, 0, 0], [0, 0, 1], 15]
         sketch: 8mmREX
   8mmREX-opening:
     desc: Opening for 8mm REX shaft
@@ -44,43 +152,46 @@ interfaces:
         default: 0
     mates:
       - "//pub/std/metric/m:m8-thru"
-  {% for depth in [0.7, 5, 8, 32] %}
+  {% for depth in [0.7, 5, 8, 9.5, 10, 10.5, 22, 32, 33] %}
   8mmREX-thru-{{ depth }}:
     desc: Through hole of {{ depth }}mm depth for 8mm REX shaft
     inherits:
       8mmREX-thru: {{ depth }}mm
     mates:
       - 8mmREX-thru
-      # 8mmREX-thru:
-      #   turnZ: 30
   {% endfor %}
   8mmREX-shaft:
     desc: 8mm REX shaft interface
+    # Everything on a REX shaft is on the same shaft: bearings, hubs, spacers
+    # and collars are stacked along it, and the same end of it can hold several.
+    multiConnect: true
     inherits:
       8mmREX: shaft
     parameters:
+      # How far along the shaft
       moveZ:
-        desc: Offset on the shaft
+        min: 0
+        # The longest 8mm REX shaft goBILDA sells
+        max: 624
     mates:
       - 8mmREX-thru
       - "//pub/std/metric/m:m8-thru"
 
   ### Patterns ###
   # 16mm pattern
-{% macro pattern_4xM4_16mm(opening) %}
-"//pub/std/metric/m:m4-{{ opening }}":
-  TL: [[-8, 8, 0], [0, 0, 1], 270]
-  TR: [[8, 8, 0], [0, 0, 1], 180]
-  BR: [[8, -8, 0], [0, 0, 1], 90]
-  BL: [[-8, -8, 0], [0, 0, 1], 0]
-{% endmacro %}
+{% set pattern_4xM4_16mm = {
+  "TL": [[-8, 8, 0], [0, 0, 1], 270],
+  "TR": [[8, 8, 0], [0, 0, 1], 180],
+  "BR": [[8, -8, 0], [0, 0, 1], 90],
+  "BL": [[-8, -8, 0], [0, 0, 1], 0]
+} %}
   4xM4-16mm-pattern:
     desc: 4 x M4 at 16mm pattern
   4xM4-16mm-pattern-thru:
     desc: 4 x M4 at 16mm pattern
     inherits:
       4xM4-16mm-pattern: thru
-      {{ pattern_4xM4_16mm("thru") | indent(6) }}
+      "//pub/std/metric/m:m4-thru": {{ pattern_4xM4_16mm | tojson }}
     mates:
       - 4xM4-16mm-pattern
   # 4xM4-16mm-pattern-thru-threaded:
@@ -91,26 +202,50 @@ interfaces:
     desc: 4 x M4 at 16mm pattern, thru, 1.5mm thick
     inherits:
       4xM4-16mm-pattern: 1.5mm
-      {{ pattern_4xM4_16mm("thru-1.5") | indent(6) }}
+      "//pub/std/metric/m:m4-thru-1.5": {{ pattern_4xM4_16mm | tojson }}
     mates:
       - 4xM4-16mm-pattern
   4xM4-16mm-pattern-thru-8mm:
     desc: 4 x M4 at 16mm pattern, thru, 8mm thick
     inherits:
       4xM4-16mm-pattern: thru-8mm
-      {{ pattern_4xM4_16mm("thru-8") | indent(6) }}
+      "//pub/std/metric/m:m4-thru-8": {{ pattern_4xM4_16mm | tojson }}
     mates:
       - 4xM4-16mm-pattern
   4xM4-16mm-pattern-threaded-thru-4mm:
-    desc: 4 x M4 at 16mm pattern, thru, 8mm thick
+    desc: 4 x M4 at 16mm pattern, threaded, 4mm thick
     inherits:
-      4xM4-16mm-pattern: thru-8mm
-      {{ pattern_4xM4_16mm("threaded-thru-4") | indent(6) }}
+      4xM4-16mm-pattern: threaded-thru-4mm
+      "//pub/std/metric/m:m4-threaded-thru-4": {{ pattern_4xM4_16mm | tojson }}
     mates:
       - 4xM4-16mm-pattern
 
 # mates:
 #   4xM4-16mm-pattern-thru: 4xM4-16mm-pattern-thru
+
+{#
+  The 2106 Series REX shafts are all modelled in the same frame: the axis is at
+  X=-43.354, Z=6.967, running along +Y from the end the E-clip is on (Y=23.419).
+  The E-clip groove is 0.8mm wide and ends 4mm from that end. Their ports:
+
+  * clip-side: that end of the shaft
+  * clip: against the E-clip, on the long side of it - what the clip holds
+  * groove: where the E-clip itself sits, facing the clip-side end (not on the
+    56mm shaft, whose model has its E-clip in it already)
+  * clean-side: the other end
+#}
+{% set rex_shaft = {} %}
+{% for length in [56, 64, 72, 80] %}
+{% set ports = {
+  "clip-side": [[-43.354, 23.419, 6.967], [1, 0, 0], 90],
+  "clip": [[-43.354, 27.419, 6.967], [1, 0, 0], 90]
+} %}
+{% if length != 56 %}
+{% set _ = ports.update({"groove": [[-43.354, 27.419, 6.967], [1, 0, 0], -90]}) %}
+{% endif %}
+{% set _ = ports.update({"clean-side": [[-43.354, (23.419 + length) | round(3), 6.967], [1, 0, 0], -90]}) %}
+{% set _ = rex_shaft.update({length: ports}) %}
+{% endfor %}
 
 parts:
   hardware/nut_m4_0_7mm:
@@ -120,6 +255,12 @@ parts:
     count_per_sku: 25
     url: https://www.gobilda.com/2811-series-zinc-plated-steel-hex-nut-m4-x-0-7mm-7mm-hex-25-pack/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-threaded-thru-depth;depth=2.75,size=4":
+        # 4.000mm tapped hole, 2.750mm deep
+        h2-bottom: [[0, 0, -1.375], [0, 0, 1], 0]
+        h2-top: [[0, 0, 1.375], [1, 0, 0], 180]
 
   hardware/plate_channel_conn:
     desc: Steel Channel-Connector Plate - 2 Pack
@@ -128,6 +269,18 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/steel-channel-connector-plate-2-pack/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m4-thru-3":
+        # 4.020mm round hole, 3.000mm deep
+        h1-back: [[-16, 3, -8], [1, 0, 0], 90]
+        h1-front: [[-16, 0, -8], [-1, 0, 0], 90]
+        h2-back: [[-16, 3, 8], [1, 0, 0], 90]
+        h2-front: [[-16, 0, 8], [-1, 0, 0], 90]
+        h3-back: [[16, 3, -8], [1, 0, 0], 90]
+        h3-front: [[16, 0, -8], [-1, 0, 0], 90]
+        h4-back: [[16, 3, 8], [1, 0, 0], 90]
+        h4-front: [[16, 0, 8], [-1, 0, 0], 90]
 
   hardware/screw_m4_0.7mm_12mm:
     desc: 2802 Series Zinc-Plated Steel Button Head Screw (M4 x 0.7mm, 12mm Length) - 25 Pack
@@ -146,6 +299,12 @@ parts:
     count_per_sku: 12
     url: https://www.gobilda.com/1500-series-plastic-spacer-5mm-id-x-7mm-od-1mm-thickness-12-pack/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m5-thru-1":
+        # 5.000mm round hole, 1.000mm deep
+        h1-back: [[0, 1, 0], [1, 0, 0], 90]
+        h1-front: [[0, 0, 0], [-1, 0, 0], 90]
 
   hardware/spacer_plastic_8mm_1mm:
     desc: 1500 Series Plastic Spacer (8mm ID x 10mm OD, 1mm Thickness) - 12 Pack
@@ -155,6 +314,11 @@ parts:
     url: https://www.gobilda.com/1500-series-plastic-spacer-8mm-id-x-10mm-od-1mm-thickness-12-pack/
     type: step
     implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m10-shaft-1":
+        # 10.000mm round shaft, 1.000mm long
+        s2-back: [[0, 1, 0], [-1, 0, 0], 90]
+        s2-front: [[0, 0, 0], [1, 0, 0], 90]
       "//pub/std/metric/m:m8-thru-1":
         side0: [[0, 0, 0], [1, 0, 0], -90]
         side1: [[0, 1, 0], [1, 0, 0], 90]
@@ -178,6 +342,15 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1601-series-flanged-ball-bearing-5mm-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-shaft-length;length=3.76,size=14":
+        # 14.000mm round shaft, 3.760mm long
+        s2-back: [[0, 4.05, 0], [-1, 0, 0], 90]
+      "//pub/std/metric/m:m5-thru-5":
+        # 5.000mm round hole, 5.000mm deep
+        h1-back: [[0, 5, 0], [1, 0, 0], 90]
+        h1-front: [[0, 0, 0], [-1, 0, 0], 90]
 
   motion/bearing_flanged_6mm:
     desc: 1611 Series Flanged Ball Bearing (6mm ID x 14mm OD, 5mm Thickness) - 2 Pack
@@ -186,6 +359,21 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1611-series-flanged-ball-bearing-6mm-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=1.524,size=8":
+        # 9.000mm round hole, 1.524mm deep
+        h2-front: [[0, 0, 0], [-1, 0, 0], 90]
+      "//pub/std/metric/m:m-hole;depth=1.57,size=8":
+        # 9.000mm round hole, 1.570mm deep
+        h3-back: [[0, 5, 0], [1, 0, 0], 90]
+      "//pub/std/metric/m:m14-shaft-3.5":
+        # 14.000mm round shaft, 3.500mm long
+        s4-back: [[0, 3.5, 0], [-1, 0, 0], 90]
+      "//pub/std/metric/m:m6-thru-5":
+        # 6.000mm round hole, 5.000mm deep
+        h1-back: [[0, 5, 0], [1, 0, 0], 90]
+        h1-front: [[0, 0, 0], [-1, 0, 0], 90]
 
   motion/bearing_flanged_8mm:
     desc: 1611 Series Flanged Ball Bearing (8mm ID x 14mm OD, 5mm Thickness) - 2 Pack
@@ -194,6 +382,15 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1611-series-flanged-ball-bearing-8mm-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m14-shaft-4":
+        # 14.000mm round shaft, 4.000mm long
+        s2-back: [[0, 4, 0], [-1, 0, 0], 90]
+      "//pub/std/metric/m:m8-thru-5":
+        # 8.000mm round hole, 5.000mm deep
+        h1-back: [[0, 5, 0], [1, 0, 0], 90]
+        h1-front: [[0, 0, 0], [-1, 0, 0], 90]
 
   motion/bearing_flanged_8mmREX:
     desc: 1611 Series Flanged Ball Bearing (8mm REX ID x 14mm OD, 5mm Thickness) - 2 Pack
@@ -204,11 +401,10 @@ parts:
     type: step
     implements:
       8mmREX-thru-5:
-        # clean-side: [[0, 0, 0], [1, 0, 0], -90]
-        # flange-side: [[0, 5, 0], [1, 0, 0], 90]
-        clean-side: [[0, 0, 0], [0.94, -0.25, -0.25], 266.16]
-        flange-side: [[0, 5, 0], [-0.94, 0.25, -0.25], 266.16]
-      "//pub/std/metric/m:m14-shaft-2": [[0, 4, 0], [1, 0, 0], -90]
+        clean-side: [[0, 0, 0], [1, 0, 0], -90]
+        flange-side: [[0, 5, 0], [1, 0, 0], 90]
+      # The 14mm outer race, from the clean side (Y=0) to the flange (Y=4)
+      "//pub/std/metric/m:m14-shaft-4": [[0, 4, 0], [1, 0, 0], -90]
 
   motion/collar_clamping_8mmREX:
     desc: 2910 Series Aluminum Clamping Collar (8mm REX ID x 20mm OD, 9mm Length)
@@ -216,6 +412,12 @@ parts:
     sku: 2910-0920-4008
     url: https://www.gobilda.com/2910-series-aluminum-clamping-collar-8mm-rex-id-x-20mm-od-9mm-length/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      8mmREX-thru-9.5:
+        # 8mm REX bore, 9.500mm deep
+        rex5-back: [[-28.855, -0.558, 18.819], [0, 0.707107, -0.707107], 180]
+        rex5-front: [[-28.855, -10.058, 18.819], [0, 0.707107, 0.707107], 180]
 
   motion/collar_set_6mm:
     desc: 2920 Series Steel Set-Screw Collar (6mm Bore) - 2 Pack
@@ -224,6 +426,15 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/2920-series-steel-set-screw-collar-6mm-bore-2-pack/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-threaded-hole;depth=3.743,size=5":
+        # 5.000mm tapped hole, 3.743mm deep
+        h3-bottom: [[-59.262, 9.43, 18.195], [0, 0, 1], 0]
+      "//pub/std/metric/m:m-thru-depth;depth=8.5,size=6":
+        # 6.000mm round hole, 8.500mm deep
+        h4-back: [[-59.262, 13.93, 24.695], [1, 0, 0], 90]
+        h4-front: [[-59.262, 5.43, 24.695], [-1, 0, 0], 90]
 
   motion/coupler_hyper_8mm_8mmREX:
     desc: 4007 Series Hyper Coupler (8mm Round Bore to 8mm REX Bore)
@@ -231,6 +442,22 @@ parts:
     sku: 4007-0008-4008
     url: https://www.gobilda.com/4007-series-hyper-coupler-8mm-round-bore-to-8mm-rex-bore/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=12.974,size=4":
+        # 4.200mm round hole, 12.974mm deep
+        h2-left: [[-31.804, -14.1, 10.97], [0.57735, 0.57735, 0.57735], 120]
+        h5-right: [[-12.556, -14.1, 23.57], [-0.57735, -0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m-hole;depth=13.123,size=4":
+        # 4.200mm round hole, 13.123mm deep
+        h4-top: [[-28.48, -2.3, 26.893], [1, 0, 0], 180]
+      "//pub/std/metric/m:m-hole;depth=13.124,size=4":
+        # 4.200mm round hole, 13.124mm deep
+        h3-bottom: [[-15.88, -2.3, 7.646], [0, 0, 1], 0]
+      8mmREX-thru-10.5:
+        # 8mm REX bore, 10.500mm deep
+        rex1-back: [[-22.18, 2.3, 17.27], [0, 0.707107, -0.707107], 180]
+        rex1-front: [[-22.18, -8.2, 17.27], [0, 0.707107, 0.707107], 180]
 
   motion/hub_hyper_8mmREX:
     desc: 1310 Series Hyper Hub (8mm REX Bore)
@@ -238,6 +465,25 @@ parts:
     sku: 1310-0016-4008
     url: https://www.gobilda.com/1310-series-hyper-hub-8mm-rex-bore/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=15.104,size=4":
+        # 4.020mm round hole, 15.104mm deep
+        h1-right: [[-4.576, -12.02, 18.63], [-0.57735, -0.57735, 0.57735], 120]
+        h2-left: [[-26.264, 0.58, 18.63], [0.57735, 0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m14-shaft-2":
+        # 14.000mm round shaft, 2.000mm long
+        s8-top: [[-15.42, -5.72, 3.03], [0, 0, 1], 0]
+      "//pub/std/metric/m:m4-hole-10":
+        # 4.020mm round hole, 10.000mm deep
+        h3-bottom: [[-7.42, 2.28, 3.03], [0, 0, 1], 0]
+        h4-bottom: [[-7.42, -13.72, 3.03], [0, 0, 1], 0]
+        h5-bottom: [[-23.42, -13.72, 3.03], [0, 0, 1], 0]
+        h6-bottom: [[-23.42, 2.28, 3.03], [0, 0, 1], 0]
+      8mmREX-thru-22:
+        # 8mm REX bore, 22.000mm deep
+        rex7-bottom: [[-15.42, -5.72, 1.03], [0, 0, 1], 120]
+        rex7-top: [[-15.42, -5.72, 23.03], [0.5, 0.866025, 0], 180]
 
   motion/hub_sonic_5mm:
     desc: 1309 Series Sonic Hub (5mm Bore)
@@ -245,6 +491,26 @@ parts:
     sku: 1309-0016-0005
     url: https://www.gobilda.com/1309-series-sonic-hub-5mm-bore/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=10.814,size=4":
+        # 4.020mm round hole, 10.814mm deep
+        h5-side: [[-18.746, 9.503, 4.11], [-0.862856, 0.357407, -0.357407], 98.421058]
+        h7-side: [[-10.381, -0.276, 4.11], [0.862856, -0.357407, -0.357407], 98.421058]
+      "//pub/std/metric/m:m-hole;depth=6.23,size=4":
+        # 4.040mm round hole, 6.230mm deep
+        h6-side: [[-18.016, 10.233, 4.11], [0.862856, -0.357407, -0.357407], 98.421058]
+        h8-side: [[-11.111, -1.007, 4.11], [-0.862856, 0.357407, -0.357407], 98.421058]
+      "//pub/std/metric/m:m4-thru-8":
+        # 4.020mm round hole, 8.000mm deep
+        h1-bottom: [[-6.56, -3.39, 0.11], [0, 0, 1], 0]
+        h1-top: [[-6.56, -3.39, 8.11], [1, 0, 0], 180]
+        h2-bottom: [[-22.56, -3.39, 0.11], [0, 0, 1], 0]
+        h2-top: [[-22.56, -3.39, 8.11], [1, 0, 0], 180]
+        h3-bottom: [[-6.56, 12.61, 0.11], [0, 0, 1], 0]
+        h3-top: [[-6.56, 12.61, 8.11], [1, 0, 0], 180]
+        h4-bottom: [[-22.56, 12.61, 0.11], [0, 0, 1], 0]
+        h4-top: [[-22.56, 12.61, 8.11], [1, 0, 0], 180]
 
   motion/hub_sonic_8mmREX:
     desc: 1309 Series Sonic Hub (8mm REX Bore)
@@ -253,18 +519,31 @@ parts:
     url: https://www.gobilda.com/1309-series-sonic-hub-8mm-rex-bore/
     type: step
     implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=10.67,size=4":
+        # 4.020mm round hole, 10.670mm deep
+        h6-side: [[-8.014, 22.665, -10.38], [-0.862856, 0.357407, -0.357407], 98.421058]
+        h8-side: [[0.148, 12.682, -10.38], [0.862856, -0.357407, -0.357407], 98.421058]
+      "//pub/std/metric/m:m-hole;depth=6.223,size=4":
+        # 4.040mm round hole, 6.223mm deep
+        h7-side: [[-7.386, 23.293, -10.38], [0.862856, -0.357407, -0.357407], 98.421058]
+      "//pub/std/metric/m:m-hole;depth=6.237,size=4":
+        # 4.040mm round hole, 6.237mm deep
+        h9-side: [[-0.481, 12.053, -10.38], [-0.862856, 0.357407, -0.357407], 98.421058]
+      # The hub is 8mm thick (Z=-14.38 to Z=-6.38), with a 2mm tall ledge on
+      # top of it (Z=-6.38 to Z=-4.38) that the REX bore runs through as well.
       4xM4-16mm-pattern-thru-8mm:
-        ledged: [[-3.875, 17.666, -6.4], [0, 1, 0], 180]
-        flat: [[-3.875, 17.666, -14.4], [0, 1, 0], 0]
-      8mmREX-thru-8:
-        ledged: [[-3.875, 17.666, -4.4], [0.79, -0.61, 0.0], 180]
-        flat: [[-3.875, 17.666, -14.4], [0, 0, 1], -15]
+        ledged: [[-3.93, 17.67, -6.38], [0, 1, 0], 180]
+        flat: [[-3.93, 17.67, -14.38], [0, 1, 0], 0]
+      8mmREX-thru-10:
+        ledged: [[-3.93, 17.67, -4.38], [0.382683, 0.92388, 0], 180]
+        flat: [[-3.93, 17.67, -14.38], [0, 0, 1], 15]
       # The hub provides a ledge that can be used as a 14mm wide 2mm long shaft
-      "//pub/std/metric/m:m14-shaft-2": [[-3.94, 17.67, -6.4], [0, 1, 0], 180]
+      "//pub/std/metric/m:m14-shaft-2": [[-3.93, 17.67, -6.38], [0, 1, 0], 180]
       # The outer perimeter of the hub can be used as a 32m wide 8mm long shaft
       "//pub/std/metric/m:m32-shaft-8":
-        ledged: [[-3.875, 17.666, -6.4], [0, 1, 0], 0]
-        flat: [[-3.875, 17.666, -14.4], [0, 1, 0], 180]
+        ledged: [[-3.93, 17.67, -6.38], [0, 1, 0], 0]
+        flat: [[-3.93, 17.67, -14.38], [0, 1, 0], 180]
 
   motion/servo_attach_arm_25t:
     desc: 1900 Series Single Servo Arm (25 Tooth Spline, 32mm Length)
@@ -272,6 +551,22 @@ parts:
     sku: 1900-0025-0104
     url: https://www.gobilda.com/1900-series-single-servo-arm-25-tooth-spline-32mm-length/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-thru-depth;depth=1.1,size=3":
+        # 3.000mm round hole, 1.100mm deep
+        h1-bottom: [[0, 0, 3.25], [0, 0, 1], 0]
+        h1-top: [[0, 0, 4.35], [1, 0, 0], 180]
+      "//pub/std/metric/m:m4-thru-4":
+        # 4.000mm round hole, 4.000mm deep
+        h2-bottom: [[-8, 0, 0], [0, 0, 1], 0]
+        h2-top: [[-8, 0, 4], [1, 0, 0], 180]
+        h3-bottom: [[-16, 0, 0], [0, 0, 1], 0]
+        h3-top: [[-16, 0, 4], [1, 0, 0], 180]
+        h4-bottom: [[-24, 0, 0], [0, 0, 1], 0]
+        h4-top: [[-24, 0, 4], [1, 0, 0], 180]
+        h5-bottom: [[-32, 0, 0], [0, 0, 1], 0]
+        h5-top: [[-32, 0, 4], [1, 0, 0], 180]
 
   motion/servo_attach_hub_low_25t:
     desc: 1906 Series Low-Profile Servo Hub (25 Tooth Spline, 32mm Diameter)
@@ -279,6 +574,39 @@ parts:
     sku: 1906-0025-0032
     url: https://www.gobilda.com/1906-series-low-profile-servo-hub-25-tooth-spline-32mm-diameter/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-shaft-length;length=1.6,size=14":
+        # 13.980mm round shaft, 1.600mm long
+        s2-front: [[0, 2.9, 0], [1, 0, 0], 90]
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=3,size=4,width=4.686":
+        # 4.000mm slot, 0.686mm of travel, 3.000mm deep
+        slot12-back: [[8, 3, -8], [0.862856, 0.357407, -0.357407], 98.421058]
+        slot12-front: [[8, 0, -8], [-0.862856, 0.357407, 0.357407], 98.421058]
+        slot13-back: [[8.485, 3, 8.485], [0.281085, 0.678598, -0.678598], 148.600285]
+        slot13-front: [[8.485, 0, 8.485], [-0.281085, 0.678598, 0.678598], 148.600285]
+        slot14-back: [[-8.485, 3, 8.485], [0.862856, 0.357407, -0.357407], 98.421058]
+        slot14-front: [[-8.485, 0, 8.485], [-0.862856, 0.357407, 0.357407], 98.421058]
+        slot15-back: [[-8, 3, -8], [0.281085, 0.678598, -0.678598], 148.600285]
+        slot15-front: [[-8, 0, -8], [-0.281085, 0.678598, 0.678598], 148.600285]
+      "//pub/std/metric/m:m-thru-depth;depth=1.1,size=3":
+        # 3.000mm round hole, 1.100mm deep
+        h1-back: [[0, 4.5, 0], [1, 0, 0], 90]
+        h1-front: [[0, 3.4, 0], [-1, 0, 0], 90]
+      "//pub/std/metric/m:m32-shaft-3":
+        # 31.980mm round shaft, 3.000mm long
+        s3-back: [[0, 3, 0], [-1, 0, 0], 90]
+        s3-front: [[0, 0, 0], [1, 0, 0], 90]
+      "//pub/std/metric/m:m4-threaded-thru-3":
+        # 4.000mm tapped hole, 3.000mm deep
+        h11-back: [[11.314, 3, 0], [1, 0, 0], 90]
+        h11-front: [[11.314, 0, 0], [-1, 0, 0], 90]
+        h5-back: [[0, 3, 11.314], [1, 0, 0], 90]
+        h5-front: [[0, 0, 11.314], [-1, 0, 0], 90]
+        h7-back: [[-11.314, 3, 0], [1, 0, 0], 90]
+        h7-front: [[-11.314, 0, 0], [-1, 0, 0], 90]
+        h9-back: [[0, 3, -11.314], [1, 0, 0], 90]
+        h9-front: [[0, 0, -11.314], [-1, 0, 0], 90]
 
   motion/shaft_6mmD_70mm:
     desc: 2101 Series Stainless Steel D-Shaft (6mm Diameter, 70mm Length)
@@ -293,48 +621,98 @@ parts:
     sku: 2106-4008-0560
     url: https://www.gobilda.com/2106-series-stainless-steel-rex-shaft-8mm-diameter-56mm-length/
     type: step
+    # This model comes with its E-clip already in the groove.
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-threaded-hole;depth=11.9,size=4":
+        # 4.000mm tapped hole, 11.900mm deep
+        clip-side: [[-43.354, 23.419, 6.967], [-1, 0, 0], 90]
+        clean-side: [[-43.354, 79.419, 6.967], [1, 0, 0], 90]
+      8mmREX-shaft: {{ rex_shaft[56] | tojson }}
 
   motion/shaft_8mmREX_64mm:
     desc: 2106 Series Stainless Steel REX Shaft (8mm Diameter, 64mm Length)
     vendor: gobilda
     sku: 2106-4008-0640
+    # Sold with an E-clip: see 'motion/shaft_8mmREX_64mm_clip'
+    item_in_sku: shaft
     url: https://www.gobilda.com/2106-series-stainless-steel-rex-shaft-8mm-diameter-64mm-length/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-threaded-hole;depth=11.9,size=4":
+        # 4.000mm tapped hole, 11.900mm deep
+        clip-side: [[-43.354, 23.419, 6.967], [-1, 0, 0], 90]
+        clean-side: [[-43.354, 87.419, 6.967], [1, 0, 0], 90]
+      8mmREX-shaft: {{ rex_shaft[64] | tojson }}
 
   motion/shaft_8mmREX_72mm:
     desc: 2106 Series Stainless Steel REX Shaft (8mm Diameter, 72mm Length)
     vendor: gobilda
     sku: 2106-4008-0720
+    # Sold with an E-clip: see 'motion/shaft_8mmREX_72mm_clip'
+    item_in_sku: shaft
     url: https://www.gobilda.com/2106-series-stainless-steel-rex-shaft-8mm-diameter-72mm-length/
     type: step
     implements:
-      8mmREX-shaft:
-        clip-side: [[-43.4, 23.41, 7], [1, 0, 0], 90]
-        clip: [[-43.4, 27.41, 7], [1, 0, 0], 90]
-        clean-side: [[-43.4, {{23.41 + 72.02}}, 7], [1, 0, 0], -90]
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-threaded-hole;depth=11.9,size=4":
+        # 4.000mm tapped hole, 11.900mm deep
+        clip-side: [[-43.354, 23.419, 6.967], [-1, 0, 0], 90]
+        clean-side: [[-43.354, 95.419, 6.967], [1, 0, 0], 90]
+      8mmREX-shaft: {{ rex_shaft[72] | tojson }}
 
   motion/shaft_8mmREX_80mm:
     desc: 2106 Series Stainless Steel REX Shaft (8mm Diameter, 80mm Length)
     vendor: gobilda
     sku: 2106-4008-0800
+    # Sold with an E-clip: see 'motion/shaft_8mmREX_80mm_clip'
+    item_in_sku: shaft
     url: https://www.gobilda.com/2106-series-stainless-steel-rex-shaft-8mm-diameter-80mm-length/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-threaded-hole;depth=11.9,size=4":
+        # 4.000mm tapped hole, 11.900mm deep
+        clip-side: [[-43.354, 23.419, 6.967], [-1, 0, 0], 90]
+        clean-side: [[-43.354, 103.419, 6.967], [1, 0, 0], 90]
+      8mmREX-shaft: {{ rex_shaft[80] | tojson }}
 
+  # The E-clip of the 2106 Series REX shafts. It is not sold on its own: it
+  # comes in the box with every shaft, under the shaft's SKU. So this is the
+  # geometry, and what is procured is one of the aliases of it that follow,
+  # one per shaft it is sold with.
   motion/shaft_8mmREX_clip:
-    desc: 2106 Series Stainless Steel REX Shaft (8mm Diameter) Clip
+    desc: 2106 Series Stainless Steel REX Shaft (8mm Diameter) E-Clip
     type: step
-    comment: comes included with REX shafts
+    manufacturable: false
+    # Modelled in the frame of the REX shafts, seated in the groove.
     implements:
       8mmREX-thru-0.7:
-        side0: [[-43.4, 26.71, 7], [1, 0, 0], 90]
-        side1: [[-43.4, 27.41, 7], [1, 0, 0], -90]
+        side0: [[-43.354, 26.719, 6.967], [1, 0, 0], -90]
+        side1: [[-43.354, 27.419, 6.967], [1, 0, 0], 90]
+
+{% for length in [64, 72, 80] %}
+  motion/shaft_8mmREX_{{ length }}mm_clip:
+    type: alias
+    source: motion/shaft_8mmREX_clip
+    desc: The E-clip of the 2106 Series REX Shaft (8mm Diameter, {{ length }}mm Length)
+    vendor: gobilda
+    sku: 2106-4008-0{{ length }}0
+    item_in_sku: clip
+{% endfor %}
 
   motion/servo_hs_488hb:
     desc: Hitec HS-488HB Servo
     vendor: gobilda
-    sku: 33488
+    sku: "33488"
     url: https://www.gobilda.com/hitec-hs-488hb-servo/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m3-threaded-hole-4":
+        # 3.080mm tapped hole, 4.000mm deep
+        h2-back: [[-9.83, 43.726, -9.919], [1, 0, 0], 90]
 
   motion/sprocket_plastic_14mm_16t:
     desc: 8mm Pitch Acetal Hub-Mount Sprocket (14mm Bore, 16 Tooth)
@@ -342,6 +720,30 @@ parts:
     sku: 3311-0014-0016
     url: https://www.gobilda.com/8mm-pitch-acetal-hub-mount-sprocket-14mm-bore-16-tooth/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.362,size=4,width=4.686":
+        # 4.000mm slot, 0.686mm of travel, 2.362mm deep
+        slot2-bottom: [[12, 0, -0.32], [0, 0, 1], 180]
+        slot2-top: [[12, 0, 2.042], [0, 1, 0], 180]
+        slot3-bottom: [[0, 11.314, -0.32], [0, 0, 1], 90]
+        slot3-top: [[0, 11.314, 2.042], [0.707107, 0.707107, 0], 180]
+        slot4-bottom: [[8.485, -8.485, -0.32], [0, 0, 1], 135]
+        slot4-top: [[8.485, -8.485, 2.042], [0.382683, 0.92388, 0], 180]
+        slot5-bottom: [[8.485, 8.485, -0.32], [0, 0, -1], 135]
+        slot5-top: [[8.485, 8.485, 2.042], [0.382683, -0.92388, 0], 180]
+        slot6-bottom: [[-8, 8, -0.32], [0, 0, 1], 135]
+        slot6-top: [[-8, 8, 2.042], [0.382683, 0.92388, 0], 180]
+        slot7-bottom: [[-8, -8, -0.32], [0, 0, -1], 135]
+        slot7-top: [[-8, -8, 2.042], [0.382683, -0.92388, 0], 180]
+        slot8-bottom: [[-11.314, 0, -0.32], [0, 0, 1], 180]
+        slot8-top: [[-11.314, 0, 2.042], [0, 1, 0], 180]
+        slot9-bottom: [[0, -11.314, -0.32], [0, 0, -1], 90]
+        slot9-top: [[0, -11.314, 2.042], [0.707107, -0.707107, 0], 180]
+      "//pub/std/metric/m:m-thru-depth;depth=2.362,size=14":
+        # 14.000mm round hole, 2.362mm deep
+        h1-bottom: [[0, 0, -0.32], [0, 0, 1], 0]
+        h1-top: [[0, 0, 2.042], [1, 0, 0], 180]
 
   motion/sprocket_steel_14mm_14t:
     desc: 8mm Pitch Steel Hub-Mount Sprocket (14mm Bore, 14 Tooth)
@@ -349,6 +751,36 @@ parts:
     sku: 3310-0014-0014
     url: https://www.gobilda.com/8mm-pitch-steel-hub-mount-sprocket-14mm-bore-14-tooth/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-threaded-thru-depth;depth=10.8,size=4":
+        # 4.000mm tapped hole, 10.800mm deep
+        h11-bottom: [[-8, 8, -5.4], [0, 0, 1], 0]
+        h11-top: [[-8, 8, 5.4], [1, 0, 0], 180]
+        h5-bottom: [[8, -8, -5.4], [0, 0, 1], 0]
+        h5-top: [[8, -8, 5.4], [1, 0, 0], 180]
+        h7-bottom: [[8, 8, -5.4], [0, 0, 1], 0]
+        h7-top: [[8, 8, 5.4], [1, 0, 0], 180]
+        h9-bottom: [[-8, -8, -5.4], [0, 0, 1], 0]
+        h9-top: [[-8, -8, 5.4], [1, 0, 0], 180]
+      "//pub/std/metric/m:m-thru-depth;depth=10.8,size=4":
+        # 4.000mm round hole, 10.800mm deep
+        h12-bottom: [[-11.314, 0, -5.4], [0, 0, 1], 0]
+        h12-top: [[-11.314, 0, 5.4], [1, 0, 0], 180]
+        h13-bottom: [[0, -11.314, -5.4], [0, 0, 1], 0]
+        h13-top: [[0, -11.314, 5.4], [1, 0, 0], 180]
+        h14-bottom: [[11.314, 0, -5.4], [0, 0, 1], 0]
+        h14-top: [[11.314, 0, 5.4], [1, 0, 0], 180]
+        h15-bottom: [[0, 11.314, -5.4], [0, 0, 1], 0]
+        h15-top: [[0, 11.314, 5.4], [1, 0, 0], 180]
+      "//pub/std/metric/m:m-thru-depth;depth=8.8,size=14":
+        # 14.000mm round hole, 8.800mm deep
+        h1-bottom: [[0, 0, -4.4], [0, 0, 1], 0]
+        h1-top: [[0, 0, 4.4], [1, 0, 0], 180]
+      "//pub/std/metric/m:m16-hole-1":
+        # 16.000mm round hole, 1.000mm deep
+        h2-bottom: [[0, 0, -5.4], [0, 0, 1], 0]
+        h3-top: [[0, 0, 5.4], [1, 0, 0], 180]
 
   motion/worm_8mmREX:
     desc: 2313 Series Stainless Steel, MOD 1.25 Worm (8mm REX Bore, 33mm Length)
@@ -357,24 +789,39 @@ parts:
     url: https://www.gobilda.com/2313-series-stainless-steel-mod-1-25-worm-8mm-rex-bore-33mm-length/
     type: step
     implements:
-      8mmREX-thru-32:
-        side0: [[-5.25, -18.02, 33.9375], [1, 0, 0], -90]
-        side1: [[-5.25, 14.98, 33.9375], [1, 0, 0], 90]
+      # The bore is 33mm long, from Y=-18.018 to Y=14.982.
+      8mmREX-thru-33:
+        side0: [[-5.257, -18.018, 33.934], [-0.57735, -0.57735, -0.57735], 120]
+        side1: [[-5.257, 14.982, 33.934], [0.57735, -0.57735, 0.57735], 120]
 
   motion/worm_gear_28t:
-    desc: https://www.gobilda.com/2314-series-brass-mod-1-25-hub-mount-worm-gear-14mm-bore-28-tooth/
+    desc: 2314 Series Brass, MOD 1.25 Hub-Mount Worm Gear (14mm Bore, 28 Tooth)
     vendor: gobilda
     sku: 2314-0014-0028
     url: https://www.gobilda.com/2314-series-brass-mod-1-25-hub-mount-worm-gear-14mm-bore-28-tooth/
     type: step
+    # The hub side of the gear is X=0.5 ("inner") to X=4.5 ("outer").
     implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m32-thru-2.5":
+        # 32.000mm round hole, 2.500mm deep
+        h2-left: [[-4.5, 0, 0], [0.57735, 0.57735, 0.57735], 120]
+        h2-right: [[-2, 0, 0], [-0.57735, -0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m8-hole-2.5":
+        # 8.000mm round hole, 2.500mm deep
+        h10-right: [[4.5, 8, 8], [-0.57735, -0.57735, 0.57735], 120]
+        h4-right: [[4.5, -8, -8], [-0.57735, -0.57735, 0.57735], 120]
+        h6-right: [[4.5, -8, 8], [-0.57735, -0.57735, 0.57735], 120]
+        h8-right: [[4.5, 8, -8], [-0.57735, -0.57735, 0.57735], 120]
+      # On the 16mm square, 1.5mm thick: counterbored from X=2 to X=4.5.
       4xM4-16mm-pattern-thru-1.5mm:
         inner: [[0.5, 0, 0], [0.57735, 0.57735, 0.57735], 120]
         outer: [[2, 0, 0], [-0.57735, -0.57735, 0.57735], 120]
+      # The same square turned by 45 degrees, threaded all the way through.
       4xM4-16mm-pattern-threaded-thru-4mm:
-        inner: [[0.5, 0, 0], [-0.68, -0.28, -0.68], 211.4]
-        outer: [[4.5, 0, 0], [0.36, 0.86, -0.36], 261.58]
-      "//pub/std/metric/m:m14-thru-2":
+        inner: [[0.5, 0, 0], [0.678598, 0.281085, 0.678598], 148.600285]
+        outer: [[4.5, 0, 0], [-0.357407, -0.862856, 0.357407], 98.421058]
+      "//pub/std/metric/m:m14-thru-4":
         inner: [[0.5, 0, 0], [0, 1, 0], 90]
         outer: [[4.5, 0, 0], [0, 1, 0], -90]
 
@@ -384,6 +831,76 @@ parts:
     sku: 1106-0015-0120
     url: https://www.gobilda.com/1106-series-square-beam-15-hole-120mm-length/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-thru-depth;depth=10.593,size=4":
+        # 4.020mm round hole, 10.593mm deep
+        h3-back: [[0, 6.593, 0], [1, 0, 0], 90]
+        h3-front: [[0, -4, 0], [-1, 0, 0], 90]
+        h4-back: [[0, 116, 0], [1, 0, 0], 90]
+        h4-front: [[0, 105.407, 0], [-1, 0, 0], 90]
+      "//pub/std/metric/m:m4-thru-8":
+        # 4.000mm round hole, 8.000mm deep
+        h1-left: [[-4, 0, 0], [0.57735, 0.57735, 0.57735], 120]
+        h1-right: [[4, 0, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h10-left: [[-4, 72, 0], [0.57735, 0.57735, 0.57735], 120]
+        h10-right: [[4, 72, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h11-left: [[-4, 64, 0], [0.57735, 0.57735, 0.57735], 120]
+        h11-right: [[4, 64, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h12-left: [[-4, 56, 0], [0.57735, 0.57735, 0.57735], 120]
+        h12-right: [[4, 56, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h13-left: [[-4, 48, 0], [0.57735, 0.57735, 0.57735], 120]
+        h13-right: [[4, 48, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h14-left: [[-4, 40, 0], [0.57735, 0.57735, 0.57735], 120]
+        h14-right: [[4, 40, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h15-left: [[-4, 32, 0], [0.57735, 0.57735, 0.57735], 120]
+        h15-right: [[4, 32, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h16-left: [[-4, 24, 0], [0.57735, 0.57735, 0.57735], 120]
+        h16-right: [[4, 24, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h17-left: [[-4, 16, 0], [0.57735, 0.57735, 0.57735], 120]
+        h17-right: [[4, 16, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h18-left: [[-4, 8, 0], [0.57735, 0.57735, 0.57735], 120]
+        h18-right: [[4, 8, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h19-bottom: [[0, 8, -4], [0, 0, 1], 0]
+        h19-top: [[0, 8, 4], [1, 0, 0], 180]
+        h2-bottom: [[0, 0, -4], [0, 0, 1], 0]
+        h2-top: [[0, 0, 4], [1, 0, 0], 180]
+        h20-bottom: [[0, 112, -4], [0, 0, 1], 0]
+        h20-top: [[0, 112, 4], [1, 0, 0], 180]
+        h21-bottom: [[0, 104, -4], [0, 0, 1], 0]
+        h21-top: [[0, 104, 4], [1, 0, 0], 180]
+        h22-bottom: [[0, 96, -4], [0, 0, 1], 0]
+        h22-top: [[0, 96, 4], [1, 0, 0], 180]
+        h23-bottom: [[0, 88, -4], [0, 0, 1], 0]
+        h23-top: [[0, 88, 4], [1, 0, 0], 180]
+        h24-bottom: [[0, 80, -4], [0, 0, 1], 0]
+        h24-top: [[0, 80, 4], [1, 0, 0], 180]
+        h25-bottom: [[0, 72, -4], [0, 0, 1], 0]
+        h25-top: [[0, 72, 4], [1, 0, 0], 180]
+        h26-bottom: [[0, 64, -4], [0, 0, 1], 0]
+        h26-top: [[0, 64, 4], [1, 0, 0], 180]
+        h27-bottom: [[0, 56, -4], [0, 0, 1], 0]
+        h27-top: [[0, 56, 4], [1, 0, 0], 180]
+        h28-bottom: [[0, 48, -4], [0, 0, 1], 0]
+        h28-top: [[0, 48, 4], [1, 0, 0], 180]
+        h29-bottom: [[0, 40, -4], [0, 0, 1], 0]
+        h29-top: [[0, 40, 4], [1, 0, 0], 180]
+        h30-bottom: [[0, 32, -4], [0, 0, 1], 0]
+        h30-top: [[0, 32, 4], [1, 0, 0], 180]
+        h31-bottom: [[0, 24, -4], [0, 0, 1], 0]
+        h31-top: [[0, 24, 4], [1, 0, 0], 180]
+        h32-bottom: [[0, 16, -4], [0, 0, 1], 0]
+        h32-top: [[0, 16, 4], [1, 0, 0], 180]
+        h5-left: [[-4, 112, 0], [0.57735, 0.57735, 0.57735], 120]
+        h5-right: [[4, 112, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h6-left: [[-4, 104, 0], [0.57735, 0.57735, 0.57735], 120]
+        h6-right: [[4, 104, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h7-left: [[-4, 96, 0], [0.57735, 0.57735, 0.57735], 120]
+        h7-right: [[4, 96, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h8-left: [[-4, 88, 0], [0.57735, 0.57735, 0.57735], 120]
+        h8-right: [[4, 88, 0], [-0.57735, -0.57735, 0.57735], 120]
+        h9-left: [[-4, 80, 0], [0.57735, 0.57735, 0.57735], 120]
+        h9-right: [[4, 80, 0], [-0.57735, -0.57735, 0.57735], 120]
 
   structure/bracket_flat_1_2:
     desc: 1108 Series Flat Pattern Bracket (1-2)
@@ -391,6 +908,76 @@ parts:
     sku: 1108-0001-0002
     url: https://www.gobilda.com/1108-series-flat-pattern-bracket-1-2/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=4.686":
+        # 4.000mm slot, 0.686mm of travel, 2.500mm deep
+        slot15-back: [[0, 1.25, 12], [0.57735, 0.57735, -0.57735], 120]
+        slot15-front: [[0, -1.25, 12], [-0.57735, 0.57735, 0.57735], 120]
+        slot16-back: [[11.314, 1.25, 0], [1, 0, 0], 90]
+        slot16-front: [[11.314, -1.25, 0], [-1, 0, 0], 90]
+        slot17-back: [[-8, 1.25, -8], [0.281085, 0.678598, -0.678598], 148.600285]
+        slot17-front: [[-8, -1.25, -8], [-0.281085, 0.678598, 0.678598], 148.600285]
+        slot18-back: [[-8.485, 1.25, 8.485], [0.862856, 0.357407, -0.357407], 98.421058]
+        slot18-front: [[-8.485, -1.25, 8.485], [-0.862856, 0.357407, 0.357407], 98.421058]
+        slot19-back: [[8.485, 1.25, 8.485], [0.281085, 0.678598, -0.678598], 148.600285]
+        slot19-front: [[8.485, -1.25, 8.485], [-0.281085, 0.678598, 0.678598], 148.600285]
+        slot20-back: [[8, 1.25, -8], [0.862856, 0.357407, -0.357407], 98.421058]
+        slot20-front: [[8, -1.25, -8], [-0.862856, 0.357407, 0.357407], 98.421058]
+        slot21-back: [[-8, 1.25, 40], [0.281085, 0.678598, -0.678598], 148.600285]
+        slot21-front: [[-8, -1.25, 40], [-0.281085, 0.678598, 0.678598], 148.600285]
+        slot22-back: [[-8.485, 1.25, 56.485], [0.862856, 0.357407, -0.357407], 98.421058]
+        slot22-front: [[-8.485, -1.25, 56.485], [-0.862856, 0.357407, 0.357407], 98.421058]
+        slot23-back: [[8.485, 1.25, 56.485], [0.281085, 0.678598, -0.678598], 148.600285]
+        slot23-front: [[8.485, -1.25, 56.485], [-0.281085, 0.678598, 0.678598], 148.600285]
+        slot24-back: [[8, 1.25, 40], [0.862856, 0.357407, -0.357407], 98.421058]
+        slot24-front: [[8, -1.25, 40], [-0.862856, 0.357407, 0.357407], 98.421058]
+        slot25-back: [[0, 1.25, -11.314], [0.57735, 0.57735, -0.57735], 120]
+        slot25-front: [[0, -1.25, -11.314], [-0.57735, 0.57735, 0.57735], 120]
+        slot26-back: [[-11.314, 1.25, 0], [0, 0.707107, -0.707107], 180]
+        slot26-front: [[-11.314, -1.25, 0], [0, 0.707107, 0.707107], 180]
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=8.686":
+        # 4.000mm slot, 4.686mm of travel, 2.500mm deep
+        slot27-back: [[0, 1.25, 36.686], [0.57735, 0.57735, -0.57735], 120]
+        slot27-front: [[0, -1.25, 36.686], [-0.57735, 0.57735, 0.57735], 120]
+        slot28-back: [[0, 1.25, 64], [0.57735, 0.57735, -0.57735], 120]
+        slot28-front: [[0, -1.25, 64], [-0.57735, 0.57735, 0.57735], 120]
+        slot29-back: [[16, 1.25, 48], [0, 0.707107, -0.707107], 180]
+        slot29-front: [[16, -1.25, 48], [0, 0.707107, 0.707107], 180]
+        slot30-back: [[-16, 1.25, 48], [1, 0, 0], 90]
+        slot30-front: [[-16, -1.25, 48], [-1, 0, 0], 90]
+      "//pub/std/metric/m:m14-thru-2.5":
+        # 14.000mm round hole, 2.500mm deep
+        h13-back: [[0, 1.25, 48], [1, 0, 0], 90]
+        h13-front: [[0, -1.25, 48], [-1, 0, 0], 90]
+        h14-back: [[0, 1.25, 0], [1, 0, 0], 90]
+        h14-front: [[0, -1.25, 0], [-1, 0, 0], 90]
+      "//pub/std/metric/m:m4-thru-2.5":
+        # 4.000mm round hole, 2.500mm deep
+        h1-back: [[-8, 1.25, 64], [1, 0, 0], 90]
+        h1-front: [[-8, -1.25, 64], [-1, 0, 0], 90]
+        h10-back: [[-16, 1.25, 40], [1, 0, 0], 90]
+        h10-front: [[-16, -1.25, 40], [-1, 0, 0], 90]
+        h11-back: [[-16, 1.25, 32], [1, 0, 0], 90]
+        h11-front: [[-16, -1.25, 32], [-1, 0, 0], 90]
+        h12-back: [[-8, 1.25, 32], [1, 0, 0], 90]
+        h12-front: [[-8, -1.25, 32], [-1, 0, 0], 90]
+        h2-back: [[-16, 1.25, 64], [1, 0, 0], 90]
+        h2-front: [[-16, -1.25, 64], [-1, 0, 0], 90]
+        h3-back: [[-16, 1.25, 56], [1, 0, 0], 90]
+        h3-front: [[-16, -1.25, 56], [-1, 0, 0], 90]
+        h4-back: [[16, 1.25, 56], [1, 0, 0], 90]
+        h4-front: [[16, -1.25, 56], [-1, 0, 0], 90]
+        h5-back: [[16, 1.25, 64], [1, 0, 0], 90]
+        h5-front: [[16, -1.25, 64], [-1, 0, 0], 90]
+        h6-back: [[8, 1.25, 64], [1, 0, 0], 90]
+        h6-front: [[8, -1.25, 64], [-1, 0, 0], 90]
+        h7-back: [[8, 1.25, 32], [1, 0, 0], 90]
+        h7-front: [[8, -1.25, 32], [-1, 0, 0], 90]
+        h8-back: [[16, 1.25, 32], [1, 0, 0], 90]
+        h8-front: [[16, -1.25, 32], [-1, 0, 0], 90]
+        h9-back: [[16, 1.25, 40], [1, 0, 0], 90]
+        h9-front: [[16, -1.25, 40], [-1, 0, 0], 90]
 
   structure/bracket_flat_2_3:
     desc: 1108 Series Flat Pattern Bracket (2-3)
@@ -398,6 +985,106 @@ parts:
     sku: 1108-0002-0003
     url: https://www.gobilda.com/1108-series-flat-pattern-bracket-2-3/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=4.686":
+        # 4.000mm slot, 0.686mm of travel, 2.500mm deep
+        slot28-back: [[-20.905, 2.5, 4.33], [0.962637, 0.19148, -0.19148], 92.181218]
+        slot28-front: [[-20.905, 0, 4.33], [-0.962637, 0.19148, 0.19148], 92.181218]
+        slot29-back: [[-26.765, 2.5, 19.746], [0.427192, 0.639338, -0.639338], 133.736411]
+        slot29-front: [[-26.765, 0, 19.746], [-0.427192, 0.639338, 0.639338], 133.736411]
+        slot30-back: [[0, 2.5, 10.334], [0.57735, 0.57735, -0.57735], 120]
+        slot30-front: [[0, 0, 10.334], [-0.57735, 0.57735, 0.57735], 120]
+        slot31-back: [[0, 2.5, 33.648], [0.57735, 0.57735, -0.57735], 120]
+        slot31-front: [[0, 0, 33.648], [-0.57735, 0.57735, 0.57735], 120]
+        slot32-back: [[20.905, 2.5, 4.33], [0.139281, 0.700215, -0.700215], 164.141558]
+        slot32-front: [[20.905, 0, 4.33], [-0.139281, 0.700215, 0.700215], 164.141558]
+        slot33-back: [[26.765, 2.5, 19.746], [0.726831, 0.485653, -0.485653], 107.978391]
+        slot33-front: [[26.765, 0, 19.746], [-0.726831, 0.485653, 0.485653], 107.978391]
+        slot34-back: [[-35.687, 2.5, -1.793], [0.427192, 0.639338, -0.639338], 133.736411]
+        slot34-front: [[-35.687, 0, -1.793], [-0.427192, 0.639338, 0.639338], 133.736411]
+        slot35-back: [[35.687, 2.5, -1.793], [0.726831, 0.485653, -0.485653], 107.978391]
+        slot35-front: [[35.687, 0, -1.793], [-0.726831, 0.485653, 0.485653], 107.978391]
+        slot36-back: [[42.444, 2.5, 13.251], [0.139281, 0.700215, -0.700215], 164.141558]
+        slot36-front: [[42.444, 0, 13.251], [-0.139281, 0.700215, 0.700215], 164.141558]
+        slot37-back: [[-42.444, 2.5, 13.251], [0.962637, 0.19148, -0.19148], 92.181218]
+        slot37-front: [[-42.444, 0, 13.251], [-0.962637, 0.19148, 0.19148], 92.181218]
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=8.686":
+        # 4.000mm slot, 4.686mm of travel, 2.500mm deep
+        slot38-back: [[-37.48, 2.5, 23.441], [0.726831, 0.485653, -0.485653], 107.978391]
+        slot38-front: [[-37.48, 0, 23.441], [-0.726831, 0.485653, 0.485653], 107.978391]
+        slot39-back: [[37.48, 2.5, 23.441], [0.427192, 0.639338, -0.639338], 133.736411]
+        slot39-front: [[37.48, 0, 23.441], [-0.427192, 0.639338, 0.639338], 133.736411]
+        slot40-back: [[16.575, 2.5, 14.782], [0.962637, 0.19148, -0.19148], 92.181218]
+        slot40-front: [[16.575, 0, 14.782], [-0.962637, 0.19148, 0.19148], 92.181218]
+        slot41-back: [[-27.028, 2.5, -1.793], [0.726831, 0.485653, -0.485653], 107.978391]
+        slot41-front: [[-27.028, 0, -1.793], [-0.726831, 0.485653, 0.485653], 107.978391]
+        slot42-back: [[41.81, 2.5, 4.33], [0.962637, 0.19148, -0.19148], 92.181218]
+        slot42-front: [[41.81, 0, 4.33], [-0.962637, 0.19148, 0.19148], 92.181218]
+        slot43-back: [[-41.81, 2.5, 4.33], [0.139281, 0.700215, -0.700215], 164.141558]
+        slot43-front: [[-41.81, 0, 4.33], [-0.139281, 0.700215, 0.700215], 164.141558]
+        slot44-back: [[-16.575, 2.5, 14.782], [0.139281, 0.700215, -0.700215], 164.141558]
+        slot44-front: [[-16.575, 0, 14.782], [-0.139281, 0.700215, 0.700215], 164.141558]
+        slot45-back: [[27.028, 2.5, -1.793], [0.427192, 0.639338, -0.639338], 133.736411]
+        slot45-front: [[27.028, 0, -1.793], [-0.427192, 0.639338, 0.639338], 133.736411]
+      "//pub/std/metric/m:m14-thru-2.5":
+        # 14.000mm round hole, 2.500mm deep
+        h13-back: [[-31.358, 2.5, 8.659], [1, 0, 0], 90]
+        h13-front: [[-31.358, 0, 8.659], [-1, 0, 0], 90]
+        h27-back: [[0, 2.5, 21.648], [1, 0, 0], 90]
+        h27-front: [[0, 0, 21.648], [-1, 0, 0], 90]
+        h4-back: [[31.358, 2.5, 8.659], [1, 0, 0], 90]
+        h4-front: [[31.358, 0, 8.659], [-1, 0, 0], 90]
+      "//pub/std/metric/m:m4-thru-2.5":
+        # 4.000mm round hole, 2.500mm deep
+        h1-back: [[44.871, 2.5, 20.38], [1, 0, 0], 90]
+        h1-front: [[44.871, 0, 20.38], [-1, 0, 0], 90]
+        h10-back: [[-44.871, 2.5, 20.38], [1, 0, 0], 90]
+        h10-front: [[-44.871, 0, 20.38], [-1, 0, 0], 90]
+        h11-back: [[-40.017, 2.5, -12.246], [1, 0, 0], 90]
+        h11-front: [[-40.017, 0, -12.246], [-1, 0, 0], 90]
+        h12-back: [[-52.263, 2.5, 17.318], [1, 0, 0], 90]
+        h12-front: [[-52.263, 0, 17.318], [-1, 0, 0], 90]
+        h14-back: [[-49.201, 2.5, 9.927], [1, 0, 0], 90]
+        h14-front: [[-49.201, 0, 9.927], [-1, 0, 0], 90]
+        h15-back: [[-43.078, 2.5, -4.855], [1, 0, 0], 90]
+        h15-front: [[-43.078, 0, -4.855], [-1, 0, 0], 90]
+        h16-back: [[-17.844, 2.5, -3.061], [1, 0, 0], 90]
+        h16-front: [[-17.844, 0, -3.061], [-1, 0, 0], 90]
+        h17-back: [[-32.626, 2.5, -9.184], [1, 0, 0], 90]
+        h17-front: [[-32.626, 0, -9.184], [-1, 0, 0], 90]
+        h18-back: [[-30.089, 2.5, 26.503], [1, 0, 0], 90]
+        h18-front: [[-30.089, 0, 26.503], [-1, 0, 0], 90]
+        h19-back: [[13.514, 2.5, 7.391], [1, 0, 0], 90]
+        h19-front: [[13.514, 0, 7.391], [-1, 0, 0], 90]
+        h2-back: [[40.017, 2.5, -12.246], [1, 0, 0], 90]
+        h2-front: [[40.017, 0, -12.246], [-1, 0, 0], 90]
+        h20-back: [[19.637, 2.5, 22.173], [1, 0, 0], 90]
+        h20-front: [[19.637, 0, 22.173], [-1, 0, 0], 90]
+        h21-back: [[10.453, 2.5, 0], [1, 0, 0], 90]
+        h21-front: [[10.453, 0, 0], [-1, 0, 0], 90]
+        h22-back: [[22.698, 2.5, 29.564], [1, 0, 0], 90]
+        h22-front: [[22.698, 0, 29.564], [-1, 0, 0], 90]
+        h23-back: [[-13.514, 2.5, 7.391], [1, 0, 0], 90]
+        h23-front: [[-13.514, 0, 7.391], [-1, 0, 0], 90]
+        h24-back: [[-19.637, 2.5, 22.173], [1, 0, 0], 90]
+        h24-front: [[-19.637, 0, 22.173], [-1, 0, 0], 90]
+        h25-back: [[-10.453, 2.5, 0], [1, 0, 0], 90]
+        h25-front: [[-10.453, 0, 0], [-1, 0, 0], 90]
+        h26-back: [[-22.698, 2.5, 29.564], [1, 0, 0], 90]
+        h26-front: [[-22.698, 0, 29.564], [-1, 0, 0], 90]
+        h3-back: [[52.263, 2.5, 17.318], [1, 0, 0], 90]
+        h3-front: [[52.263, 0, 17.318], [-1, 0, 0], 90]
+        h5-back: [[49.201, 2.5, 9.927], [1, 0, 0], 90]
+        h5-front: [[49.201, 0, 9.927], [-1, 0, 0], 90]
+        h6-back: [[43.078, 2.5, -4.855], [1, 0, 0], 90]
+        h6-front: [[43.078, 0, -4.855], [-1, 0, 0], 90]
+        h7-back: [[17.844, 2.5, -3.061], [1, 0, 0], 90]
+        h7-front: [[17.844, 0, -3.061], [-1, 0, 0], 90]
+        h8-back: [[32.626, 2.5, -9.184], [1, 0, 0], 90]
+        h8-front: [[32.626, 0, -9.184], [-1, 0, 0], 90]
+        h9-back: [[30.089, 2.5, 26.503], [1, 0, 0], 90]
+        h9-front: [[30.089, 0, 26.503], [-1, 0, 0], 90]
 
   structure/mount_quad_block:
     desc: 1201 Series Quad Block Pattern Mount (43-2)
@@ -406,7 +1093,8 @@ parts:
     url: https://www.gobilda.com/1201-series-quad-block-pattern-mount-43-2/
     type: step
     implements:
-      "//pub/std/metric/m:m4-threaded-thru-8":
+      # Through the corner bosses, from each side into the pocket: 8.5mm.
+      "//pub/std/metric/m:m-threaded-thru-depth;depth=8.5,size=4":
         side0-0: [[-21.5, 8, -16], [0, 1, 0], 90]
         side0-1: [[-21.5, 8, 16], [0, 1, 0], 90]
         side1-0: [[-16, 8, -21.5], [0, 1, 0], 0]
@@ -415,6 +1103,15 @@ parts:
         side2-1: [[21.5, 8, -16], [0, 1, 0], -90]
         side3-0: [[16, 8, 21.5], [0, 1, 0], 180]
         side3-1: [[-16, 8, 21.5], [0, 1, 0], 180]
+        # ... and where each of them comes out, into the pocket
+        side0-0-inner: [[-13, 8, -16], [-0.57735, -0.57735, 0.57735], 120]
+        side0-1-inner: [[-13, 8, 16], [-0.57735, -0.57735, 0.57735], 120]
+        side1-0-inner: [[-16, 8, -13], [1, 0, 0], 180]
+        side1-1-inner: [[16, 8, -13], [1, 0, 0], 180]
+        side2-0-inner: [[13, 8, 16], [0.57735, 0.57735, 0.57735], 120]
+        side2-1-inner: [[13, 8, -16], [0.57735, 0.57735, 0.57735], 120]
+        side3-0-inner: [[16, 8, 13], [0, 0, 1], 0]
+        side3-1-inner: [[-16, 8, 13], [0, 0, 1], 0]
       "//pub/std/metric/m:m4-threaded-thru-12":
         front-0-0-00: [[-16, 0, 16], [1, 0, 0], -90]
         front-0-1-00: [[-16, 0, -16], [1, 0, 0], -90]
@@ -450,16 +1147,21 @@ parts:
         rear-1-0-11: [[16, 4, 8], [1, 0, 0], 90]
         rear-1-1-00: [[8, 4, -16], [1, 0, 0], 90]
         rear-1-1-11: [[16, 4, -8], [1, 0, 0], 90]
-      "//pub/std/metric/m:m4-thru-4-slotted-2":
-        front-0-0-11: [[-8, 0, 8], [1, 0, 0], -90]
-        front-0-1-11: [[-8, 0, -8], [1, 0, 0], -90]
-        front-1-0-01: [[8, 0, 8], [1, 0, 0], -90]
-        front-1-1-01: [[8, 0, -8], [1, 0, 0], -90]
-        rear-0-0-11: [[-8, 4, 8], [1, 0, 0], 90]
-        rear-0-1-11: [[-8, 4, -8], [1, 0, 0], 90]
-        rear-1-0-01: [[8, 4, 8], [1, 0, 0], 90]
-        rear-1-1-01: [[8, 4, -8], [1, 0, 0], 90]
-      "//pub/std/metric/m:m14-hole-3.5":
+      # Slotted outwards along the diagonal, onto the 24mm circle.
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=4,size=4,width={{ slot_diagonal }}":
+        front-0-0-11: [[-8, 0, 8], {{ slot["front:mp"][0] }}, {{ slot["front:mp"][1] }}]
+        front-0-1-11: [[-8, 0, -8], {{ slot["front:mm"][0] }}, {{ slot["front:mm"][1] }}]
+        front-1-0-01: [[8, 0, 8], {{ slot["front:pp"][0] }}, {{ slot["front:pp"][1] }}]
+        front-1-1-01: [[8, 0, -8], {{ slot["front:pm"][0] }}, {{ slot["front:pm"][1] }}]
+        rear-0-0-11: [[-8, 4, 8], {{ slot["rear:mp"][0] }}, {{ slot["rear:mp"][1] }}]
+        rear-0-1-11: [[-8, 4, -8], {{ slot["rear:mm"][0] }}, {{ slot["rear:mm"][1] }}]
+        rear-1-0-01: [[8, 4, 8], {{ slot["rear:pp"][0] }}, {{ slot["rear:pp"][1] }}]
+        rear-1-1-01: [[8, 4, -8], {{ slot["rear:pm"][0] }}, {{ slot["rear:pm"][1] }}]
+      # The counterbore, which a 14mm OD flanged bearing's flange sits in
+      "//pub/std/metric/m:m16-hole-1":
+        front: [[0, 0, 0], [-1, 0, 0], 90]
+      # 14mm through the 4mm plate, under a 16mm counterbore 1mm deep in front.
+      "//pub/std/metric/m:m14-thru-3":
         front: [[0, 1, 0], [1, 0, 0], -90]
         rear: [[0, 4, 0], [1, 0, 0], 90]
 
@@ -469,6 +1171,81 @@ parts:
     sku: 1802-0043-0001
     url: https://www.gobilda.com/1802-series-servo-frame-43mm-width-for-standard-size-servos/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=1.01,size=4":
+        # 4.000mm round hole, 1.010mm deep
+        h1-back: [[-6.7, -4.5, 20.55], [1, 0, 0], 90]
+        h11-back: [[-55.21, -4.5, 10.64], [1, 0, 0], 90]
+        h18-back: [[-6.71, -4.5, 10.64], [1, 0, 0], 90]
+        h5-back: [[-55.21, -4.5, 20.54], [1, 0, 0], 90]
+      "//pub/std/metric/m:m-hole;depth=1.26,size=3":
+        # 3.300mm round hole, 1.260mm deep
+        h31-left: [[-57.96, 1.24, 7.64], [0.57735, 0.57735, 0.57735], 120]
+        h33-left: [[-57.96, 1.24, 23.64], [0.57735, 0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m-shaft-length;length=1.01,size=8":
+        # 8.000mm round shaft, 1.010mm long
+        s13-back: [[-55.21, -4.5, 10.64], [-1, 0, 0], 90]
+        s13-front: [[-55.21, -5.51, 10.64], [1, 0, 0], 90]
+        s20-back: [[-6.71, -4.5, 10.64], [-1, 0, 0], 90]
+        s20-front: [[-6.71, -5.51, 10.64], [1, 0, 0], 90]
+        s3-back: [[-6.7, -4.5, 20.55], [-1, 0, 0], 90]
+        s3-front: [[-6.7, -5.51, 20.55], [1, 0, 0], 90]
+        s7-back: [[-55.21, -4.5, 20.54], [-1, 0, 0], 90]
+        s7-front: [[-55.21, -5.51, 20.54], [1, 0, 0], 90]
+      "//pub/std/metric/m:m4-hole-4.5":
+        # 4.020mm round hole, 4.500mm deep
+        h25-left: [[-62.46, 1.24, -0.36], [0.57735, 0.57735, 0.57735], 120]
+        h32-left: [[-62.46, 1.24, 7.64], [0.57735, 0.57735, 0.57735], 120]
+        h34-left: [[-62.46, 1.24, 23.64], [0.57735, 0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m4-thru-4.5":
+        # 4.020mm round hole, 4.500mm deep
+        h26-left: [[-62.46, 1.24, 31.64], [0.57735, 0.57735, 0.57735], 120]
+        h26-right: [[-57.96, 1.24, 31.64], [-0.57735, -0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m4-thru-5":
+        # 4.020mm round hole, 5.000mm deep
+        h23-bottom: [[-56.96, 1.24, -5.86], [0, 0, 1], 0]
+        h23-top: [[-56.96, 1.24, -0.86], [1, 0, 0], 180]
+        h24-bottom: [[-56.96, 1.24, 32.14], [0, 0, 1], 0]
+        h24-top: [[-56.96, 1.24, 37.14], [1, 0, 0], 180]
+        h27-bottom: [[-24.96, 1.24, -5.86], [0, 0, 1], 0]
+        h27-top: [[-24.96, 1.24, -0.86], [1, 0, 0], 180]
+        h28-bottom: [[-24.96, 1.24, 32.14], [0, 0, 1], 0]
+        h28-top: [[-24.96, 1.24, 37.14], [1, 0, 0], 180]
+        h29-bottom: [[-8.96, 1.24, -5.86], [0, 0, 1], 0]
+        h29-top: [[-8.96, 1.24, -0.86], [1, 0, 0], 180]
+        h30-bottom: [[-8.96, 1.24, 32.14], [0, 0, 1], 0]
+        h30-top: [[-8.96, 1.24, 37.14], [1, 0, 0], 180]
+        h8-bottom: [[-32.96, 1.24, -5.86], [0, 0, 1], 0]
+        h8-top: [[-32.96, 1.24, -0.86], [1, 0, 0], 180]
+        h9-bottom: [[-32.96, 1.24, 32.14], [0, 0, 1], 0]
+        h9-top: [[-32.96, 1.24, 37.14], [1, 0, 0], 180]
+      "//pub/std/metric/m:m4-thru-6":
+        # 4.040mm round hole, 6.000mm deep
+        h10-back: [[-56.96, 4.24, -0.36], [1, 0, 0], 90]
+        h10-front: [[-56.96, -1.76, -0.36], [-1, 0, 0], 90]
+        h12-back: [[-55.21, 4.24, 10.64], [1, 0, 0], 90]
+        h12-front: [[-55.21, -1.76, 10.64], [-1, 0, 0], 90]
+        h14-back: [[-32.96, 4.24, -0.36], [1, 0, 0], 90]
+        h14-front: [[-32.96, -1.76, -0.36], [-1, 0, 0], 90]
+        h15-back: [[-56.96, 4.24, 31.64], [1, 0, 0], 90]
+        h15-front: [[-56.96, -1.76, 31.64], [-1, 0, 0], 90]
+        h16-back: [[-24.96, 4.24, -0.36], [1, 0, 0], 90]
+        h16-front: [[-24.96, -1.76, -0.36], [-1, 0, 0], 90]
+        h17-back: [[-8.96, 4.24, -0.36], [1, 0, 0], 90]
+        h17-front: [[-8.96, -1.76, -0.36], [-1, 0, 0], 90]
+        h19-back: [[-6.71, 4.24, 10.64], [1, 0, 0], 90]
+        h19-front: [[-6.71, -1.76, 10.64], [-1, 0, 0], 90]
+        h2-back: [[-6.7, 4.24, 20.55], [1, 0, 0], 90]
+        h2-front: [[-6.7, -1.76, 20.55], [-1, 0, 0], 90]
+        h21-back: [[-24.96, 4.24, 31.64], [1, 0, 0], 90]
+        h21-front: [[-24.96, -1.76, 31.64], [-1, 0, 0], 90]
+        h22-back: [[-8.96, 4.24, 31.64], [1, 0, 0], 90]
+        h22-front: [[-8.96, -1.76, 31.64], [-1, 0, 0], 90]
+        h4-back: [[-32.96, 4.24, 31.64], [1, 0, 0], 90]
+        h4-front: [[-32.96, -1.76, 31.64], [-1, 0, 0], 90]
+        h6-back: [[-55.21, 4.24, 20.54], [1, 0, 0], 90]
+        h6-front: [[-55.21, -1.76, 20.54], [-1, 0, 0], 90]
 
   structure/standoff_m4_43mm:
     desc: 1501 Series M4 x 0.7mm Standoff (6mm OD, 43mm Length) - 4 Pack
@@ -477,97 +1254,111 @@ parts:
     count_per_sku: 4
     url: https://www.gobilda.com/1501-series-m4-x-0-7mm-standoff-6mm-od-43mm-length-4-pack/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-shaft-length;length=43,size=6":
+        # 5.960mm round shaft, 43.000mm long
+        s5-back: [[0, 21.5, 0], [-1, 0, 0], 90]
+        s5-front: [[0, -21.5, 0], [1, 0, 0], 90]
+      "//pub/std/metric/m:m4-threaded-hole-8":
+        # 4.000mm tapped hole, 8.000mm deep
+        h3-front: [[0, -21.5, 0], [-1, 0, 0], 90]
+        h4-back: [[0, 21.5, 0], [1, 0, 0], 90]
 
-
-{% macro channel_pattern(size) %}
-"//pub/std/metric/m:m14-hole-2.5":
-  {% for i in range(size) %}
-  top-inner-{{i}}: [[0, {{ 24 + 24*i }}, 0], [1, 0, 0], 0]
-  top-outer-{{i}}: [[0, {{ 24 + 24*i }}, 2.5], [1, 0, 0], 180]
-  right-inner-{{i}}: [[21.5, {{ 24 + 24*i }}, -21.5], [0, 1, 0], 90]
-  right-outer-{{i}}: [[24, {{ 24 + 24*i }}, -21.5], [0, 1, 0], -90]
-  left-inner-{{i}}: [[-21.5, {{ 24 + 24*i }}, -21.5], [0, 1, 0], -90]
-  left-outer-{{i}}: [[-24, {{ 24 + 24*i }}, -21.5], [0, 1, 0], 90]
-  {% endfor %}
-
-"//pub/std/metric/m:m4-thru-2.5":
-  {% for j in range(size + 1) %}
-  left-outer-{{ j }}-0-00: [[-24, {{ 24 * j + 8 }}, {{ -21.5 + 16 }}], [0, 1, 0], 90]
-  left-outer-{{ j }}-0-10: [[-24, {{ 24 * j + 16 }}, {{ -21.5 + 16 }}], [0, 1, 0], 90]
-  left-outer-{{ j }}-1-00: [[-24, {{ 24 * j + 8 }}, {{ -21.5 - 16 }}], [0, 1, 0], 90]
-  left-outer-{{ j }}-1-10: [[-24, {{ 24 * j + 16 }}, {{ -21.5 - 16 }}], [0, 1, 0], 90]
-  left-inner-{{ j }}-0-00: [[-21.5, {{ 24 * j + 8 }}, {{ -21.5 + 16 }}], [0, 1, 0], -90]
-  left-inner-{{ j }}-0-10: [[-21.5, {{ 24 * j + 16 }}, {{ -21.5 + 16 }}], [0, 1, 0], -90]
-  left-inner-{{ j }}-1-00: [[-21.5, {{ 24 * j + 8 }}, {{ -21.5 - 16 }}], [0, 1, 0], -90]
-  left-inner-{{ j }}-1-10: [[-21.5, {{ 24 * j + 16 }}, {{ -21.5 - 16 }}], [0, 1, 0], -90]
-  right-outer-{{ j }}-0-00: [[24, {{ 24 * j + 8 }}, {{ -21.5 + 16 }}], [0, 1, 0], -90]
-  right-outer-{{ j }}-0-10: [[24, {{ 24 * j + 16 }}, {{ -21.5 + 16 }}], [0, 1, 0], -90]
-  right-outer-{{ j }}-1-00: [[24, {{ 24 * j + 8 }}, {{ -21.5 - 16 }}], [0, 1, 0], -90]
-  right-outer-{{ j }}-1-10: [[24, {{ 24 * j + 16 }}, {{ -21.5 - 16 }}], [0, 1, 0], -90]
-  right-inner-{{ j }}-0-00: [[21.5, {{ 24 * j + 8 }}, {{ -21.5 + 16 }}], [0, 1, 0], 90]
-  right-inner-{{ j }}-0-10: [[21.5, {{ 24 * j + 16 }}, {{ -21.5 + 16 }}], [0, 1, 0], 90]
-  right-inner-{{ j }}-1-00: [[21.5, {{ 24 * j + 8 }}, {{ -21.5 - 16 }}], [0, 1, 0], 90]
-  right-inner-{{ j }}-1-10: [[21.5, {{ 24 * j + 16 }}, {{ -21.5 - 16 }}], [0, 1, 0], 90]
-  top-outer-{{ j }}-0-00: [[16, {{ 24 * j + 8 }},  2.5], [0, 1, 0], 180]
-  top-outer-{{ j }}-0-10: [[16, {{ 24 * j + 16 }},  2.5], [0, 1, 0], 180]
-  top-outer-{{ j }}-1-00: [[-16, {{ 24 * j + 8 }}, 2.5], [0, 1, 0], 180]
-  top-outer-{{ j }}-1-10: [[-16, {{ 24 * j + 16 }}, 2.5], [0, 1, 0], 180]
-  top-inner-{{ j }}-0-00: [[16, {{ 24 * j + 8 }},  0], [0, 1, 0], 0]
-  top-inner-{{ j }}-0-10: [[16, {{ 24 * j + 16 }},  0], [0, 1, 0], 0]
-  top-inner-{{ j }}-1-00: [[-16, {{ 24 * j + 8 }}, 0], [0, 1, 0], 0]
-  top-inner-{{ j }}-1-10: [[-16, {{ 24 * j + 16 }}, 0], [0, 1, 0], 0]
-  {% endfor %}
-
-"//pub/std/metric/m:m4-thru-4-slotted-2":
-  {% for j in range(size + 1) %}
-  left-outer-{{ j }}-0-01: [[-24, {{ 24 * j + 8 }}, {{ -21.5 + 8 }}], [0, 1, 0], 90]
-  left-outer-{{ j }}-0-11: [[-24, {{ 24 * j + 16 }}, {{ -21.5 + 8 }}], [0, 1, 0], 90]
-  left-outer-{{ j }}-1-01: [[-24, {{ 24 * j + 8 }}, {{ -21.5 - 8 }}], [0, 1, 0], 90]
-  left-outer-{{ j }}-1-11: [[-24, {{ 24 * j + 16 }}, {{ -21.5 - 8 }}], [0, 1, 0], 90]
-  left-inner-{{ j }}-0-01: [[-21.5, {{ 24 * j + 8 }}, {{ -21.5 + 8 }}], [0, 1, 0], -90]
-  left-inner-{{ j }}-0-11: [[-21.5, {{ 24 * j + 16 }}, {{ -21.5 + 8 }}], [0, 1, 0], -90]
-  left-inner-{{ j }}-1-01: [[-21.5, {{ 24 * j + 8 }}, {{ -21.5 - 8 }}], [0, 1, 0], -90]
-  left-inner-{{ j }}-1-11: [[-21.5, {{ 24 * j + 16 }}, {{ -21.5 - 8 }}], [0, 1, 0], -90]
-  right-outer-{{ j }}-0-01: [[24, {{ 24 * j + 8 }}, {{ -21.5 + 8 }}], [0, 1, 0], -90]
-  right-outer-{{ j }}-0-11: [[24, {{ 24 * j + 16 }}, {{ -21.5 + 8 }}], [0, 1, 0], -90]
-  right-outer-{{ j }}-1-01: [[24, {{ 24 * j + 8 }}, {{ -21.5 - 8 }}], [0, 1, 0], -90]
-  right-outer-{{ j }}-1-11: [[24, {{ 24 * j + 16 }}, {{ -21.5 - 8 }}], [0, 1, 0], -90]
-  right-inner-{{ j }}-0-01: [[21.5, {{ 24 * j + 8 }}, {{ -21.5 + 8 }}], [0, 1, 0], 90]
-  right-inner-{{ j }}-0-11: [[21.5, {{ 24 * j + 16 }}, {{ -21.5 + 8 }}], [0, 1, 0], 90]
-  right-inner-{{ j }}-1-01: [[21.5, {{ 24 * j + 8 }}, {{ -21.5 - 8 }}], [0, 1, 0], 90]
-  right-inner-{{ j }}-1-11: [[21.5, {{ 24 * j + 16 }}, {{ -21.5 - 8 }}], [0, 1, 0], 90]
-  top-outer-{{ j }}-0-01: [[8, {{ 24 * j + 8 }}, 2.5], [0, 1, 0], 180]
-  top-outer-{{ j }}-0-11: [[8, {{ 24 * j + 16 }}, 2.5], [0, 1, 0], 180]
-  top-outer-{{ j }}-1-01: [[-8, {{ 24 * j + 8 }}, 2.5], [0, 1, 0], 180]
-  top-outer-{{ j }}-1-11: [[-8, {{ 24 * j + 16 }}, 2.5], [0, 1, 0], 180]
-  top-inner-{{ j }}-0-01: [[8, {{ 24 * j + 8 }}, 0], [0, 1, 0], 0]
-  top-inner-{{ j }}-0-11: [[8, {{ 24 * j + 16 }}, 0], [0, 1, 0], 0]
-  top-inner-{{ j }}-1-01: [[-8, {{ 24 * j + 8 }}, 0], [0, 1, 0], 0]
-  top-inner-{{ j }}-1-11: [[-8, {{ 24 * j + 16 }}, 0], [0, 1, 0], 0]
-  left-outer-{{ j }}-c: [[-24, {{ 24 * (j + 1) - 8 * SQRT_2 }}, -21.5], [0, 1, 0], 90]
-  left-inner-{{ j }}-c: [[-21.5, {{ 24 * (j + 1) - 8 * SQRT_2 }}, -21.5], [0, 1, 0], -90]
-  right-outer-{{ j }}-c: [[24, {{ 24 * (j + 1) - 8 * SQRT_2 }}, -21.5], [0, 1, 0], -90]
-  right-inner-{{ j }}-c: [[21.5, {{ 24 * (j + 1) - 8 * SQRT_2 }}, -21.5], [0, 1, 0], 90]
-  top-outer-{{ j }}-c: [[0, {{ 24 * (j + 1) - 8 * SQRT_2 }}, 2.5], [0, 1, 0], 180]
-  top-inner-{{ j }}-c: [[0, {{ 24 * (j + 1) - 8 * SQRT_2 }}, 0], [0, 1, 0], 0]
-  {% endfor %}
-
-"//pub/std/metric/m:m4-thru-4-slotted-4":
-  {% for j in range(size) %}
-  left-outer-{{ j }}-t: [[-24, {{ 24 * (j + 1) }}, -5.5], [0, 1, 0], 90]
-  left-inner-{{ j }}-t: [[-21.5, {{ 24 * (j + 1) }}, -5.5], [0, 1, 0], -90]
-  right-outer-{{ j }}-t: [[24, {{ 24 * (j + 1) }}, -5.5], [0, 1, 0], -90]
-  right-inner-{{ j }}-t: [[21.5, {{ 24 * (j + 1) }}, -5.5], [0, 1, 0], 90]
-  top-outer-{{ j }}-t: [[-16, {{ 24 * (j + 1) }}, 2.5], [0, 1, 0], 180]
-  top-inner-{{ j }}-t: [[-16, {{ 24 * (j + 1) }}, 0], [0, 1, 0], 0]
-  left-outer-{{ j }}-b: [[-24, {{ 24 * (j + 1) }}, -37.5], [0, 1, 0], 90]
-  left-inner-{{ j }}-b: [[-21.5, {{ 24 * (j + 1) }}, -37.5], [0, 1, 0], -90]
-  right-outer-{{ j }}-b: [[24, {{ 24 * (j + 1) }}, -37.5], [0, 1, 0], -90]
-  right-inner-{{ j }}-b: [[21.5, {{ 24 * (j + 1) }}, -37.5], [0, 1, 0], 90]
-  top-outer-{{ j }}-b: [[16, {{ 24 * (j + 1) }}, 2.5], [0, 1, 0], 180]
-  top-inner-{{ j }}-b: [[16, {{ 24 * (j + 1) }}, 0], [0, 1, 0], 0]
-  {% endfor %}
-{% endmacro %}
+{#
+  The goBILDA pattern of a U-channel. The channel runs along +Y, its top is
+  Z=0 to Z=2.5 and its side walls are 2.5mm thick at X=+-21.5 to X=+-24,
+  centred on Z=-21.5. It is 24mm per hole, and each 24mm cell carries a 14mm
+  hole in the middle of it and the M4 pattern around it. Per face, for each
+  interface below: where the face is and how a round hole on it is turned.
+#}
+{% set walls = [
+  ("left-outer", -24, [[0, 1, 0], 90]),
+  ("left-inner", -21.5, [[0, 1, 0], -90]),
+  ("right-outer", 24, [[0, 1, 0], -90]),
+  ("right-inner", 21.5, [[0, 1, 0], 90])
+] %}
+{% set tops = [
+  ("top-outer", 2.5, [[0, 1, 0], 180]),
+  ("top-inner", 0, [[0, 1, 0], 0])
+] %}
+{% set channel = {} %}
+{% for size in [2, 5, 7, 9] %}
+{% set holes = {"m14": {}, "m4": {}, "diagonal": {}, "center": {}, "long": {}} %}
+{# The 14mm holes, one in the middle of each cell but the two at the ends #}
+{% for i in range(size) %}
+{% set y = 24 + 24 * i %}
+{% set _ = holes.m14.update({
+  "top-inner-" ~ i: [[0, y, 0], [1, 0, 0], 0],
+  "top-outer-" ~ i: [[0, y, 2.5], [1, 0, 0], 180],
+  "right-inner-" ~ i: [[21.5, y, -21.5], [0, 1, 0], 90],
+  "right-outer-" ~ i: [[24, y, -21.5], [0, 1, 0], -90],
+  "left-inner-" ~ i: [[-21.5, y, -21.5], [0, 1, 0], -90],
+  "left-outer-" ~ i: [[-24, y, -21.5], [0, 1, 0], 90]
+}) %}
+{% endfor %}
+{% for j in range(size + 1) %}
+{# Round, on the 8mm grid, 16mm off the middle of the face #}
+{% for face, x, turn in walls %}
+{% set _ = holes.m4.update({
+  face ~ "-" ~ j ~ "-0-00": [[x, 24 * j + 8, -5.5]] + turn,
+  face ~ "-" ~ j ~ "-0-10": [[x, 24 * j + 16, -5.5]] + turn,
+  face ~ "-" ~ j ~ "-1-00": [[x, 24 * j + 8, -37.5]] + turn,
+  face ~ "-" ~ j ~ "-1-10": [[x, 24 * j + 16, -37.5]] + turn
+}) %}
+{% endfor %}
+{% for face, z, turn in tops %}
+{% set _ = holes.m4.update({
+  face ~ "-" ~ j ~ "-0-00": [[16, 24 * j + 8, z]] + turn,
+  face ~ "-" ~ j ~ "-0-10": [[16, 24 * j + 16, z]] + turn,
+  face ~ "-" ~ j ~ "-1-00": [[-16, 24 * j + 8, z]] + turn,
+  face ~ "-" ~ j ~ "-1-10": [[-16, 24 * j + 16, z]] + turn
+}) %}
+{% endfor %}
+{# On the 8mm grid, 8mm off the middle, slotted diagonally away from the
+   corner of the cell they are nearest to #}
+{% for face, x, turn in walls %}
+{% set _ = holes.diagonal.update({
+  face ~ "-" ~ j ~ "-0-01": [[x, 24 * j + 8, -13.5]] + slot[face ~ ":pp"],
+  face ~ "-" ~ j ~ "-0-11": [[x, 24 * j + 16, -13.5]] + slot[face ~ ":mp"],
+  face ~ "-" ~ j ~ "-1-01": [[x, 24 * j + 8, -29.5]] + slot[face ~ ":pm"],
+  face ~ "-" ~ j ~ "-1-11": [[x, 24 * j + 16, -29.5]] + slot[face ~ ":mm"]
+}) %}
+{% endfor %}
+{% for face, z, turn in tops %}
+{% set _ = holes.diagonal.update({
+  face ~ "-" ~ j ~ "-0-01": [[8, 24 * j + 8, z]] + slot[face ~ ":pp"],
+  face ~ "-" ~ j ~ "-0-11": [[8, 24 * j + 16, z]] + slot[face ~ ":pm"],
+  face ~ "-" ~ j ~ "-1-01": [[-8, 24 * j + 8, z]] + slot[face ~ ":mp"],
+  face ~ "-" ~ j ~ "-1-11": [[-8, 24 * j + 16, z]] + slot[face ~ ":mm"]
+}) %}
+{% endfor %}
+{# On the middle line of the face, between two cells, slotted towards the
+   lower one #}
+{% for face, x, turn in walls %}
+{% set _ = holes.center.update({face ~ "-" ~ j ~ "-c": [[x, 24 * (j + 1) - 8 * SQRT_2, -21.5]] + slot[face ~ ":m0"]}) %}
+{% endfor %}
+{% for face, z, turn in tops %}
+{% set _ = holes.center.update({face ~ "-" ~ j ~ "-c": [[0, 24 * (j + 1) - 8 * SQRT_2, z]] + slot[face ~ ":0m"]}) %}
+{% endfor %}
+{% endfor %}
+{# Beside each 14mm hole, at the edges of the face, slotted towards the hole #}
+{% for j in range(size) %}
+{% for face, x, turn in walls %}
+{% set _ = holes.long.update({
+  face ~ "-" ~ j ~ "-t": [[x, 24 * (j + 1), -5.5]] + slot[face ~ ":0m"],
+  face ~ "-" ~ j ~ "-b": [[x, 24 * (j + 1), -37.5]] + slot[face ~ ":0p"]
+}) %}
+{% endfor %}
+{% for face, z, turn in tops %}
+{% set _ = holes.long.update({
+  face ~ "-" ~ j ~ "-t": [[-16, 24 * (j + 1), z]] + slot[face ~ ":p0"],
+  face ~ "-" ~ j ~ "-b": [[16, 24 * (j + 1), z]] + slot[face ~ ":m0"]
+}) %}
+{% endfor %}
+{% endfor %}
+{% set _ = channel.update({size: holes}) %}
+{% endfor %}
 
   structure/u_channel_2:
     desc: 1120 Series U-Channel (2 Hole, 72mm Length)
@@ -576,7 +1367,11 @@ parts:
     url: https://www.gobilda.com/1120-series-u-channel-2-hole-72mm-length/
     type: step
     implements:
-      {{ channel_pattern(2) | indent(8) }}
+      "//pub/std/metric/m:m14-thru-2.5": {{ channel[2].m14 | tojson }}
+      "//pub/std/metric/m:m4-thru-2.5": {{ channel[2].m4 | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_diagonal }}": {{ channel[2].diagonal | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_center }}": {{ channel[2].center | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_long }}": {{ channel[2].long | tojson }}
 
   structure/u_channel_5:
     desc: 1120 Series U-Channel (5 Hole, 144mm Length)
@@ -585,7 +1380,11 @@ parts:
     url: https://www.gobilda.com/1120-series-u-channel-5-hole-144mm-length/
     type: step
     implements:
-      {{ channel_pattern(5) | indent(8) }}
+      "//pub/std/metric/m:m14-thru-2.5": {{ channel[5].m14 | tojson }}
+      "//pub/std/metric/m:m4-thru-2.5": {{ channel[5].m4 | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_diagonal }}": {{ channel[5].diagonal | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_center }}": {{ channel[5].center | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_long }}": {{ channel[5].long | tojson }}
 
   structure/u_channel_7:
     desc: 1120 Series U-Channel (7 Hole, 192mm Length)
@@ -594,7 +1393,11 @@ parts:
     url: https://www.gobilda.com/1120-series-u-channel-7-hole-192mm-length/
     type: step
     implements:
-      {{ channel_pattern(7) | indent(8) }}
+      "//pub/std/metric/m:m14-thru-2.5": {{ channel[7].m14 | tojson }}
+      "//pub/std/metric/m:m4-thru-2.5": {{ channel[7].m4 | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_diagonal }}": {{ channel[7].diagonal | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_center }}": {{ channel[7].center | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_long }}": {{ channel[7].long | tojson }}
 
   structure/u_channel_9:
     desc: 1120 Series U-Channel (9 Hole, 240mm Length)
@@ -603,7 +1406,11 @@ parts:
     url: https://www.gobilda.com/1120-series-u-channel-9-hole-240mm-length/
     type: step
     implements:
-      {{ channel_pattern(9) | indent(8) }}
+      "//pub/std/metric/m:m14-thru-2.5": {{ channel[9].m14 | tojson }}
+      "//pub/std/metric/m:m4-thru-2.5": {{ channel[9].m4 | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_diagonal }}": {{ channel[9].diagonal | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_center }}": {{ channel[9].center | tojson }}
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width={{ slot_long }}": {{ channel[9].long | tojson }}
 
   structure/u_channel_low_3:
     desc: 1121 Series Low-Side U-Channel (3 Hole, 96mm Length)
@@ -611,6 +1418,152 @@ parts:
     sku: 1121-0003-0096
     url: https://www.gobilda.com/1121-series-low-side-u-channel-3-hole-96mm-length/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=4.686":
+        # 4.000mm slot, 0.686mm of travel, 2.500mm deep
+        slot42-left: [[-24, 80, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot42-right: [[-21.5, 80, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot43-left: [[-24, 88, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot43-right: [[-21.5, 88, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot44-left: [[-24, 32, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot44-right: [[-21.5, 32, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot45-left: [[-24, 8, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot45-right: [[-21.5, 8, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot46-left: [[-24, 16, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot46-right: [[-21.5, 16, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot47-left: [[-24, 64, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot47-right: [[-21.5, 64, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot48-left: [[-24, 56, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot48-right: [[-21.5, 56, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot49-left: [[-24, 40, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot49-right: [[-21.5, 40, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot50-left: [[-24, 87.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot50-right: [[-21.5, 87.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot51-left: [[-24, 8.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot51-right: [[-21.5, 8.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot52-left: [[-24, 80.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot52-right: [[-21.5, 80.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot53-left: [[-24, 63.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot53-right: [[-21.5, 63.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot54-left: [[-24, 15.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot54-right: [[-21.5, 15.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot55-left: [[-24, 32.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot55-right: [[-21.5, 32.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot56-left: [[-24, 56.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot56-right: [[-21.5, 56.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot57-left: [[-24, 39.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot57-right: [[-21.5, 39.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=5.373":
+        # 4.000mm slot, 1.373mm of travel, 2.500mm deep
+        slot58-left: [[-24, 60.686, -21.5], [-0.57735, 0.57735, -0.57735], 120]
+        slot58-right: [[-21.5, 60.686, -21.5], [0.57735, -0.57735, -0.57735], 120]
+        slot59-left: [[-24, 36.686, -21.5], [-0.57735, 0.57735, -0.57735], 120]
+        slot59-right: [[-21.5, 36.686, -21.5], [0.57735, -0.57735, -0.57735], 120]
+        slot60-left: [[-24, 12.686, -21.5], [-0.57735, 0.57735, -0.57735], 120]
+        slot60-right: [[-21.5, 12.686, -21.5], [0.57735, -0.57735, -0.57735], 120]
+        slot61-left: [[-24, 83.314, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        slot61-right: [[-21.5, 83.314, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=8.686":
+        # 4.000mm slot, 4.686mm of travel, 2.500mm deep
+        slot62-left: [[-24, 24, -5.5], [0, 1, 0], 90]
+        slot62-right: [[-21.5, 24, -5.5], [0.707107, 0, -0.707107], 180]
+        slot63-left: [[-24, 48, -5.5], [0, 1, 0], 90]
+        slot63-right: [[-21.5, 48, -5.5], [0.707107, 0, -0.707107], 180]
+        slot64-left: [[-24, 72, -5.5], [0, 1, 0], 90]
+        slot64-right: [[-21.5, 72, -5.5], [0.707107, 0, -0.707107], 180]
+        slot65-left: [[-24, 72, -37.5], [0.707107, 0, 0.707107], 180]
+        slot65-right: [[-21.5, 72, -37.5], [0, -1, 0], 90]
+        slot66-left: [[-24, 48, -37.5], [0.707107, 0, 0.707107], 180]
+        slot66-right: [[-21.5, 48, -37.5], [0, -1, 0], 90]
+        slot67-left: [[-24, 24, -37.5], [0.707107, 0, 0.707107], 180]
+        slot67-right: [[-21.5, 24, -37.5], [0, -1, 0], 90]
+      "//pub/std/metric/m:m14-thru-2.5":
+        # 14.000mm round hole, 2.500mm deep
+        h39-left: [[-24, 72, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        h39-right: [[-21.5, 72, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+        h40-left: [[-24, 48, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        h40-right: [[-21.5, 48, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+        h41-left: [[-24, 24, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        h41-right: [[-21.5, 24, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m4-thru-2.5":
+        # 4.000mm round hole, 2.500mm deep
+        h1-bottom: [[-16, 88, -45.5], [0, 0, 1], 0]
+        h1-top: [[-16, 88, -43], [1, 0, 0], 180]
+        h10-bottom: [[-16, 56, 0], [0, 0, 1], 0]
+        h10-top: [[-16, 56, 2.5], [1, 0, 0], 180]
+        h11-bottom: [[-16, 48, -45.5], [0, 0, 1], 0]
+        h11-top: [[-16, 48, -43], [1, 0, 0], 180]
+        h12-bottom: [[-16, 48, 0], [0, 0, 1], 0]
+        h12-top: [[-16, 48, 2.5], [1, 0, 0], 180]
+        h13-bottom: [[-16, 40, -45.5], [0, 0, 1], 0]
+        h13-top: [[-16, 40, -43], [1, 0, 0], 180]
+        h14-bottom: [[-16, 40, 0], [0, 0, 1], 0]
+        h14-top: [[-16, 40, 2.5], [1, 0, 0], 180]
+        h15-bottom: [[-16, 32, -45.5], [0, 0, 1], 0]
+        h15-top: [[-16, 32, -43], [1, 0, 0], 180]
+        h16-bottom: [[-16, 32, 0], [0, 0, 1], 0]
+        h16-top: [[-16, 32, 2.5], [1, 0, 0], 180]
+        h17-bottom: [[-16, 24, -45.5], [0, 0, 1], 0]
+        h17-top: [[-16, 24, -43], [1, 0, 0], 180]
+        h18-bottom: [[-16, 24, 0], [0, 0, 1], 0]
+        h18-top: [[-16, 24, 2.5], [1, 0, 0], 180]
+        h19-bottom: [[-16, 16, -45.5], [0, 0, 1], 0]
+        h19-top: [[-16, 16, -43], [1, 0, 0], 180]
+        h2-bottom: [[-16, 88, 0], [0, 0, 1], 0]
+        h2-top: [[-16, 88, 2.5], [1, 0, 0], 180]
+        h20-bottom: [[-16, 16, 0], [0, 0, 1], 0]
+        h20-top: [[-16, 16, 2.5], [1, 0, 0], 180]
+        h21-bottom: [[-16, 8, -45.5], [0, 0, 1], 0]
+        h21-top: [[-16, 8, -43], [1, 0, 0], 180]
+        h22-bottom: [[-16, 8, 0], [0, 0, 1], 0]
+        h22-top: [[-16, 8, 2.5], [1, 0, 0], 180]
+        h23-left: [[-24, 88, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h23-right: [[-21.5, 88, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h24-left: [[-24, 80, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h24-right: [[-21.5, 80, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h25-left: [[-24, 64, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h25-right: [[-21.5, 64, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h26-left: [[-24, 56, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h26-right: [[-21.5, 56, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h27-left: [[-24, 40, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h27-right: [[-21.5, 40, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h28-left: [[-24, 32, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h28-right: [[-21.5, 32, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h29-left: [[-24, 16, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h29-right: [[-21.5, 16, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h3-bottom: [[-16, 80, -45.5], [0, 0, 1], 0]
+        h3-top: [[-16, 80, -43], [1, 0, 0], 180]
+        h30-left: [[-24, 88, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h30-right: [[-21.5, 88, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h31-left: [[-24, 80, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h31-right: [[-21.5, 80, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h32-left: [[-24, 64, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h32-right: [[-21.5, 64, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h33-left: [[-24, 56, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h33-right: [[-21.5, 56, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h34-left: [[-24, 40, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h34-right: [[-21.5, 40, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h35-left: [[-24, 32, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h35-right: [[-21.5, 32, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h36-left: [[-24, 16, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h36-right: [[-21.5, 16, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h37-left: [[-24, 8, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h37-right: [[-21.5, 8, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h38-left: [[-24, 8, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h38-right: [[-21.5, 8, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h4-bottom: [[-16, 80, 0], [0, 0, 1], 0]
+        h4-top: [[-16, 80, 2.5], [1, 0, 0], 180]
+        h5-bottom: [[-16, 72, -45.5], [0, 0, 1], 0]
+        h5-top: [[-16, 72, -43], [1, 0, 0], 180]
+        h6-bottom: [[-16, 72, 0], [0, 0, 1], 0]
+        h6-top: [[-16, 72, 2.5], [1, 0, 0], 180]
+        h7-bottom: [[-16, 64, -45.5], [0, 0, 1], 0]
+        h7-top: [[-16, 64, -43], [1, 0, 0], 180]
+        h8-bottom: [[-16, 64, 0], [0, 0, 1], 0]
+        h8-top: [[-16, 64, 2.5], [1, 0, 0], 180]
+        h9-bottom: [[-16, 56, -45.5], [0, 0, 1], 0]
+        h9-top: [[-16, 56, -43], [1, 0, 0], 180]
 
   structure/u_channel_low_7:
     desc: 1121 Series Low-Side U-Channel (7 Hole, 192mm Length)
@@ -618,11 +1571,303 @@ parts:
     sku: 1121-0007-0192
     url: https://www.gobilda.com/1121-series-low-side-u-channel-7-hole-192mm-length/
     type: step
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=4.686":
+        # 4.000mm slot, 0.686mm of travel, 2.500mm deep
+        slot100-left: [[-24, 152.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot100-right: [[-21.5, 152.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot101-left: [[-24, 176.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot101-right: [[-21.5, 176.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot102-left: [[-24, 184, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot102-right: [[-21.5, 184, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot103-left: [[-24, 160, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot103-right: [[-21.5, 160, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot104-left: [[-24, 136, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot104-right: [[-21.5, 136, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot105-left: [[-24, 112, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot105-right: [[-21.5, 112, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot106-left: [[-24, 87.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot106-right: [[-21.5, 87.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot107-left: [[-24, 8.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot107-right: [[-21.5, 8.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot108-left: [[-24, 80.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot108-right: [[-21.5, 80.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot109-left: [[-24, 63.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot109-right: [[-21.5, 63.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot110-left: [[-24, 15.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot110-right: [[-21.5, 15.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot111-left: [[-24, 32.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot111-right: [[-21.5, 32.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot112-left: [[-24, 56.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot112-right: [[-21.5, 56.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot113-left: [[-24, 39.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot113-right: [[-21.5, 39.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot114-left: [[-24, 183.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot114-right: [[-21.5, 183.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot115-left: [[-24, 111.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot115-right: [[-21.5, 111.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot116-left: [[-24, 135.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot116-right: [[-21.5, 135.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot117-left: [[-24, 159.515, -13.015], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot117-right: [[-21.5, 159.515, -13.015], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot86-left: [[-24, 176, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot86-right: [[-21.5, 176, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot87-left: [[-24, 152, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot87-right: [[-21.5, 152, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot88-left: [[-24, 128, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot88-right: [[-21.5, 128, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot89-left: [[-24, 104, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot89-right: [[-21.5, 104, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot90-left: [[-24, 80, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot90-right: [[-21.5, 80, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot91-left: [[-24, 88, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot91-right: [[-21.5, 88, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot92-left: [[-24, 32, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot92-right: [[-21.5, 32, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot93-left: [[-24, 8, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot93-right: [[-21.5, 8, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot94-left: [[-24, 16, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot94-right: [[-21.5, 16, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot95-left: [[-24, 64, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot95-right: [[-21.5, 64, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot96-left: [[-24, 56, -29.5], [0.357407, 0.862856, 0.357407], 98.421058]
+        slot96-right: [[-21.5, 56, -29.5], [-0.678598, -0.281085, 0.678598], 148.600285]
+        slot97-left: [[-24, 40, -29.5], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot97-right: [[-21.5, 40, -29.5], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot98-left: [[-24, 104.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot98-right: [[-21.5, 104.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+        slot99-left: [[-24, 128.485, -13.015], [-0.357407, 0.862856, -0.357407], 98.421058]
+        slot99-right: [[-21.5, 128.485, -13.015], [0.678598, -0.281085, -0.678598], 148.600285]
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=5.373":
+        # 4.000mm slot, 1.373mm of travel, 2.500mm deep
+        slot118-left: [[-24, 108.686, -21.5], [-0.57735, 0.57735, -0.57735], 120]
+        slot118-right: [[-21.5, 108.686, -21.5], [0.57735, -0.57735, -0.57735], 120]
+        slot119-left: [[-24, 60.686, -21.5], [-0.57735, 0.57735, -0.57735], 120]
+        slot119-right: [[-21.5, 60.686, -21.5], [0.57735, -0.57735, -0.57735], 120]
+        slot120-left: [[-24, 36.686, -21.5], [-0.57735, 0.57735, -0.57735], 120]
+        slot120-right: [[-21.5, 36.686, -21.5], [0.57735, -0.57735, -0.57735], 120]
+        slot121-left: [[-24, 12.686, -21.5], [-0.57735, 0.57735, -0.57735], 120]
+        slot121-right: [[-21.5, 12.686, -21.5], [0.57735, -0.57735, -0.57735], 120]
+        slot122-left: [[-24, 179.314, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        slot122-right: [[-21.5, 179.314, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+        slot123-left: [[-24, 156.686, -21.5], [-0.57735, 0.57735, -0.57735], 120]
+        slot123-right: [[-21.5, 156.686, -21.5], [0.57735, -0.57735, -0.57735], 120]
+        slot124-left: [[-24, 132.686, -21.5], [-0.57735, 0.57735, -0.57735], 120]
+        slot124-right: [[-21.5, 132.686, -21.5], [0.57735, -0.57735, -0.57735], 120]
+        slot125-left: [[-24, 84.686, -21.5], [-0.57735, 0.57735, -0.57735], 120]
+        slot125-right: [[-21.5, 84.686, -21.5], [0.57735, -0.57735, -0.57735], 120]
+      "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=8.686":
+        # 4.000mm slot, 4.686mm of travel, 2.500mm deep
+        slot126-left: [[-24, 24, -5.5], [0, 1, 0], 90]
+        slot126-right: [[-21.5, 24, -5.5], [0.707107, 0, -0.707107], 180]
+        slot127-left: [[-24, 48, -5.5], [0, 1, 0], 90]
+        slot127-right: [[-21.5, 48, -5.5], [0.707107, 0, -0.707107], 180]
+        slot128-left: [[-24, 72, -5.5], [0, 1, 0], 90]
+        slot128-right: [[-21.5, 72, -5.5], [0.707107, 0, -0.707107], 180]
+        slot129-left: [[-24, 96, -5.5], [0, 1, 0], 90]
+        slot129-right: [[-21.5, 96, -5.5], [0.707107, 0, -0.707107], 180]
+        slot130-left: [[-24, 120, -5.5], [0, 1, 0], 90]
+        slot130-right: [[-21.5, 120, -5.5], [0.707107, 0, -0.707107], 180]
+        slot131-left: [[-24, 144, -5.5], [0, 1, 0], 90]
+        slot131-right: [[-21.5, 144, -5.5], [0.707107, 0, -0.707107], 180]
+        slot132-left: [[-24, 168, -5.5], [0, 1, 0], 90]
+        slot132-right: [[-21.5, 168, -5.5], [0.707107, 0, -0.707107], 180]
+        slot133-left: [[-24, 168, -37.5], [0.707107, 0, 0.707107], 180]
+        slot133-right: [[-21.5, 168, -37.5], [0, -1, 0], 90]
+        slot134-left: [[-24, 144, -37.5], [0.707107, 0, 0.707107], 180]
+        slot134-right: [[-21.5, 144, -37.5], [0, -1, 0], 90]
+        slot135-left: [[-24, 120, -37.5], [0.707107, 0, 0.707107], 180]
+        slot135-right: [[-21.5, 120, -37.5], [0, -1, 0], 90]
+        slot136-left: [[-24, 96, -37.5], [0.707107, 0, 0.707107], 180]
+        slot136-right: [[-21.5, 96, -37.5], [0, -1, 0], 90]
+        slot137-left: [[-24, 72, -37.5], [0.707107, 0, 0.707107], 180]
+        slot137-right: [[-21.5, 72, -37.5], [0, -1, 0], 90]
+        slot138-left: [[-24, 48, -37.5], [0.707107, 0, 0.707107], 180]
+        slot138-right: [[-21.5, 48, -37.5], [0, -1, 0], 90]
+        slot139-left: [[-24, 24, -37.5], [0.707107, 0, 0.707107], 180]
+        slot139-right: [[-21.5, 24, -37.5], [0, -1, 0], 90]
+      "//pub/std/metric/m:m14-thru-2.5":
+        # 14.000mm round hole, 2.500mm deep
+        h79-left: [[-24, 168, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        h79-right: [[-21.5, 168, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+        h80-left: [[-24, 144, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        h80-right: [[-21.5, 144, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+        h81-left: [[-24, 120, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        h81-right: [[-21.5, 120, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+        h82-left: [[-24, 96, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        h82-right: [[-21.5, 96, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+        h83-left: [[-24, 72, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        h83-right: [[-21.5, 72, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+        h84-left: [[-24, 48, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        h84-right: [[-21.5, 48, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+        h85-left: [[-24, 24, -21.5], [0.57735, 0.57735, 0.57735], 120]
+        h85-right: [[-21.5, 24, -21.5], [-0.57735, -0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m4-thru-2.5":
+        # 4.000mm round hole, 2.500mm deep
+        h1-bottom: [[-16, 184, -45.5], [0, 0, 1], 0]
+        h1-top: [[-16, 184, -43], [1, 0, 0], 180]
+        h10-bottom: [[-16, 152, 0], [0, 0, 1], 0]
+        h10-top: [[-16, 152, 2.5], [1, 0, 0], 180]
+        h11-bottom: [[-16, 144, -45.5], [0, 0, 1], 0]
+        h11-top: [[-16, 144, -43], [1, 0, 0], 180]
+        h12-bottom: [[-16, 144, 0], [0, 0, 1], 0]
+        h12-top: [[-16, 144, 2.5], [1, 0, 0], 180]
+        h13-bottom: [[-16, 136, -45.5], [0, 0, 1], 0]
+        h13-top: [[-16, 136, -43], [1, 0, 0], 180]
+        h14-bottom: [[-16, 136, 0], [0, 0, 1], 0]
+        h14-top: [[-16, 136, 2.5], [1, 0, 0], 180]
+        h15-bottom: [[-16, 128, -45.5], [0, 0, 1], 0]
+        h15-top: [[-16, 128, -43], [1, 0, 0], 180]
+        h16-bottom: [[-16, 128, 0], [0, 0, 1], 0]
+        h16-top: [[-16, 128, 2.5], [1, 0, 0], 180]
+        h17-bottom: [[-16, 120, -45.5], [0, 0, 1], 0]
+        h17-top: [[-16, 120, -43], [1, 0, 0], 180]
+        h18-bottom: [[-16, 120, 0], [0, 0, 1], 0]
+        h18-top: [[-16, 120, 2.5], [1, 0, 0], 180]
+        h19-bottom: [[-16, 112, -45.5], [0, 0, 1], 0]
+        h19-top: [[-16, 112, -43], [1, 0, 0], 180]
+        h2-bottom: [[-16, 184, 0], [0, 0, 1], 0]
+        h2-top: [[-16, 184, 2.5], [1, 0, 0], 180]
+        h20-bottom: [[-16, 112, 0], [0, 0, 1], 0]
+        h20-top: [[-16, 112, 2.5], [1, 0, 0], 180]
+        h21-bottom: [[-16, 104, -45.5], [0, 0, 1], 0]
+        h21-top: [[-16, 104, -43], [1, 0, 0], 180]
+        h22-bottom: [[-16, 104, 0], [0, 0, 1], 0]
+        h22-top: [[-16, 104, 2.5], [1, 0, 0], 180]
+        h23-bottom: [[-16, 96, -45.5], [0, 0, 1], 0]
+        h23-top: [[-16, 96, -43], [1, 0, 0], 180]
+        h24-bottom: [[-16, 96, 0], [0, 0, 1], 0]
+        h24-top: [[-16, 96, 2.5], [1, 0, 0], 180]
+        h25-bottom: [[-16, 88, -45.5], [0, 0, 1], 0]
+        h25-top: [[-16, 88, -43], [1, 0, 0], 180]
+        h26-bottom: [[-16, 88, 0], [0, 0, 1], 0]
+        h26-top: [[-16, 88, 2.5], [1, 0, 0], 180]
+        h27-bottom: [[-16, 80, -45.5], [0, 0, 1], 0]
+        h27-top: [[-16, 80, -43], [1, 0, 0], 180]
+        h28-bottom: [[-16, 80, 0], [0, 0, 1], 0]
+        h28-top: [[-16, 80, 2.5], [1, 0, 0], 180]
+        h29-bottom: [[-16, 72, -45.5], [0, 0, 1], 0]
+        h29-top: [[-16, 72, -43], [1, 0, 0], 180]
+        h3-bottom: [[-16, 176, -45.5], [0, 0, 1], 0]
+        h3-top: [[-16, 176, -43], [1, 0, 0], 180]
+        h30-bottom: [[-16, 72, 0], [0, 0, 1], 0]
+        h30-top: [[-16, 72, 2.5], [1, 0, 0], 180]
+        h31-bottom: [[-16, 64, -45.5], [0, 0, 1], 0]
+        h31-top: [[-16, 64, -43], [1, 0, 0], 180]
+        h32-bottom: [[-16, 64, 0], [0, 0, 1], 0]
+        h32-top: [[-16, 64, 2.5], [1, 0, 0], 180]
+        h33-bottom: [[-16, 56, -45.5], [0, 0, 1], 0]
+        h33-top: [[-16, 56, -43], [1, 0, 0], 180]
+        h34-bottom: [[-16, 56, 0], [0, 0, 1], 0]
+        h34-top: [[-16, 56, 2.5], [1, 0, 0], 180]
+        h35-bottom: [[-16, 48, -45.5], [0, 0, 1], 0]
+        h35-top: [[-16, 48, -43], [1, 0, 0], 180]
+        h36-bottom: [[-16, 48, 0], [0, 0, 1], 0]
+        h36-top: [[-16, 48, 2.5], [1, 0, 0], 180]
+        h37-bottom: [[-16, 40, -45.5], [0, 0, 1], 0]
+        h37-top: [[-16, 40, -43], [1, 0, 0], 180]
+        h38-bottom: [[-16, 40, 0], [0, 0, 1], 0]
+        h38-top: [[-16, 40, 2.5], [1, 0, 0], 180]
+        h39-bottom: [[-16, 32, -45.5], [0, 0, 1], 0]
+        h39-top: [[-16, 32, -43], [1, 0, 0], 180]
+        h4-bottom: [[-16, 176, 0], [0, 0, 1], 0]
+        h4-top: [[-16, 176, 2.5], [1, 0, 0], 180]
+        h40-bottom: [[-16, 32, 0], [0, 0, 1], 0]
+        h40-top: [[-16, 32, 2.5], [1, 0, 0], 180]
+        h41-bottom: [[-16, 24, -45.5], [0, 0, 1], 0]
+        h41-top: [[-16, 24, -43], [1, 0, 0], 180]
+        h42-bottom: [[-16, 24, 0], [0, 0, 1], 0]
+        h42-top: [[-16, 24, 2.5], [1, 0, 0], 180]
+        h43-bottom: [[-16, 16, -45.5], [0, 0, 1], 0]
+        h43-top: [[-16, 16, -43], [1, 0, 0], 180]
+        h44-bottom: [[-16, 16, 0], [0, 0, 1], 0]
+        h44-top: [[-16, 16, 2.5], [1, 0, 0], 180]
+        h45-bottom: [[-16, 8, -45.5], [0, 0, 1], 0]
+        h45-top: [[-16, 8, -43], [1, 0, 0], 180]
+        h46-bottom: [[-16, 8, 0], [0, 0, 1], 0]
+        h46-top: [[-16, 8, 2.5], [1, 0, 0], 180]
+        h47-left: [[-24, 184, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h47-right: [[-21.5, 184, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h48-left: [[-24, 176, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h48-right: [[-21.5, 176, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h49-left: [[-24, 160, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h49-right: [[-21.5, 160, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h5-bottom: [[-16, 168, -45.5], [0, 0, 1], 0]
+        h5-top: [[-16, 168, -43], [1, 0, 0], 180]
+        h50-left: [[-24, 152, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h50-right: [[-21.5, 152, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h51-left: [[-24, 136, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h51-right: [[-21.5, 136, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h52-left: [[-24, 128, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h52-right: [[-21.5, 128, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h53-left: [[-24, 112, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h53-right: [[-21.5, 112, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h54-left: [[-24, 104, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h54-right: [[-21.5, 104, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h55-left: [[-24, 88, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h55-right: [[-21.5, 88, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h56-left: [[-24, 80, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h56-right: [[-21.5, 80, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h57-left: [[-24, 64, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h57-right: [[-21.5, 64, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h58-left: [[-24, 56, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h58-right: [[-21.5, 56, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h59-left: [[-24, 40, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h59-right: [[-21.5, 40, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h6-bottom: [[-16, 168, 0], [0, 0, 1], 0]
+        h6-top: [[-16, 168, 2.5], [1, 0, 0], 180]
+        h60-left: [[-24, 32, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h60-right: [[-21.5, 32, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h61-left: [[-24, 16, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h61-right: [[-21.5, 16, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h62-left: [[-24, 184, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h62-right: [[-21.5, 184, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h63-left: [[-24, 176, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h63-right: [[-21.5, 176, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h64-left: [[-24, 160, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h64-right: [[-21.5, 160, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h65-left: [[-24, 152, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h65-right: [[-21.5, 152, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h66-left: [[-24, 136, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h66-right: [[-21.5, 136, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h67-left: [[-24, 128, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h67-right: [[-21.5, 128, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h68-left: [[-24, 112, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h68-right: [[-21.5, 112, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h69-left: [[-24, 104, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h69-right: [[-21.5, 104, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h7-bottom: [[-16, 160, -45.5], [0, 0, 1], 0]
+        h7-top: [[-16, 160, -43], [1, 0, 0], 180]
+        h70-left: [[-24, 88, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h70-right: [[-21.5, 88, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h71-left: [[-24, 80, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h71-right: [[-21.5, 80, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h72-left: [[-24, 64, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h72-right: [[-21.5, 64, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h73-left: [[-24, 56, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h73-right: [[-21.5, 56, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h74-left: [[-24, 40, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h74-right: [[-21.5, 40, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h75-left: [[-24, 32, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h75-right: [[-21.5, 32, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h76-left: [[-24, 16, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h76-right: [[-21.5, 16, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h77-left: [[-24, 8, -5.5], [0.57735, 0.57735, 0.57735], 120]
+        h77-right: [[-21.5, 8, -5.5], [-0.57735, -0.57735, 0.57735], 120]
+        h78-left: [[-24, 8, -37.5], [0.57735, 0.57735, 0.57735], 120]
+        h78-right: [[-21.5, 8, -37.5], [-0.57735, -0.57735, 0.57735], 120]
+        h8-bottom: [[-16, 160, 0], [0, 0, 1], 0]
+        h8-top: [[-16, 160, 2.5], [1, 0, 0], 180]
+        h9-bottom: [[-16, 152, -45.5], [0, 0, 1], 0]
+        h9-top: [[-16, 152, -43], [1, 0, 0], 180]
 
 assemblies:
   examples/wormgear:
     type: assy
     desc: A sample assembly demonstrating some typical pattern applications.
+    manufacturing:
+      method: assy
 
 render:
   readme:
@@ -635,4 +1880,6 @@ render:
       - sketches
       - interfaces
       - parts
-    viewportOrigin: [20, 55, -180]
+    # Along the channel, the way it is open at its ends
+    viewport_origin: [100, -25, 15]
+    viewport_up: [0, 0, 1]
