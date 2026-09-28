@@ -1,7 +1,7 @@
 name: //pub/robotics/parts/gobilda
 desc: goBILDA® is a modern build system designed for educators and students.
 url: "https://gobilda.com/"
-partcad: ">=0.8.127"
+partcad: ">=0.8.131"
 # Everything in this package can be bought from goBILDA (see 'suppliers'
 # below). Some SKUs are sets of more than one kind of item - a REX shaft comes
 # with its E-clip - and each item of a set is a part of its own, naming the
