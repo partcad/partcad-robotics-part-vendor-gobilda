@@ -55,12 +55,13 @@ import sys
 from collections import defaultdict
 
 from OCP.BRepAdaptor import BRepAdaptor_Surface
+from OCP.BRepClass import BRepClass_FaceClassifier
 from OCP.BRepClass3d import BRepClass3d_SolidClassifier
 from OCP.GeomAbs import GeomAbs_Cylinder, GeomAbs_Plane
 from OCP.gp import gp_Pnt
 from OCP.STEPControl import STEPControl_Reader
 from OCP.BRep import BRep_Tool
-from OCP.TopAbs import TopAbs_FACE, TopAbs_IN, TopAbs_REVERSED, TopAbs_SOLID, TopAbs_VERTEX
+from OCP.TopAbs import TopAbs_FACE, TopAbs_IN, TopAbs_ON, TopAbs_REVERSED, TopAbs_SOLID, TopAbs_VERTEX
 from OCP.TopExp import TopExp_Explorer
 from OCP.TopoDS import TopoDS
 
@@ -211,6 +212,7 @@ class Plane:
         surface = BRepAdaptor_Surface(face)
         plane = surface.Plane()
         n, p = plane.Axis().Direction(), plane.Location()
+        self.face = face
         self.normal = [n.X(), n.Y(), n.Z()]
         self.point = [p.X(), p.Y(), p.Z()]
         self.vertices = []
@@ -219,6 +221,11 @@ class Plane:
             v = BRep_Tool.Pnt_s(TopoDS.Vertex_s(explorer.Current()))
             self.vertices.append([v.X(), v.Y(), v.Z()])
             explorer.Next()
+
+    def contains(self, point):
+        """Whether 'point', which is in the plane, is on the face."""
+        state = BRepClass_FaceClassifier(self.face, gp_Pnt(*point), 1e-6).State()
+        return state in (TopAbs_IN, TopAbs_ON)
 
 
 class Model:
@@ -280,21 +287,41 @@ class Model:
         """
         return not any(self.inside(p) for p in self.ring(line, v + outward * 0.05, radius * 0.9)[1:])
 
-    def settle(self, axis_point, direction, v, outward):
+    def settle(self, axis_point, direction, v, outward, radius):
         """Where a feature ending at 'v' really ends: on the face it ends on.
 
         A chamfer or an undercut at the mouth of a hole leaves the cylinder
-        short of the face the hole is in. The face is the nearest plane across
-        the axis within REACH of 'v', in the direction the feature ends in.
+        short of the face the hole is in. The face is the farthest plane
+        across the axis within REACH of 'v', in the direction the feature ends
+        in - a chamfer only ever moves the end of a feature back from it, and
+        the step a chamfer ends in is a plane on the way there - and it is a
+        face at the feature: around the mouth of a hole, or across the end of
+        a shaft. A plane that is only that far along the axis somewhere else in
+        the part is not it.
         """
-        best = v
+        x = perpendicular(direction)
+        y = cross(direction, x)
+        best = None
         for plane in self.planes:
             if abs(abs(dot(plane.normal, direction)) - 1) > 1e-4:
                 continue
             w = dot(plane.point, direction)
-            if 0 <= (w - v) * outward <= REACH and abs(w - v) >= abs(best - v):
+            if not 0 <= (w - v) * outward <= REACH:
+                continue
+            if best is not None and abs(w - v) <= abs(best - v):
+                continue
+            centre = add(axis_point, mul(direction, w - dot(axis_point, direction)))
+            probes = [centre] + [
+                add(centre, mul(side, r * k))
+                # across the end of a shaft, which may be a ring around a bore
+                # in it, and around the mouth of a hole
+                for r in (radius * 0.25, radius * 0.5, radius * 0.75, radius * 0.95, radius + REACH + 0.1)
+                for side in (x, y)
+                for k in (1, -1)
+            ]
+            if any(plane.contains(p) for p in probes):
                 best = w
-        return best
+        return v if best is None else best
 
 
 # --- features ------------------------------------------------------------------
@@ -376,6 +403,9 @@ def _depth_name(depth):
 
 def _m_interface(kind, size, depth):
     """The '//pub/std/metric/m' interface of an M<size> feature this deep."""
+    named = min(M_DEPTHS, key=lambda known: abs(known - depth))
+    if abs(named - depth) <= TOL:
+        depth = named
     depth = round(depth, 3)
     if size in M_SIZES and depth in M_DEPTHS:
         return "%s:m%s-%s-%s" % (M, _depth_name(size), kind, _depth_name(depth))
@@ -421,6 +451,66 @@ class Port:
         self.alternates = []
 
 
+class Axis:
+    """A line in the model: the axis of a feature that has no round face on it."""
+
+    def __init__(self, point, direction):
+        self.direction = canonical(direction)
+        # The point of the axis closest to the origin, as for a Cylinder
+        self.point = sub(point, mul(self.direction, dot(point, self.direction)))
+
+    def at(self, v):
+        return add(self.point, mul(self.direction, v))
+
+
+def _hex_axes(model):
+    """The axes of the hexes 7mm across the flats in the model, from the flats alone.
+
+    Two opposite flats 7mm apart, three times around one axis, 60 degrees
+    apart: the axis is where their middle planes meet.
+    """
+    # Parallel planes 7mm apart, by the direction they are across
+    by_normal = defaultdict(list)
+    for plane in model.planes:
+        n = canonical(plane.normal)
+        key = tuple(round(k, 4) for k in n)
+        by_normal[key].append((dot(plane.point, n), plane))
+    pairs = []
+    for key, planes in by_normal.items():
+        n = list(key)
+        planes.sort(key=lambda p: p[0])
+        for i, (a, _) in enumerate(planes):
+            for b, _ in planes[i + 1 :]:
+                if b - a > 2 * REX_FLAT + TOL:
+                    break
+                if abs(b - a - 2 * REX_FLAT) < TOL:
+                    pairs.append((unit(n), (a + b) / 2))
+    axes = []
+    for i, (n1, m1) in enumerate(pairs):
+        for n2, m2 in pairs[i + 1 :]:
+            c = dot(n1, n2)
+            if abs(abs(c) - 0.5) > 1e-3:
+                continue
+            d = unit(cross(n1, n2))
+            # The point where the two middle planes meet, in the plane across 'd'
+            point = add(mul(n1, (m1 - c * m2) / (1 - c * c)), mul(n2, (m2 - c * m1) / (1 - c * c)))
+            third = any(
+                abs(dot(n3, d)) < 1e-4
+                and abs(abs(dot(n3, n1)) - 0.5) < 1e-3
+                and abs(abs(dot(n3, n2)) - 0.5) < 1e-3
+                and abs(dot(point, n3) - m3) < TOL
+                for n3, m3 in pairs
+            )
+            if not third:
+                continue
+            axis = Axis(point, d)
+            if not any(
+                norm(sub(axis.direction, a.direction)) < 1e-4 and norm(sub(axis.point, a.point)) < TOL for a in axes
+            ):
+                axes.append(axis)
+    return axes
+
+
 def deduce(model):
     """Every port the model says it has, and what it could not name."""
     ports = []
@@ -430,8 +520,7 @@ def deduce(model):
 
     # Where each line's REX hex is, if it has one: flats 3.5mm off the axis,
     # parallel to it, facing at least three ways
-    def hex_flats(line):
-        c = line[0]
+    def hex_flats(c):
         flats = []
         for plane in model.planes:
             if abs(dot(plane.normal, c.direction)) > 1e-4:
@@ -446,56 +535,59 @@ def deduce(model):
         return flats if len(facing) >= 3 else []
 
     feature = 0
+
+    # 8mm REX(TM): a hex 7mm across the flats, around 'axis'. A bore may or may
+    # not draw its corners rounded; a shaft does, at 8mm, which is what tells
+    # it from a 7mm hex nut.
+    def rex(axis, line):
+        nonlocal feature
+        d = axis.direction
+        flats = hex_flats(axis)
+        if not flats:
+            return False
+        along = [dot(v, d) for f in flats for v in f.vertices]
+        start, end = min(along), max(along)
+        middle = axis.at((start + end) / 2)
+        # A bore has nothing just inside its flats; a hex nut or a hex
+        # shaft is solid there
+        n = flats[0].normal
+        toward = unit(sub(n, mul(d, dot(n, d))))
+        if dot(sub(flats[0].point, axis.point), toward) < 0:
+            toward = mul(toward, -1)
+        hole = not model.inside(add(middle, mul(toward, REX_FLAT - 0.1)))
+        arcs = [c for c in line if abs(c.radius - REX_ROUND) < TOL and c.span < 359]
+        if not hole and not arcs:
+            return False
+        feature += 1
+        used.update(id(c) for c in arcs)
+        start = model.settle(axis.point, d, start, -1, REX_ROUND)
+        end = model.settle(axis.point, d, end, 1, REX_ROUND)
+        # +X at a corner of the hex: 30 degrees off a flat
+        x = rotate(unit(sub(n, mul(d, dot(n, d)))), d, 30)
+        if hole:
+            depth = end - start
+            named = min(REX_DEPTHS, key=lambda known: abs(known - depth))
+            interface = "8mmREX-thru-%s" % _depth_name(named)
+            note = "8mm REX bore, %.3fmm deep" % depth
+            if abs(named - depth) > 0.05:
+                note += " - no '8mmREX-thru-%s' is declared, add one" % _depth_name(depth)
+                interface = "8mmREX-thru-%s" % _depth_name(depth)
+            for v, into in ((start, 1), (end, -1)):
+                z = mul(d, into)
+                ports.append(Port(interface, "rex%d-%s" % (feature, _face_name(mul(z, -1))), axis.at(v), z, x, note))
+        else:
+            note = "8mm REX shaft, %.3fmm long" % (end - start)
+            for v, out in ((start, -1), (end, 1)):
+                z = mul(d, out)
+                ports.append(Port("8mmREX-shaft", "rex%d-%s" % (feature, _face_name(z)), axis.at(v), z, x, note))
+        return True
+
     for line in lines:
         by_radius = defaultdict(list)
         for c in line:
             by_radius[(round(c.radius, 2), c.hole)].append(c)
-
-        # 8mm REX(TM): a hex 7mm across the flats, around this line. A bore
-        # may or may not draw its corners rounded; a shaft does, at 8mm, which
-        # is what tells it from a 7mm hex nut.
         d = line[0].direction
-        flats = hex_flats(line)
-        if flats:
-            along = [dot(v, d) for f in flats for v in f.vertices]
-            start, end = min(along), max(along)
-            middle = line[0].at((start + end) / 2)
-            # A bore has nothing just inside its flats; a hex nut or a hex
-            # shaft is solid there
-            n = flats[0].normal
-            toward = unit(sub(n, mul(d, dot(n, d))))
-            if dot(sub(flats[0].point, line[0].point), toward) < 0:
-                toward = mul(toward, -1)
-            hole = not model.inside(add(middle, mul(toward, REX_FLAT - 0.1)))
-            arcs = [c for c in line if abs(c.radius - REX_ROUND) < TOL and c.span < 359]
-            if hole or arcs:
-                feature += 1
-                used.update(id(c) for c in arcs)
-                start = model.settle(line[0].point, d, start, -1)
-                end = model.settle(line[0].point, d, end, 1)
-                # +X at a corner of the hex: 30 degrees off a flat
-                n = flats[0].normal
-                x = rotate(unit(sub(n, mul(d, dot(n, d)))), d, 30)
-                if hole:
-                    depth = end - start
-                    named = min(REX_DEPTHS, key=lambda known: abs(known - depth))
-                    interface = "8mmREX-thru-%s" % _depth_name(named)
-                    note = "8mm REX bore, %.3fmm deep" % depth
-                    if abs(named - depth) > 0.05:
-                        note += " - no '8mmREX-thru-%s' is declared, add one" % _depth_name(depth)
-                        interface = "8mmREX-thru-%s" % _depth_name(depth)
-                    for v, into in ((start, 1), (end, -1)):
-                        z = mul(d, into)
-                        ports.append(
-                            Port(interface, "rex%d-%s" % (feature, _face_name(mul(z, -1))), line[0].at(v), z, x, note)
-                        )
-                else:
-                    note = "8mm REX shaft, %.3fmm long" % (end - start)
-                    for v, out in ((start, -1), (end, 1)):
-                        z = mul(d, out)
-                        ports.append(
-                            Port("8mmREX-shaft", "rex%d-%s" % (feature, _face_name(z)), line[0].at(v), z, x, note)
-                        )
+        rex(line[0], line)
 
         for (radius, hole), faces in sorted(by_radius.items()):
             faces = [f for f in faces if id(f) not in used]
@@ -506,8 +598,8 @@ def deduce(model):
                     continue  # half a slot, or a rounded edge: see '_slots'
                 diameter = 2 * radius
                 size = _size(diameter, hole)
-                start = model.settle(line[0].point, d, run["start"], -1)
-                end = model.settle(line[0].point, d, run["end"], 1)
+                start = model.settle(line[0].point, d, run["start"], -1, radius)
+                end = model.settle(line[0].point, d, run["end"], 1, radius)
                 length = end - start
                 if length < SLIVER:
                     continue
@@ -591,6 +683,20 @@ def deduce(model):
                                 interface, "s%d-%s" % (feature, _face_name(z)), line[0].at(v), z, perpendicular(d), note
                             )
                         )
+
+    # A hex with no round face on its axis - a bore drawn with sharp corners
+    # and nothing else around it - has no line above: find it from its flats
+    for axis in _hex_axes(model):
+        if any(
+            norm(sub(line[0].direction, axis.direction)) < 1e-4 and norm(sub(line[0].point, axis.point)) < TOL
+            for line in lines
+        ):
+            continue
+        if not rex(axis, []):
+            unknown.append(
+                "a hex 7mm across the flats around %s along %s, with no bore in it"
+                % (_fmt(axis.point), _fmt(axis.direction))
+            )
 
     slot_ports, slot_unknown, feature, slot_ends = _slots(model, used, feature)
     # A round hole at the end of a slot is that slot, drawn as a hole too
@@ -676,8 +782,8 @@ def _slots(model, used, feature):
         diameter = 2 * a.radius
         size = _size(diameter, True)
         d = a.direction
-        start = model.settle(a.point, d, a.start, -1)
-        end = model.settle(a.point, d, a.end, 1)
+        start = model.settle(a.point, d, a.start, -1, a.radius)
+        end = model.settle(a.point, d, a.end, 1, a.radius)
         depth = end - start
         if depth < SLIVER:
             continue

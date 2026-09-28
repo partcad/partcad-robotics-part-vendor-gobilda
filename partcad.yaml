@@ -344,8 +344,11 @@ parts:
     type: step
     implements:
       # Deduced from the model by tools/deduce_ports.py
-      "//pub/std/metric/m:m-shaft-length;length=3.76,size=14":
-        # 14.000mm round shaft, 3.760mm long
+      # From the flange to the tip. The tip is rounded 0.4mm back, further
+      # than tools/deduce_ports.py looks for the face a feature ends on, so it
+      # reads the shaft as 3.65mm long and its tip as a second place to connect.
+      "//pub/std/metric/m:m-shaft-length;length=4.05,size=14":
+        # 14.000mm round shaft, 4.050mm long
         s2-back: [[0, 4.05, 0], [-1, 0, 0], 90]
       "//pub/std/metric/m:m5-thru-5":
         # 5.000mm round hole, 5.000mm deep
@@ -493,10 +496,10 @@ parts:
     type: step
     implements:
       # Deduced from the model by tools/deduce_ports.py
-      "//pub/std/metric/m:m-hole;depth=10.814,size=4":
-        # 4.020mm round hole, 10.814mm deep
-        h5-side: [[-18.746, 9.503, 4.11], [-0.862856, 0.357407, -0.357407], 98.421058]
-        h7-side: [[-10.381, -0.276, 4.11], [0.862856, -0.357407, -0.357407], 98.421058]
+      "//pub/std/metric/m:m-hole;depth=10.52,size=4":
+        # 4.020mm round hole, 10.520mm deep
+        h5-side: [[-18.644, 9.605, 4.11], [-0.862856, 0.357407, -0.357407], 98.421058]
+        h7-side: [[-10.482, -0.378, 4.11], [0.862856, -0.357407, -0.357407], 98.421058]
       "//pub/std/metric/m:m-hole;depth=6.23,size=4":
         # 4.040mm round hole, 6.230mm deep
         h6-side: [[-18.016, 10.233, 4.11], [0.862856, -0.357407, -0.357407], 98.421058]
@@ -576,9 +579,9 @@ parts:
     type: step
     implements:
       # Deduced from the model by tools/deduce_ports.py
-      "//pub/std/metric/m:m-shaft-length;length=1.6,size=14":
-        # 13.980mm round shaft, 1.600mm long
-        s2-front: [[0, 2.9, 0], [1, 0, 0], 90]
+      "//pub/std/metric/m:m14-shaft-1.5":
+        # 13.980mm round shaft, 1.500mm long
+        s2-front: [[0, 3, 0], [1, 0, 0], 90]
       "//pub/std/metric/m:m-thru-depth-slotted;depth=3,size=4,width=4.686":
         # 4.000mm slot, 0.686mm of travel, 3.000mm deep
         slot12-back: [[8, 3, -8], [0.862856, 0.357407, -0.357407], 98.421058]
@@ -1173,17 +1176,19 @@ parts:
     type: step
     implements:
       # Deduced from the model by tools/deduce_ports.py
-      "//pub/std/metric/m:m-hole;depth=1.01,size=4":
+      "//pub/std/metric/m:m4-hole-1":
         # 4.000mm round hole, 1.010mm deep
         h1-back: [[-6.7, -4.5, 20.55], [1, 0, 0], 90]
         h11-back: [[-55.21, -4.5, 10.64], [1, 0, 0], 90]
         h18-back: [[-6.71, -4.5, 10.64], [1, 0, 0], 90]
         h5-back: [[-55.21, -4.5, 20.54], [1, 0, 0], 90]
-      "//pub/std/metric/m:m-hole;depth=1.26,size=3":
-        # 3.300mm round hole, 1.260mm deep
+      "//pub/std/metric/m:m3-thru-1":
+        # 3.300mm round hole, 1.000mm deep
         h31-left: [[-57.96, 1.24, 7.64], [0.57735, 0.57735, 0.57735], 120]
+        h31-right: [[-56.96, 1.24, 7.64], [-0.57735, -0.57735, 0.57735], 120]
         h33-left: [[-57.96, 1.24, 23.64], [0.57735, 0.57735, 0.57735], 120]
-      "//pub/std/metric/m:m-shaft-length;length=1.01,size=8":
+        h33-right: [[-56.96, 1.24, 23.64], [-0.57735, -0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m8-shaft-1":
         # 8.000mm round shaft, 1.010mm long
         s13-back: [[-55.21, -4.5, 10.64], [-1, 0, 0], 90]
         s13-front: [[-55.21, -5.51, 10.64], [1, 0, 0], 90]
