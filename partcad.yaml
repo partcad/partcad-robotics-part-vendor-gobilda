@@ -32,6 +32,9 @@ suppliers:
 #   points along the slot towards the other end, which is how far 'moveX' lets
 #   the fastener travel.
 # * An 8mm REX(TM) port's +X points at a corner of the hex. See '8mmREX' below.
+# * Every tooth of a gear is a port and so is every gap between two teeth, on
+#   the pitch circle with +Z towards the axis of the gear and +X along the
+#   tooth. See 'gear-tooth' below.
 #
 # The Jinja2 dictionary below is the orientation of a slot's port ([axis, angle]),
 # for every face a slot is cut in: the face is named the way the ports on it are, and
@@ -119,6 +122,15 @@ sketches:
     desc: 8mm REX(TM) shafting
     type: basic
     circle: 4
+  # As wide as a tooth is thick at its pitch circle, which is half the pitch
+  # and as wide as the gap between two teeth there: the radius is pi / 4 of the
+  # module ('pi' itself is not a number a multiplication takes here)
+  gear-tooth:
+    desc: A tooth of a MOD %module% gear, or the gap between two, at the pitch circle
+    type: basic
+    circle: "%0.785398 * module%"
+    parameters:
+      module: 1.0
 
 interfaces:
   ### Shafts ###
@@ -219,6 +231,90 @@ interfaces:
       "//pub/std/metric/m:m4-threaded-thru-4": {{ pattern_4xM4_16mm | tojson }}
     mates:
       - 4xM4-16mm-pattern
+
+  ### Gears ###
+  # Every tooth of a gear is a port, and so is every gap between two teeth. Two
+  # gears of the same module mesh when a tooth of one is in a gap of the other,
+  # whichever tooth and whichever gap: that is what makes them the same module.
+  #
+  # A part implementing one of these puts the port where the centre line of the
+  # tooth (or of the gap) crosses the pitch circle - one module below the tip of
+  # the tooth, which is where the pitch circles of two meshing gears touch
+  # whether or not their teeth are profile shifted - with +Z into the gear,
+  # towards its axis, and +X along the tooth: along the axis of a spur gear or a
+  # worm wheel, across the thread of a worm or a rack.
+  #
+  # The port turns that by -45 degrees about +Z, for the same reason an 8mm REX
+  # port turns its hex by 15: connecting two ports swaps their X and Y, and the
+  # axis of a gear only comes out of that swap pointing the way the axis of the
+  # other one does when it is halfway between them. So two meshing gears are
+  # put side by side, axes parallel, their +X along the same way; a worm wheel
+  # is put across a worm, its axis along the worm's thread.
+  #
+  # Only the module is said. The pressure angle and the helix are not, so
+  # nothing here stops a worm wheel, whose teeth lean along the thread of its
+  # worm, from being put on a spur gear.
+  gear-tooth:
+    desc: A tooth of a MOD %module% gear
+    parameters:
+      module: 1.0
+    ports:
+      tooth:
+        location: [[0, 0, 0], [0, 0, 1], -45]
+        sketch: "gear-tooth;module=%module%"
+    mates:
+      - "gear-gap;module=%module%"
+  gear-gap:
+    desc: The gap between two teeth of a MOD %module% gear
+    parameters:
+      module: 1.0
+    ports:
+      gap:
+        location: [[0, 0, 0], [0, 0, 1], -45]
+        sketch: "gear-tooth;module=%module%"
+    mates:
+      - "gear-tooth;module=%module%"
+
+  # One pitch of a round gear: a tooth, and the gap before it. Its +Z is the
+  # axis of the gear, on the plane halfway across the teeth, and its +X is the
+  # centre line of the tooth. The gap is half a pitch clockwise of the tooth.
+  #
+  # 'shift' is the profile shift: the teeth are cut that many modules further
+  # out than the module and the number of teeth alone put them, and so is the
+  # pitch circle the ports are on.
+  gear-pitch:
+    desc: A tooth of a MOD %module% gear of %teeth% teeth, and the gap before it
+    parameters:
+      module: 1.0
+      shift: 0.0
+      teeth: 20
+    inherits:
+      "gear-tooth;module=%module%":
+        "": [["%module * (teeth / 2 + shift)%", 0, 0], [0, 1, 0], -90]
+      # The same, turned by half a pitch about +Z
+      "gear-gap;module=%module%":
+        "":
+          - - "%module * (teeth / 2 + shift) * cos(pi / teeth)%"
+            - "%-module * (teeth / 2 + shift) * sin(pi / teeth)%"
+            - 0
+          - ["%-sin(pi / (2 * teeth))%", "%-cos(pi / (2 * teeth))%", "%-sin(pi / (2 * teeth))%"]
+          - "%2 * degrees(acos(cos(pi / (2 * teeth)) / sqrt(2)))%"
+
+  # All the teeth of a round gear, and all the gaps between them: a pitch per
+  # tooth, numbered counterclockwise about +Z from the one on +X. So the tooth
+  # '1' is on +X, and the gap '1' is the one before it.
+{% for teeth in [28] %}
+  gear-{{ teeth }}t:
+    desc: The {{ teeth }} teeth of a MOD %module% gear, and the gaps between them
+    parameters:
+      module: 1.0
+      shift: 0.0
+    inherits:
+      "gear-pitch;module=%module%,shift=%shift%,teeth={{ teeth }}":
+{% for i in range(teeth) %}
+        "{{ i + 1 }}": [[0, 0, 0], [0, 0, 1], {{ (360 * i / teeth) | round(6) }}]
+{% endfor %}
+{% endfor %}
 
 # mates:
 #   4xM4-16mm-pattern-thru: 4xM4-16mm-pattern-thru
@@ -793,6 +889,24 @@ parts:
       8mmREX-thru-33:
         side0: [[-5.257, -18.018, 33.934], [-0.57735, -0.57735, -0.57735], 120]
         side1: [[-5.257, 14.982, 33.934], [0.57735, -0.57735, 0.57735], 120]
+      # The thread is single start, 3.927mm (pi times the module) a turn, and
+      # its teeth are where it crosses the plane through the axis on the +X
+      # side of it, on the pitch circle 6.25mm from the axis (one module below
+      # the tip of the thread): the four with a whole flank on either side of
+      # them, numbered from the 'side0' end. The gap a tooth has the number of
+      # is the one before it. +X is across the thread, towards -Z.
+      #
+      # A gear meshes with the worm on that side of it. Turning the worm moves
+      # them along: turned about +Y (from +Z towards +X), they move towards
+      # 'side1', 3.927mm a turn.
+      "gear-tooth;module=1.25":
+{% for y in [-6.39, -2.463, 1.464, 5.391] %}
+        "{{ loop.index }}": [[0.993, {{ y }}, 33.934], [0.707107, 0, -0.707107], 180]
+{% endfor %}
+      "gear-gap;module=1.25":
+{% for y in [-8.354, -4.427, -0.5, 3.427] %}
+        "{{ loop.index }}": [[0.993, {{ y }}, 33.934], [0.707107, 0, -0.707107], 180]
+{% endfor %}
 
   motion/worm_gear_28t:
     desc: 2314 Series Brass, MOD 1.25 Hub-Mount Worm Gear (14mm Bore, 28 Tooth)
@@ -824,6 +938,12 @@ parts:
       "//pub/std/metric/m:m14-thru-4":
         inner: [[0.5, 0, 0], [0, 1, 0], 90]
         outer: [[4.5, 0, 0], [0, 1, 0], -90]
+      # The teeth are around +X, halfway across them on the plane X=0. Their
+      # tips are 19mm from the axis where the throat of the gear is narrowest,
+      # so the pitch circle is 17.75mm, a 0.2 module profile shift out from the
+      # 17.5mm that 28 teeth of MOD 1.25 make. The tooth '1' is half a pitch
+      # (6.429 degrees) from +Y towards +Z, and the gap '1' is on +Y.
+      "gear-28t;module=1.25,shift=0.2": [[0, 0, 0], [0.597762, 0.534193, 0.597762], 123.778396]
 
   structure/beam_15:
     desc: 1106 Series Square Beam (15 Hole, 120mm Length)
@@ -1868,6 +1988,16 @@ assemblies:
     desc: A sample assembly demonstrating some typical pattern applications.
     manufacturing:
       method: assy
+  examples/worm_drive:
+    type: assy
+    desc: The worm gear meshing with the worm through one of its teeth.
+    manufacturing:
+      method: assy
+    render:
+      svg:
+        # Down the axis of the gear, from beside the 'side0' end of the worm
+        viewport_origin: [-20, -40, 100]
+        viewport_up: [1, 0, 0]
 
 render:
   readme:
