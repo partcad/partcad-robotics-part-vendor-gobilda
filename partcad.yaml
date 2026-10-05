@@ -124,7 +124,8 @@ sketches:
     circle: 4
   # As wide as a tooth is thick at its pitch circle, which is half the pitch
   # and as wide as the gap between two teeth there: the radius is pi / 4 of the
-  # module ('pi' itself is not a number a multiplication takes here)
+  # module ('PI' itself is not a number a multiplication takes before PartCAD
+  # partcad/partcad#737)
   gear-tooth:
     desc: A tooth of a MOD %module% gear, or the gap between two, at the pitch circle
     type: basic
@@ -294,11 +295,11 @@ interfaces:
       # The same, turned by half a pitch about +Z
       "gear-gap;module=%module%":
         "":
-          - - "%module * (teeth / 2 + shift) * cos(pi / teeth)%"
-            - "%-module * (teeth / 2 + shift) * sin(pi / teeth)%"
+          - - "%module * (teeth / 2 + shift) * cos(PI / teeth)%"
+            - "%-module * (teeth / 2 + shift) * sin(PI / teeth)%"
             - 0
-          - ["%-sin(pi / (2 * teeth))%", "%-cos(pi / (2 * teeth))%", "%-sin(pi / (2 * teeth))%"]
-          - "%2 * degrees(acos(cos(pi / (2 * teeth)) / sqrt(2)))%"
+          - ["%-sin(PI / (2 * teeth))%", "%-cos(PI / (2 * teeth))%", "%-sin(PI / (2 * teeth))%"]
+          - "%2 * degrees(acos(cos(PI / (2 * teeth)) / sqrt(2)))%"
 
   # All the teeth of a round gear, and all the gaps between them: a pitch per
   # tooth, numbered counterclockwise about +Z from the one on +X. So the tooth
