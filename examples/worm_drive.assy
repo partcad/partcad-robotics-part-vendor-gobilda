@@ -1,0 +1,17 @@
+links:
+  - part: motion/worm_8mmREX
+    name: worm
+
+  # A tooth of the gear in the gap in the middle of the worm. Any tooth goes in
+  # any gap: it is the gear that turns, and the worm.
+  - part: motion/worm_gear_28t
+    name: gear
+    connect:
+      with: "gear-tooth;module=1.25"
+      withInstance: "1"
+      name: worm
+      to: "gear-gap;module=1.25"
+      toInstance: "3"
+      # The two models are not exact conjugates of each other, so their flanks
+      # share about 1mm^3 wherever they mesh.
+      interferes: worm

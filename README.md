@@ -6,6 +6,12 @@ It’s metric, lightweight, and has an ever-growing library of parts.
 
 ## Assemblies
 
+### examples/worm_drive
+<table><tr>
+<td valign=top><a href="examples/worm_drive.assy"><img src="././examples/worm_drive.svg" alt="examples/worm_drive" style="width: auto; height: auto; max-width: 200px; max-height: 200px;"></a></td>
+<td valign=top>The worm gear meshing with the worm through one of its teeth.</td>
+</tr></table>
+
 ### examples/wormgear
 <table><tr>
 <td valign=top><a href="examples/wormgear.assy"><img src="././examples/wormgear.svg" alt="examples/wormgear" style="width: auto; height: auto; max-width: 200px; max-height: 200px;"></a></td>

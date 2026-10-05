@@ -53,6 +53,11 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
 * A slot's port is the centre of one end, +X along the slot to the other end.
 * An 8mm REX(TM) port's +X points at a corner of the hex. The `8mmREX` interface turns it by 15 degrees, which is
   what makes two REX ports meet with their flats aligned.
+* Every tooth of a gear is a port, and so is every gap between two teeth: on the pitch circle (one module below the
+  tips), +Z towards the gear's axis, +X along the tooth. `gear-tooth;module=<m>` mates `gear-gap;module=<m>`, so any
+  tooth goes in any gap of a gear of the same module. A round gear implements `gear-<teeth>t;module=<m>,shift=<x>`
+  once, on its axis, and gets every tooth and gap, numbered: see `motion/worm_gear_28t`, and `motion/worm_8mmREX`
+  for a worm.
 * Holes and shafts are the interfaces of `//pub/std/metric/m`: `m4-thru-8` where the standard names the size and
   the depth, `m-thru-depth;depth=8.5,size=4` where it does not. Write the parameters of such a reference in
   alphabetical order: that is how PartCAD names it, and an ASSY file's `to:` is matched against that name.
@@ -64,6 +69,10 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
   pattern mounts' holes are, for one. The product page says which holes are tapped.
 * **What a feature is for**, beyond its shape. A 32mm pocket is an `m32` opening whether or not anything that
   size is ever put in it. Leave out what nothing will ever connect to.
+* **Teeth.** It does not see them. Measure how far the tips of the teeth are from the axis, halfway across them, and
+  where the first one is, and declare the gear by hand: the pitch circle is one module in from the tips, and whatever
+  it is off `module * teeth / 2` by is its `shift`, in modules. A gear of a number of teeth nothing here has yet needs
+  that number added to the list `gear-<teeth>t` is generated for.
 * **Instance names.** It numbers the features and names each mouth by the face it is on (`h3-top`, `rex1-bottom`,
   `slot7-left`). Rename them to something a person connecting the part would recognise - `ledged` and `flat` on
   a hub - where there are few enough of them to be worth it; keep them as they are on a channel with hundreds.
