@@ -116,9 +116,12 @@ suppliers:
 {% set slot_center = "%.3f" | format(4 + 24 - 16 * SQRT_2) %}
 {% set slot_long = "%.3f" | format(4 + 16 - 8 * SQRT_2) %}
 
+# A sketch is named for the interface whose port it draws, with "-boundary"
+# after it: a name is one object of a package whatever its kind, and the
+# interface - what other packages connect through - has the plain one.
 sketches:
   # https://www.gobilda.com/stainless-steel-rex-shafting
-  8mmREX:
+  8mmREX-boundary:
     desc: 8mm REX(TM) shafting
     type: basic
     circle: 4
@@ -126,7 +129,7 @@ sketches:
   # and as wide as the gap between two teeth there: the radius is pi / 4 of the
   # module ('PI' itself is not a number a multiplication takes before PartCAD
   # partcad/partcad#737)
-  gear-tooth:
+  gear-tooth-boundary:
     desc: A tooth of a MOD %module% gear, or the gap between two, at the pitch circle
     type: basic
     circle: "%0.785398 * module%"
@@ -148,7 +151,7 @@ interfaces:
         # about 45 degrees, and a hex (60 degree symmetry) only comes out of
         # that mirror unchanged when its flats sit at 15 degrees off +X.
         location: [[0, 0, 0], [0, 0, 1], 15]
-        sketch: 8mmREX
+        sketch: 8mmREX-boundary
   8mmREX-opening:
     desc: Opening for 8mm REX shaft
     abstract: True
@@ -262,7 +265,7 @@ interfaces:
     ports:
       tooth:
         location: [[0, 0, 0], [0, 0, 1], -45]
-        sketch: "gear-tooth;module=%module%"
+        sketch: "gear-tooth-boundary;module=%module%"
     mates:
       - "gear-gap;module=%module%"
   gear-gap:
@@ -272,7 +275,7 @@ interfaces:
     ports:
       gap:
         location: [[0, 0, 0], [0, 0, 1], -45]
-        sketch: "gear-tooth;module=%module%"
+        sketch: "gear-tooth-boundary;module=%module%"
     mates:
       - "gear-tooth;module=%module%"
 
