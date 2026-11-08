@@ -40,7 +40,7 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
    what the script saw and could not name - a spline, a D-bore, a size no standard names - and are for you to
    declare by hand, or to leave out.
 
-4. Check it: `pc test` and `pc render`, and `pc lint`. All three have to pass.
+4. Check it: `pc qual test` and `pc render`, and `pc lint`. All three have to pass.
 
 ## The conventions
 
