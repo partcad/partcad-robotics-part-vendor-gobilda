@@ -29,7 +29,24 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
    comes with every shaft length) is declared once for its geometry, and once more per set as an `alias` naming
    that set's SKU: see `motion/shaft_8mmREX_clip` and the aliases after it.
 
-3. Deduce its ports:
+3. Say what it is made of. The STEP file has no colour or material in it, so take them from the spec table on the
+   product page, using the `colors:`, `materials:` and `finishes:` declared at the top of `partcad.yaml`:
+
+   ```yaml
+       parameters:
+         material: {type: string, default: ":Aluminum"}       # the page's "Material"
+         color: {type: string, default: ":Aluminum"}          # its "Color", or what its finish looks like
+         finish: {type: string, default: ":Clear Anodized"}   # its "Finish", if it states one
+   ```
+
+   Name the colour even where the material claims it: a drawing reads the `color` alone. Add a declaration for a
+   material, colour or finish the page names and the package does not have yet, named as the page names it.
+   Then compare the mass `pc info` reports with the page's "Weight". If they are more than 10% apart, state the
+   page's weight under `properties: physics: mass:` (in kg), with a comment saying why. Common reasons: the part is
+   several pieces in different materials (a hub and its steel pinch bolts), or the model is simplified (a bearing
+   with no balls in it).
+
+4. Deduce its ports:
 
    ```shell
    poetry run python tools/deduce_ports.py --part motion/hub_sonic_8mmREX
@@ -40,7 +57,7 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
    what the script saw and could not name - a spline, a D-bore, a size no standard names - and are for you to
    declare by hand, or to leave out.
 
-4. Check it: `pc test` and `pc render`, and `pc lint`. All three have to pass.
+5. Check it: `pc test` and `pc render`, and `pc lint`. All three have to pass.
 
 ## The conventions
 
