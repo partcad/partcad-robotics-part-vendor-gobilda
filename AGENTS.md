@@ -46,9 +46,29 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
    declaration for a grade, colour or finish the package does not have yet.
    Then compare the mass `pc info` reports with the page's "Weight". If they are more than 10% apart, try the
    grades the page's metal could be before anything else. If none accounts for it, do not state a weight: say in
-   a comment what goBILDA lists, what the model weighs, and why they differ, for example a part that is several
-   pieces in different materials (a hub and its steel pinch bolts), or a simplified model (a bearing with no balls
-   in it). Only something that is no one material, a servo, states its weight under `properties: physics: mass:`.
+   a comment what goBILDA lists, what the model weighs, and why they differ, for example a simplified model (a
+   bearing with no balls in it). Only something that is no one material, a servo, states its weight under
+   `properties: physics: mass:`.
+
+   Last, require it: `requirements: {has_color: true, has_material: true, has_weight: true}` (only `has_weight` for
+   what is no one material), which `pc test` checks.
+
+   **A model that is pieces of different materials** - a hub and its steel pinch bolts, one solid each in one STEP
+   file - is an assembly of those pieces. See `motion/hub_sonic_8mmREX` and its `.assy` file:
+
+   * `<name>_model` reads the file as it is (`path:` it), and is `manufacturable: false`: it is no item.
+   * Each kind of piece but the main one is `<name>_<piece>`, a `boolean` part: `operation: and` of the model and
+     `<name>_<piece>_box`, with `whole: true`, which keeps the model's solids that lie wholly inside the box. The
+     box is a `basic` cuboid around those solids, a few tenths of a millimetre clear of them, that holds no other
+     solid whole.
+   * The main piece is `<name>_<body>`: the model `xor` the other pieces, `whole: true`, which is what is left of
+     the model without them.
+   * Each piece says what it is made of, as a part does, and is `manufacturable: false` too: it comes in the item.
+   * The assembly `<name>` links the pieces, all at the origin (each is where the model has it), and carries what
+     the part would have: `desc`, `vendor`, `sku`, `count_per_sku`, the requirements and the `implements:`. An
+     assembly takes no `url:`, so the product page is a comment. An ASSY file links it as `assembly:`.
+
+   `tools/deduce_ports.py --part <name>` reads such an assembly's model and checks it against the assembly's ports.
 
 4. Deduce its ports:
 

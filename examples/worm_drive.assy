@@ -1,5 +1,5 @@
 links:
-  - part: motion/worm_8mmREX
+  - assembly: motion/worm_8mmREX
     name: worm
 
   # A tooth of the gear in the gap in the middle of the worm. Any tooth goes in

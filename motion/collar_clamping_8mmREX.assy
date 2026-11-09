@@ -1,0 +1,8 @@
+# The 2910 Series Aluminum Clamping Collar (8mm REX ID x 20mm OD, 9mm Length) as goBILDA sells it: the collar and its pinch bolt.
+# Each is taken out of goBILDA's model of the whole of it (see 'motion/collar_clamping_8mmREX_model' in partcad.yaml),
+# so each is where that model has it, and all of them are placed at the origin.
+links:
+  - part: motion/collar_clamping_8mmREX_collar
+    name: collar
+  - part: motion/collar_clamping_8mmREX_pinch_bolt
+    name: pinch-bolt

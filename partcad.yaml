@@ -43,8 +43,18 @@ suppliers:
 #
 # Where a part's computed weight is more than 10% off goBILDA's, it says so
 # in a comment, and why, and is weighed as modelled all the same: a bearing
-# modelled as a solid ring with no balls, or a hub whose steel pinch bolts
-# are weighed as its aluminium.
+# modelled as a solid ring with no balls, for one.
+#
+# A model that is pieces of different materials - a hub and its steel pinch
+# bolts, as one STEP file - is an assembly of those pieces, each taken out of
+# the model as a part of its own ('type: boolean': each piece is the solids of
+# the model inside a box around it, and what is left is the model 'xor' those).
+# The assembly is what is bought, under the item's SKU, and has the ports the
+# item has.
+#
+# Every item bought requires what this says of it ('has_color',
+# 'has_material', 'has_weight'), and 'pc test' holds it to that: a reference
+# that resolves to nothing, or a colour that is only a picture, fails.
 colors:
   Aluminum:
     desc: Bare aluminium, which is also how it looks under a clear anodised coat
@@ -67,6 +77,9 @@ colors:
   Black:
     desc: Black, as the "Color" of goBILDA's plastic items
     display: "#1C1C1C"
+  Black Oxide:
+    desc: The dark grey-black of a black-oxide conversion coating on steel
+    display: "#2E2E30"
 
 materials:
   6061-T6 Aluminum:
@@ -138,6 +151,12 @@ finishes:
   Black Zinc-Plated:
     desc: Black zinc plating
     display: {roughness: 0.4, metallic: 0.6}
+  Black Oxide:
+    desc: >-
+      A black-oxide conversion coating, as on goBILDA's alloy steel set screws
+      (the 2806 Series), which the set screws in its collars and worms are
+      taken to be
+    display: {roughness: 0.55, metallic: 0.7}
 
 # How a port of this package is written down, so that it lands on the geometry:
 #
@@ -476,6 +495,7 @@ parts:
       material: {type: string, default: ":1018 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-threaded-thru-depth;depth=2.75,size=4":
@@ -494,6 +514,7 @@ parts:
       material: {type: string, default: ":1018 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m4-thru-3":
@@ -518,6 +539,7 @@ parts:
       material: {type: string, default: ":4140 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       "//pub/std/metric/m:m4-screw-12": [[0, 0, -2.2], [1, 0, 0], 0]
 
@@ -531,6 +553,7 @@ parts:
     parameters:
       material: {type: string, default: ":POM"}
       color: {type: string, default: ":Black"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m5-thru-1":
@@ -548,6 +571,7 @@ parts:
     parameters:
       material: {type: string, default: ":POM"}
       color: {type: string, default: ":Black"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m10-shaft-1":
@@ -569,6 +593,7 @@ parts:
       material: {type: string, default: ":1018 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       "//pub/std/metric/m:m8-thru-4":
         side0: [[0, -2, 0], [1, 0, 0], -90]
@@ -585,6 +610,7 @@ parts:
     # ring between its shields, with no balls in it.
     parameters:
       material: {type: string, default: ":52100 Steel"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-shaft-length;length=3.76,size=14":
@@ -606,6 +632,7 @@ parts:
     # ring between its shields, with no balls in it.
     parameters:
       material: {type: string, default: ":52100 Steel"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=1.524,size=8":
@@ -633,6 +660,7 @@ parts:
     # ring between its shields, with no balls in it.
     parameters:
       material: {type: string, default: ":52100 Steel"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m14-shaft-4":
@@ -654,6 +682,7 @@ parts:
     # solid ring between its shields, with no balls in it.
     parameters:
       material: {type: string, default: ":52100 Steel"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       8mmREX-thru-5:
         clean-side: [[0, 0, 0], [1, 0, 0], -90]
@@ -661,177 +690,230 @@ parts:
       # The 14mm outer race, from the clean side (Y=0) to the flange (Y=4)
       "//pub/std/metric/m:m14-shaft-4": [[0, 4, 0], [1, 0, 0], -90]
 
-  motion/collar_clamping_8mmREX:
-    desc: 2910 Series Aluminum Clamping Collar (8mm REX ID x 20mm OD, 9mm Length)
-    vendor: gobilda
-    sku: 2910-0920-4008
-    url: https://www.gobilda.com/2910-series-aluminum-clamping-collar-8mm-rex-id-x-20mm-od-9mm-length/
+  # goBILDA's model of the 2910 Series Aluminum Clamping Collar (8mm REX ID x
+  # 20mm OD, 9mm Length): the collar and its pinch bolt, one solid each, in one
+  # file. Not an item of its own: what is bought is the assembly
+  # 'motion/collar_clamping_8mmREX', of the pieces below, which are taken out of
+  # it.
+  motion/collar_clamping_8mmREX_model:
+    desc: goBILDA's model of the 2910 Series Aluminum Clamping Collar (8mm REX ID x 20mm OD, 9mm Length), all its pieces in one file
     type: step
-    # goBILDA lists 7.3g. The model weighs 6.1g at 6061-T6's density: its pinch
-    # bolt is steel, weighed here as the collar's aluminium.
+    path: motion/collar_clamping_8mmREX.step
+    manufacturable: false
+  motion/collar_clamping_8mmREX_collar:
+    desc: The collar of the 2910 Series Aluminum Clamping Collar (8mm REX ID x 20mm OD, 9mm Length), without its pinch bolt
+    type: boolean
+    operation: xor
+    parts: [motion/collar_clamping_8mmREX_model, motion/collar_clamping_8mmREX_pinch_bolt]
+    whole: true
+    manufacturable: false
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    implements:
-      # Deduced from the model by tools/deduce_ports.py
-      8mmREX-thru-9.5:
-        # 8mm REX bore, 9.500mm deep
-        rex5-back: [[-28.855, -0.558, 18.819], [0, 0.707107, -0.707107], 180]
-        rex5-front: [[-28.855, -10.058, 18.819], [0, 0.707107, 0.707107], 180]
+  motion/collar_clamping_8mmREX_pinch_bolt:
+    desc: The pinch bolt of the 2910 Series Aluminum Clamping Collar (8mm REX ID x 20mm OD, 9mm Length)
+    type: boolean
+    operation: and
+    parts: [motion/collar_clamping_8mmREX_model, motion/collar_clamping_8mmREX_pinch_bolt_box]
+    whole: true
+    manufacturable: false
+    parameters:
+      material: {type: string, default: ":4140 Steel"}
+      color: {type: string, default: ":Zinc-Plated"}
+      finish: {type: string, default: ":Zinc-Plated"}
+  motion/collar_clamping_8mmREX_pinch_bolt_box:
+    desc: Around the pinch bolt in goBILDA's model, and around nothing else whole
+    type: basic
+    cuboid: [14.61, 7.61, 7.61]
+    offset: [[-29.105, -5.555, 12.865], [0, 0, 1], 0]
+    manufacturable: false
 
-  motion/collar_set_6mm:
-    desc: 2920 Series Steel Set-Screw Collar (6mm Bore) - 2 Pack
-    vendor: gobilda
-    sku: 2920-0001-0006
-    count_per_sku: 2
-    url: https://www.gobilda.com/2920-series-steel-set-screw-collar-6mm-bore-2-pack/
+  # goBILDA's model of the 2920 Series Steel Set-Screw Collar (6mm Bore) - 2
+  # Pack: the collar and its set screw, one solid each, in one file. Not an item
+  # of its own: what is bought is the assembly 'motion/collar_set_6mm', of the
+  # pieces below, which are taken out of it.
+  motion/collar_set_6mm_model:
+    desc: goBILDA's model of the 2920 Series Steel Set-Screw Collar (6mm Bore) - 2 Pack, all its pieces in one file
     type: step
+    path: motion/collar_set_6mm.step
+    manufacturable: false
+  motion/collar_set_6mm_collar:
+    desc: The collar of the 2920 Series Steel Set-Screw Collar (6mm Bore) - 2 Pack, without its set screw
+    type: boolean
+    operation: xor
+    parts: [motion/collar_set_6mm_model, motion/collar_set_6mm_set_screw]
+    whole: true
+    manufacturable: false
     parameters:
       material: {type: string, default: ":1018 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
-    implements:
-      # Deduced from the model by tools/deduce_ports.py
-      "//pub/std/metric/m:m-threaded-hole;depth=3.743,size=5":
-        # 5.000mm tapped hole, 3.743mm deep
-        h3-bottom: [[-59.262, 9.43, 18.195], [0, 0, 1], 0]
-      "//pub/std/metric/m:m-thru-depth;depth=8.5,size=6":
-        # 6.000mm round hole, 8.500mm deep
-        h4-back: [[-59.262, 13.93, 24.695], [1, 0, 0], 90]
-        h4-front: [[-59.262, 5.43, 24.695], [-1, 0, 0], 90]
+  motion/collar_set_6mm_set_screw:
+    desc: The set screw of the 2920 Series Steel Set-Screw Collar (6mm Bore) - 2 Pack
+    type: boolean
+    operation: and
+    parts: [motion/collar_set_6mm_model, motion/collar_set_6mm_set_screw_box]
+    whole: true
+    manufacturable: false
+    parameters:
+      material: {type: string, default: ":4140 Steel"}
+      color: {type: string, default: ":Black Oxide"}
+      finish: {type: string, default: ":Black Oxide"}
+  motion/collar_set_6mm_set_screw_box:
+    desc: Around the set screw in goBILDA's model, and around nothing else whole
+    type: basic
+    cuboid: [5.61, 5.61, 4.61]
+    offset: [[-59.265, 9.425, 20.195], [0, 0, 1], 0]
+    manufacturable: false
 
-  motion/coupler_hyper_8mm_8mmREX:
-    desc: 4007 Series Hyper Coupler (8mm Round Bore to 8mm REX Bore)
-    vendor: gobilda
-    sku: 4007-0008-4008
-    url: https://www.gobilda.com/4007-series-hyper-coupler-8mm-round-bore-to-8mm-rex-bore/
+  # goBILDA's model of the 4007 Series Hyper Coupler (8mm Round Bore to 8mm REX
+  # Bore): the coupler and its pinch bolts, one solid each, in one file. Not an
+  # item of its own: what is bought is the assembly
+  # 'motion/coupler_hyper_8mm_8mmREX', of the pieces below, which are taken out
+  # of it.
+  motion/coupler_hyper_8mm_8mmREX_model:
+    desc: goBILDA's model of the 4007 Series Hyper Coupler (8mm Round Bore to 8mm REX Bore), all its pieces in one file
     type: step
-    # goBILDA lists 19g. The model weighs 12.6g at 6061-T6's density: its four
-    # pinch bolts are steel, weighed here as its aluminium, which accounts for
-    # some of that.
+    path: motion/coupler_hyper_8mm_8mmREX.step
+    manufacturable: false
+  motion/coupler_hyper_8mm_8mmREX_coupler:
+    desc: The coupler of the 4007 Series Hyper Coupler (8mm Round Bore to 8mm REX Bore), without its pinch bolts
+    type: boolean
+    operation: xor
+    parts: [motion/coupler_hyper_8mm_8mmREX_model, motion/coupler_hyper_8mm_8mmREX_pinch_bolts]
+    whole: true
+    manufacturable: false
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    implements:
-      # Deduced from the model by tools/deduce_ports.py
-      "//pub/std/metric/m:m-hole;depth=12.974,size=4":
-        # 4.200mm round hole, 12.974mm deep
-        h2-left: [[-31.804, -14.1, 10.97], [0.57735, 0.57735, 0.57735], 120]
-        h5-right: [[-12.556, -14.1, 23.57], [-0.57735, -0.57735, 0.57735], 120]
-      "//pub/std/metric/m:m-hole;depth=13.123,size=4":
-        # 4.200mm round hole, 13.123mm deep
-        h4-top: [[-28.48, -2.3, 26.893], [1, 0, 0], 180]
-      "//pub/std/metric/m:m-hole;depth=13.124,size=4":
-        # 4.200mm round hole, 13.124mm deep
-        h3-bottom: [[-15.88, -2.3, 7.646], [0, 0, 1], 0]
-      8mmREX-thru-10.5:
-        # 8mm REX bore, 10.500mm deep
-        rex1-back: [[-22.18, 2.3, 17.27], [0, 0.707107, -0.707107], 180]
-        rex1-front: [[-22.18, -8.2, 17.27], [0, 0.707107, 0.707107], 180]
+  motion/coupler_hyper_8mm_8mmREX_pinch_bolts:
+    desc: The four pinch bolts of the 4007 Series Hyper Coupler (8mm Round Bore to 8mm REX Bore)
+    type: boolean
+    operation: and
+    parts: [motion/coupler_hyper_8mm_8mmREX_model, motion/coupler_hyper_8mm_8mmREX_pinch_bolts_box]
+    whole: true
+    manufacturable: false
+    parameters:
+      material: {type: string, default: ":4140 Steel"}
+      color: {type: string, default: ":Zinc-Plated"}
+      finish: {type: string, default: ":Zinc-Plated"}
+  motion/coupler_hyper_8mm_8mmREX_pinch_bolts_box:
+    desc: Around the pinch bolts in goBILDA's model, and around nothing else whole
+    type: basic
+    cuboid: [20.2, 19.42, 20.21]
+    offset: [[-22.18, -8.2, 17.275], [0, 0, 1], 0]
+    manufacturable: false
 
-  motion/hub_hyper_8mmREX:
-    desc: 1310 Series Hyper Hub (8mm REX Bore)
-    vendor: gobilda
-    sku: 1310-0016-4008
-    url: https://www.gobilda.com/1310-series-hyper-hub-8mm-rex-bore/
+  # goBILDA's model of the 1310 Series Hyper Hub (8mm REX Bore): the hub and its
+  # pinch bolts, one solid each, in one file. Not an item of its own: what is
+  # bought is the assembly 'motion/hub_hyper_8mmREX', of the pieces below, which
+  # are taken out of it.
+  motion/hub_hyper_8mmREX_model:
+    desc: goBILDA's model of the 1310 Series Hyper Hub (8mm REX Bore), all its pieces in one file
     type: step
-    # goBILDA lists 23g. The model weighs 18.8g at 6061-T6's density: its two
-    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
-    # accounts for some of that.
+    path: motion/hub_hyper_8mmREX.step
+    manufacturable: false
+  motion/hub_hyper_8mmREX_hub:
+    desc: The hub of the 1310 Series Hyper Hub (8mm REX Bore), without its pinch bolts
+    type: boolean
+    operation: xor
+    parts: [motion/hub_hyper_8mmREX_model, motion/hub_hyper_8mmREX_pinch_bolts]
+    whole: true
+    manufacturable: false
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    implements:
-      # Deduced from the model by tools/deduce_ports.py
-      "//pub/std/metric/m:m-hole;depth=15.104,size=4":
-        # 4.020mm round hole, 15.104mm deep
-        h1-right: [[-4.576, -12.02, 18.63], [-0.57735, -0.57735, 0.57735], 120]
-        h2-left: [[-26.264, 0.58, 18.63], [0.57735, 0.57735, 0.57735], 120]
-      "//pub/std/metric/m:m14-shaft-2":
-        # 14.000mm round shaft, 2.000mm long
-        s8-top: [[-15.42, -5.72, 3.03], [0, 0, 1], 0]
-      "//pub/std/metric/m:m4-hole-10":
-        # 4.020mm round hole, 10.000mm deep
-        h3-bottom: [[-7.42, 2.28, 3.03], [0, 0, 1], 0]
-        h4-bottom: [[-7.42, -13.72, 3.03], [0, 0, 1], 0]
-        h5-bottom: [[-23.42, -13.72, 3.03], [0, 0, 1], 0]
-        h6-bottom: [[-23.42, 2.28, 3.03], [0, 0, 1], 0]
-      8mmREX-thru-22:
-        # 8mm REX bore, 22.000mm deep
-        rex7-bottom: [[-15.42, -5.72, 1.03], [0, 0, 1], 120]
-        rex7-top: [[-15.42, -5.72, 23.03], [0.5, 0.866025, 0], 180]
+  motion/hub_hyper_8mmREX_pinch_bolts:
+    desc: The two pinch bolts of the 1310 Series Hyper Hub (8mm REX Bore)
+    type: boolean
+    operation: and
+    parts: [motion/hub_hyper_8mmREX_model, motion/hub_hyper_8mmREX_pinch_bolts_box]
+    whole: true
+    manufacturable: false
+    parameters:
+      material: {type: string, default: ":4140 Steel"}
+      color: {type: string, default: ":Zinc-Plated"}
+      finish: {type: string, default: ":Zinc-Plated"}
+  motion/hub_hyper_8mmREX_pinch_bolts_box:
+    desc: Around the pinch bolts in goBILDA's model, and around nothing else whole
+    type: basic
+    cuboid: [17.12, 20.2, 7.62]
+    offset: [[-15.42, -5.72, 18.63], [0, 0, 1], 0]
+    manufacturable: false
 
-  motion/hub_sonic_5mm:
-    desc: 1309 Series Sonic Hub (5mm Bore)
-    vendor: gobilda
-    sku: 1309-0016-0005
-    url: https://www.gobilda.com/1309-series-sonic-hub-5mm-bore/
+  # goBILDA's model of the 1309 Series Sonic Hub (5mm Bore): the hub and its
+  # pinch bolts, one solid each, in one file. Not an item of its own: what is
+  # bought is the assembly 'motion/hub_sonic_5mm', of the pieces below, which
+  # are taken out of it.
+  motion/hub_sonic_5mm_model:
+    desc: goBILDA's model of the 1309 Series Sonic Hub (5mm Bore), all its pieces in one file
     type: step
-    # goBILDA lists 15g. The model weighs 10.8g at 6061-T6's density: its two
-    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
-    # accounts for some of that.
+    path: motion/hub_sonic_5mm.step
+    manufacturable: false
+  motion/hub_sonic_5mm_hub:
+    desc: The hub of the 1309 Series Sonic Hub (5mm Bore), without its pinch bolts
+    type: boolean
+    operation: xor
+    parts: [motion/hub_sonic_5mm_model, motion/hub_sonic_5mm_pinch_bolts]
+    whole: true
+    manufacturable: false
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    implements:
-      # Deduced from the model by tools/deduce_ports.py
-      "//pub/std/metric/m:m-hole;depth=10.814,size=4":
-        # 4.020mm round hole, 10.814mm deep
-        h5-side: [[-18.746, 9.503, 4.11], [-0.862856, 0.357407, -0.357407], 98.421058]
-        h7-side: [[-10.381, -0.276, 4.11], [0.862856, -0.357407, -0.357407], 98.421058]
-      "//pub/std/metric/m:m-hole;depth=6.23,size=4":
-        # 4.040mm round hole, 6.230mm deep
-        h6-side: [[-18.016, 10.233, 4.11], [0.862856, -0.357407, -0.357407], 98.421058]
-        h8-side: [[-11.111, -1.007, 4.11], [-0.862856, 0.357407, -0.357407], 98.421058]
-      "//pub/std/metric/m:m4-thru-8":
-        # 4.020mm round hole, 8.000mm deep
-        h1-bottom: [[-6.56, -3.39, 0.11], [0, 0, 1], 0]
-        h1-top: [[-6.56, -3.39, 8.11], [1, 0, 0], 180]
-        h2-bottom: [[-22.56, -3.39, 0.11], [0, 0, 1], 0]
-        h2-top: [[-22.56, -3.39, 8.11], [1, 0, 0], 180]
-        h3-bottom: [[-6.56, 12.61, 0.11], [0, 0, 1], 0]
-        h3-top: [[-6.56, 12.61, 8.11], [1, 0, 0], 180]
-        h4-bottom: [[-22.56, 12.61, 0.11], [0, 0, 1], 0]
-        h4-top: [[-22.56, 12.61, 8.11], [1, 0, 0], 180]
+  motion/hub_sonic_5mm_pinch_bolts:
+    desc: The two pinch bolts of the 1309 Series Sonic Hub (5mm Bore)
+    type: boolean
+    operation: and
+    parts: [motion/hub_sonic_5mm_model, motion/hub_sonic_5mm_pinch_bolts_box]
+    whole: true
+    manufacturable: false
+    parameters:
+      material: {type: string, default: ":4140 Steel"}
+      color: {type: string, default: ":Zinc-Plated"}
+      finish: {type: string, default: ":Zinc-Plated"}
+  motion/hub_sonic_5mm_pinch_bolts_box:
+    desc: Around the pinch bolts in goBILDA's model, and around nothing else whole
+    type: basic
+    cuboid: [26.42, 8.28, 7.69]
+    offset: [[-14.56, 4.61, 4.075], [0, 0, 1], 0]
+    manufacturable: false
 
-  motion/hub_sonic_8mmREX:
-    desc: 1309 Series Sonic Hub (8mm REX Bore)
-    vendor: gobilda
-    sku: 1309-0016-4008
-    url: https://www.gobilda.com/1309-series-sonic-hub-8mm-rex-bore/
+  # goBILDA's model of the 1309 Series Sonic Hub (8mm REX Bore): the hub and its
+  # pinch bolts, one solid each, in one file. Not an item of its own: what is
+  # bought is the assembly 'motion/hub_sonic_8mmREX', of the pieces below, which
+  # are taken out of it.
+  motion/hub_sonic_8mmREX_model:
+    desc: goBILDA's model of the 1309 Series Sonic Hub (8mm REX Bore), all its pieces in one file
     type: step
-    # goBILDA lists 14g. The model weighs 10.3g at 6061-T6's density: its two
-    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
-    # accounts for some of that.
+    path: motion/hub_sonic_8mmREX.step
+    manufacturable: false
+  motion/hub_sonic_8mmREX_hub:
+    desc: The hub of the 1309 Series Sonic Hub (8mm REX Bore), without its pinch bolts
+    type: boolean
+    operation: xor
+    parts: [motion/hub_sonic_8mmREX_model, motion/hub_sonic_8mmREX_pinch_bolts]
+    whole: true
+    manufacturable: false
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    implements:
-      # Deduced from the model by tools/deduce_ports.py
-      "//pub/std/metric/m:m-hole;depth=10.67,size=4":
-        # 4.020mm round hole, 10.670mm deep
-        h6-side: [[-8.014, 22.665, -10.38], [-0.862856, 0.357407, -0.357407], 98.421058]
-        h8-side: [[0.148, 12.682, -10.38], [0.862856, -0.357407, -0.357407], 98.421058]
-      "//pub/std/metric/m:m-hole;depth=6.223,size=4":
-        # 4.040mm round hole, 6.223mm deep
-        h7-side: [[-7.386, 23.293, -10.38], [0.862856, -0.357407, -0.357407], 98.421058]
-      "//pub/std/metric/m:m-hole;depth=6.237,size=4":
-        # 4.040mm round hole, 6.237mm deep
-        h9-side: [[-0.481, 12.053, -10.38], [-0.862856, 0.357407, -0.357407], 98.421058]
-      # The hub is 8mm thick (Z=-14.38 to Z=-6.38), with a 2mm tall ledge on
-      # top of it (Z=-6.38 to Z=-4.38) that the REX bore runs through as well.
-      4xM4-16mm-pattern-thru-8mm:
-        ledged: [[-3.93, 17.67, -6.38], [0, 1, 0], 180]
-        flat: [[-3.93, 17.67, -14.38], [0, 1, 0], 0]
-      8mmREX-thru-10:
-        ledged: [[-3.93, 17.67, -4.38], [0.382683, 0.92388, 0], 180]
-        flat: [[-3.93, 17.67, -14.38], [0, 0, 1], 15]
-      # The hub provides a ledge that can be used as a 14mm wide 2mm long shaft
-      "//pub/std/metric/m:m14-shaft-2": [[-3.93, 17.67, -6.38], [0, 1, 0], 180]
-      # The outer perimeter of the hub can be used as a 32m wide 8mm long shaft
-      "//pub/std/metric/m:m32-shaft-8":
-        ledged: [[-3.93, 17.67, -6.38], [0, 1, 0], 0]
-        flat: [[-3.93, 17.67, -14.38], [0, 1, 0], 180]
+  motion/hub_sonic_8mmREX_pinch_bolts:
+    desc: The two pinch bolts of the 1309 Series Sonic Hub (8mm REX Bore)
+    type: boolean
+    operation: and
+    parts: [motion/hub_sonic_8mmREX_model, motion/hub_sonic_8mmREX_pinch_bolts_box]
+    whole: true
+    manufacturable: false
+    parameters:
+      material: {type: string, default: ":4140 Steel"}
+      color: {type: string, default: ":Zinc-Plated"}
+      finish: {type: string, default: ":Zinc-Plated"}
+  motion/hub_sonic_8mmREX_pinch_bolts_box:
+    desc: Around the pinch bolts in goBILDA's model, and around nothing else whole
+    type: basic
+    cuboid: [26.41, 8.29, 7.69]
+    offset: [[-3.925, 17.675, -10.415], [0, 0, 1], 0]
+    manufacturable: false
 
   motion/servo_attach_arm_25t:
     desc: 1900 Series Single Servo Arm (25 Tooth Spline, 32mm Length)
@@ -842,6 +924,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-thru-depth;depth=1.1,size=3":
@@ -871,6 +954,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-shaft-length;length=1.6,size=14":
@@ -913,6 +997,7 @@ parts:
     type: step
     parameters:
       material: {type: string, default: ":303 Stainless Steel"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
 
   motion/shaft_8mmREX_56mm:
     desc: 2106 Series Stainless Steel REX Shaft (8mm Diameter, 56mm Length)
@@ -922,6 +1007,7 @@ parts:
     type: step
     parameters:
       material: {type: string, default: ":303 Stainless Steel"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     # This model comes with its E-clip already in the groove.
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -941,6 +1027,7 @@ parts:
     type: step
     parameters:
       material: {type: string, default: ":303 Stainless Steel"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-threaded-hole;depth=11.9,size=4":
@@ -959,6 +1046,7 @@ parts:
     type: step
     parameters:
       material: {type: string, default: ":303 Stainless Steel"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-threaded-hole;depth=11.9,size=4":
@@ -977,6 +1065,7 @@ parts:
     type: step
     parameters:
       material: {type: string, default: ":303 Stainless Steel"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-threaded-hole;depth=11.9,size=4":
@@ -997,6 +1086,7 @@ parts:
     parameters:
       material: {type: string, default: ":303 Stainless Steel"}
     manufacturable: false
+    requirements: {has_color: true, has_material: true, has_weight: true}
     # Modelled in the frame of the REX shafts, seated in the groove.
     implements:
       8mmREX-thru-0.7:
@@ -1023,6 +1113,7 @@ parts:
       physics:
         # A servo is a motor, gears and a circuit in a case: no one material.
         mass: 0.045 # kg
+    requirements: {has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m3-threaded-hole-4":
@@ -1038,6 +1129,7 @@ parts:
     parameters:
       material: {type: string, default: ":POM"}
       color: {type: string, default: ":Black"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-thru-depth-slotted;depth=2.362,size=4,width=4.686":
@@ -1073,6 +1165,7 @@ parts:
       material: {type: string, default: ":1045 Steel"}
       color: {type: string, default: ":Black Zinc-Plated"}
       finish: {type: string, default: ":Black Zinc-Plated"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-threaded-thru-depth;depth=10.8,size=4":
@@ -1104,37 +1197,41 @@ parts:
         h2-bottom: [[0, 0, -5.4], [0, 0, 1], 0]
         h3-top: [[0, 0, 5.4], [1, 0, 0], 180]
 
-  motion/worm_8mmREX:
-    desc: 2313 Series Stainless Steel, MOD 1.25 Worm (8mm REX Bore, 33mm Length)
-    vendor: gobilda
-    sku: 2313-4008-0033
-    url: https://www.gobilda.com/2313-series-stainless-steel-mod-1-25-worm-8mm-rex-bore-33mm-length/
+  # goBILDA's model of the 2313 Series Stainless Steel, MOD 1.25 Worm (8mm REX
+  # Bore, 33mm Length): the worm and its set screws, one solid each, in one
+  # file. Not an item of its own: what is bought is the assembly
+  # 'motion/worm_8mmREX', of the pieces below, which are taken out of it.
+  motion/worm_8mmREX_model:
+    desc: goBILDA's model of the 2313 Series Stainless Steel, MOD 1.25 Worm (8mm REX Bore, 33mm Length), all its pieces in one file
     type: step
+    path: motion/worm_8mmREX.step
+    manufacturable: false
+  motion/worm_8mmREX_worm:
+    desc: The worm of the 2313 Series Stainless Steel, MOD 1.25 Worm (8mm REX Bore, 33mm Length), without its set screws
+    type: boolean
+    operation: xor
+    parts: [motion/worm_8mmREX_model, motion/worm_8mmREX_set_screws]
+    whole: true
+    manufacturable: false
     parameters:
       material: {type: string, default: ":303 Stainless Steel"}
-    implements:
-      # The bore is 33mm long, from Y=-18.018 to Y=14.982.
-      8mmREX-thru-33:
-        side0: [[-5.257, -18.018, 33.934], [-0.57735, -0.57735, -0.57735], 120]
-        side1: [[-5.257, 14.982, 33.934], [0.57735, -0.57735, 0.57735], 120]
-      # The thread is single start, 3.927mm (pi times the module) a turn, and
-      # its teeth are where it crosses the plane through the axis on the +X
-      # side of it, on the pitch circle 6.25mm from the axis (one module below
-      # the tip of the thread): the four with a whole flank on either side of
-      # them, numbered from the 'side0' end. The gap a tooth has the number of
-      # is the one before it. +X is across the thread, towards -Z.
-      #
-      # A gear meshes with the worm on that side of it. Turning the worm moves
-      # them along: turned about +Y (from +Z towards +X), they move towards
-      # 'side1', 3.927mm a turn.
-      "gear-tooth;module=1.25":
-{% for y in [-6.39, -2.463, 1.464, 5.391] %}
-        "{{ loop.index }}": [[0.993, {{ y }}, 33.934], [0.707107, 0, -0.707107], 180]
-{% endfor %}
-      "gear-gap;module=1.25":
-{% for y in [-8.354, -4.427, -0.5, 3.427] %}
-        "{{ loop.index }}": [[0.993, {{ y }}, 33.934], [0.707107, 0, -0.707107], 180]
-{% endfor %}
+  motion/worm_8mmREX_set_screws:
+    desc: The four set screws of the 2313 Series Stainless Steel, MOD 1.25 Worm (8mm REX Bore, 33mm Length)
+    type: boolean
+    operation: and
+    parts: [motion/worm_8mmREX_model, motion/worm_8mmREX_set_screws_box]
+    whole: true
+    manufacturable: false
+    parameters:
+      material: {type: string, default: ":4140 Steel"}
+      color: {type: string, default: ":Black Oxide"}
+      finish: {type: string, default: ":Black Oxide"}
+  motion/worm_8mmREX_set_screws_box:
+    desc: Around the set screws in goBILDA's model, and around nothing else whole
+    type: basic
+    cuboid: [13.79, 31.71, 10.71]
+    offset: [[-4.345, -1.515, 31.485], [0, 0, 1], 0]
+    manufacturable: false
 
   motion/worm_gear_28t:
     desc: 2314 Series Brass, MOD 1.25 Hub-Mount Worm Gear (14mm Bore, 28 Tooth)
@@ -1144,6 +1241,7 @@ parts:
     type: step
     parameters:
       material: {type: string, default: ":H59 Brass"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     # The hub side of the gear is X=0.5 ("inner") to X=4.5 ("outer").
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -1184,6 +1282,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-thru-depth;depth=10.593,size=4":
@@ -1264,6 +1363,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=4.686":
@@ -1344,6 +1444,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=4.686":
@@ -1454,6 +1555,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Through the corner bosses, from each side into the pocket: 8.5mm.
       "//pub/std/metric/m:m-threaded-thru-depth;depth=8.5,size=4":
@@ -1527,97 +1629,70 @@ parts:
         front: [[0, 1, 0], [1, 0, 0], -90]
         rear: [[0, 4, 0], [1, 0, 0], 90]
 
-  structure/mount_servo_43mm_std:
-    desc: 1802 Series Servo Frame (43mm Width, for Standard Size Servos)
-    vendor: gobilda
-    sku: 1802-0043-0001
-    url: https://www.gobilda.com/1802-series-servo-frame-43mm-width-for-standard-size-servos/
+  # goBILDA's model of the 1802 Series Servo Frame (43mm Width, for Standard
+  # Size Servos): the frame and its screws and its washers, one solid each, in
+  # one file. Not an item of its own: what is bought is the assembly
+  # 'structure/mount_servo_43mm_std', of the pieces below, which are taken out
+  # of it.
+  structure/mount_servo_43mm_std_model:
+    desc: goBILDA's model of the 1802 Series Servo Frame (43mm Width, for Standard Size Servos), all its pieces in one file
     type: step
-    # goBILDA lists 24g. The model weighs 17.4g at 6061-T6's density: it
-    # includes the four screws and four washers it is sold with, which are
-    # zinc-plated steel, weighed here as its aluminium, which accounts for some
-    # of that.
+    path: structure/mount_servo_43mm_std.step
+    manufacturable: false
     # FreeCAD saved this file, and it coloured every face in its own default
     # grey. That is not goBILDA's colour, so the file's CMF is dropped.
     parameters:
+      sourceCmf: {type: string, default: drop}
+  structure/mount_servo_43mm_std_frame:
+    desc: The frame of the 1802 Series Servo Frame (43mm Width, for Standard Size Servos), without its screws and washers
+    type: boolean
+    operation: and
+    parts: [structure/mount_servo_43mm_std_model, structure/mount_servo_43mm_std_frame_box]
+    whole: true
+    manufacturable: false
+    parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-      sourceCmf: {type: string, default: drop}
-    implements:
-      # Deduced from the model by tools/deduce_ports.py
-      "//pub/std/metric/m:m-hole;depth=1.01,size=4":
-        # 4.000mm round hole, 1.010mm deep
-        h1-back: [[-6.7, -4.5, 20.55], [1, 0, 0], 90]
-        h11-back: [[-55.21, -4.5, 10.64], [1, 0, 0], 90]
-        h18-back: [[-6.71, -4.5, 10.64], [1, 0, 0], 90]
-        h5-back: [[-55.21, -4.5, 20.54], [1, 0, 0], 90]
-      "//pub/std/metric/m:m-hole;depth=1.26,size=3":
-        # 3.300mm round hole, 1.260mm deep
-        h31-left: [[-57.96, 1.24, 7.64], [0.57735, 0.57735, 0.57735], 120]
-        h33-left: [[-57.96, 1.24, 23.64], [0.57735, 0.57735, 0.57735], 120]
-      "//pub/std/metric/m:m-shaft-length;length=1.01,size=8":
-        # 8.000mm round shaft, 1.010mm long
-        s13-back: [[-55.21, -4.5, 10.64], [-1, 0, 0], 90]
-        s13-front: [[-55.21, -5.51, 10.64], [1, 0, 0], 90]
-        s20-back: [[-6.71, -4.5, 10.64], [-1, 0, 0], 90]
-        s20-front: [[-6.71, -5.51, 10.64], [1, 0, 0], 90]
-        s3-back: [[-6.7, -4.5, 20.55], [-1, 0, 0], 90]
-        s3-front: [[-6.7, -5.51, 20.55], [1, 0, 0], 90]
-        s7-back: [[-55.21, -4.5, 20.54], [-1, 0, 0], 90]
-        s7-front: [[-55.21, -5.51, 20.54], [1, 0, 0], 90]
-      "//pub/std/metric/m:m4-hole-4.5":
-        # 4.020mm round hole, 4.500mm deep
-        h25-left: [[-62.46, 1.24, -0.36], [0.57735, 0.57735, 0.57735], 120]
-        h32-left: [[-62.46, 1.24, 7.64], [0.57735, 0.57735, 0.57735], 120]
-        h34-left: [[-62.46, 1.24, 23.64], [0.57735, 0.57735, 0.57735], 120]
-      "//pub/std/metric/m:m4-thru-4.5":
-        # 4.020mm round hole, 4.500mm deep
-        h26-left: [[-62.46, 1.24, 31.64], [0.57735, 0.57735, 0.57735], 120]
-        h26-right: [[-57.96, 1.24, 31.64], [-0.57735, -0.57735, 0.57735], 120]
-      "//pub/std/metric/m:m4-thru-5":
-        # 4.020mm round hole, 5.000mm deep
-        h23-bottom: [[-56.96, 1.24, -5.86], [0, 0, 1], 0]
-        h23-top: [[-56.96, 1.24, -0.86], [1, 0, 0], 180]
-        h24-bottom: [[-56.96, 1.24, 32.14], [0, 0, 1], 0]
-        h24-top: [[-56.96, 1.24, 37.14], [1, 0, 0], 180]
-        h27-bottom: [[-24.96, 1.24, -5.86], [0, 0, 1], 0]
-        h27-top: [[-24.96, 1.24, -0.86], [1, 0, 0], 180]
-        h28-bottom: [[-24.96, 1.24, 32.14], [0, 0, 1], 0]
-        h28-top: [[-24.96, 1.24, 37.14], [1, 0, 0], 180]
-        h29-bottom: [[-8.96, 1.24, -5.86], [0, 0, 1], 0]
-        h29-top: [[-8.96, 1.24, -0.86], [1, 0, 0], 180]
-        h30-bottom: [[-8.96, 1.24, 32.14], [0, 0, 1], 0]
-        h30-top: [[-8.96, 1.24, 37.14], [1, 0, 0], 180]
-        h8-bottom: [[-32.96, 1.24, -5.86], [0, 0, 1], 0]
-        h8-top: [[-32.96, 1.24, -0.86], [1, 0, 0], 180]
-        h9-bottom: [[-32.96, 1.24, 32.14], [0, 0, 1], 0]
-        h9-top: [[-32.96, 1.24, 37.14], [1, 0, 0], 180]
-      "//pub/std/metric/m:m4-thru-6":
-        # 4.040mm round hole, 6.000mm deep
-        h10-back: [[-56.96, 4.24, -0.36], [1, 0, 0], 90]
-        h10-front: [[-56.96, -1.76, -0.36], [-1, 0, 0], 90]
-        h12-back: [[-55.21, 4.24, 10.64], [1, 0, 0], 90]
-        h12-front: [[-55.21, -1.76, 10.64], [-1, 0, 0], 90]
-        h14-back: [[-32.96, 4.24, -0.36], [1, 0, 0], 90]
-        h14-front: [[-32.96, -1.76, -0.36], [-1, 0, 0], 90]
-        h15-back: [[-56.96, 4.24, 31.64], [1, 0, 0], 90]
-        h15-front: [[-56.96, -1.76, 31.64], [-1, 0, 0], 90]
-        h16-back: [[-24.96, 4.24, -0.36], [1, 0, 0], 90]
-        h16-front: [[-24.96, -1.76, -0.36], [-1, 0, 0], 90]
-        h17-back: [[-8.96, 4.24, -0.36], [1, 0, 0], 90]
-        h17-front: [[-8.96, -1.76, -0.36], [-1, 0, 0], 90]
-        h19-back: [[-6.71, 4.24, 10.64], [1, 0, 0], 90]
-        h19-front: [[-6.71, -1.76, 10.64], [-1, 0, 0], 90]
-        h2-back: [[-6.7, 4.24, 20.55], [1, 0, 0], 90]
-        h2-front: [[-6.7, -1.76, 20.55], [-1, 0, 0], 90]
-        h21-back: [[-24.96, 4.24, 31.64], [1, 0, 0], 90]
-        h21-front: [[-24.96, -1.76, 31.64], [-1, 0, 0], 90]
-        h22-back: [[-8.96, 4.24, 31.64], [1, 0, 0], 90]
-        h22-front: [[-8.96, -1.76, 31.64], [-1, 0, 0], 90]
-        h4-back: [[-32.96, 4.24, 31.64], [1, 0, 0], 90]
-        h4-front: [[-32.96, -1.76, 31.64], [-1, 0, 0], 90]
-        h6-back: [[-55.21, 4.24, 20.54], [1, 0, 0], 90]
-        h6-front: [[-55.21, -1.76, 20.54], [-1, 0, 0], 90]
+  structure/mount_servo_43mm_std_frame_box:
+    desc: Around the frame in goBILDA's model of it, and around nothing else whole
+    type: basic
+    cuboid: [63.36, 6.62, 43.62]
+    offset: [[-31.09, 1.24, 15.64], [0, 0, 1], 0]
+    manufacturable: false
+  structure/mount_servo_43mm_std_screws:
+    desc: The four screws of the 1802 Series Servo Frame (43mm Width, for Standard Size Servos)
+    type: boolean
+    operation: and
+    parts: [structure/mount_servo_43mm_std_model, structure/mount_servo_43mm_std_screws_box]
+    whole: true
+    manufacturable: false
+    parameters:
+      material: {type: string, default: ":4140 Steel"}
+      color: {type: string, default: ":Zinc-Plated"}
+      finish: {type: string, default: ":Zinc-Plated"}
+  structure/mount_servo_43mm_std_screws_box:
+    desc: Around the screws in goBILDA's model, and around nothing else whole
+    type: basic
+    cuboid: [56.1, 4.62, 17.5]
+    offset: [[-30.95, -7.5, 15.6], [0, 0, 1], 0]
+    manufacturable: false
+  structure/mount_servo_43mm_std_washers:
+    desc: The four washers of the 1802 Series Servo Frame (43mm Width, for Standard Size Servos)
+    type: boolean
+    operation: and
+    parts: [structure/mount_servo_43mm_std_model, structure/mount_servo_43mm_std_washers_box]
+    whole: true
+    manufacturable: false
+    parameters:
+      material: {type: string, default: ":1018 Steel"}
+      color: {type: string, default: ":Zinc-Plated"}
+      finish: {type: string, default: ":Zinc-Plated"}
+  structure/mount_servo_43mm_std_washers_box:
+    desc: Around the washers in goBILDA's model, and around nothing else whole
+    type: basic
+    cuboid: [57.1, 1.62, 18.5]
+    offset: [[-30.95, -5, 15.6], [0, 0, 1], 0]
+    manufacturable: false
 
   structure/standoff_m4_43mm:
     desc: 1501 Series M4 x 0.7mm Standoff (6mm OD, 43mm Length) - 4 Pack
@@ -1629,6 +1704,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-shaft-length;length=43,size=6":
@@ -1744,6 +1820,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       "//pub/std/metric/m:m14-thru-2.5": {{ channel[2].m14 | tojson }}
       "//pub/std/metric/m:m4-thru-2.5": {{ channel[2].m4 | tojson }}
@@ -1760,6 +1837,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       "//pub/std/metric/m:m14-thru-2.5": {{ channel[5].m14 | tojson }}
       "//pub/std/metric/m:m4-thru-2.5": {{ channel[5].m4 | tojson }}
@@ -1776,6 +1854,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       "//pub/std/metric/m:m14-thru-2.5": {{ channel[7].m14 | tojson }}
       "//pub/std/metric/m:m4-thru-2.5": {{ channel[7].m4 | tojson }}
@@ -1792,6 +1871,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       "//pub/std/metric/m:m14-thru-2.5": {{ channel[9].m14 | tojson }}
       "//pub/std/metric/m:m4-thru-2.5": {{ channel[9].m4 | tojson }}
@@ -1808,6 +1888,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=4.686":
@@ -1964,6 +2045,7 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    requirements: {has_color: true, has_material: true, has_weight: true}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-thru-depth-slotted;depth=2.5,size=4,width=4.686":
@@ -2256,6 +2338,272 @@ parts:
         h9-top: [[-16, 152, -43], [1, 0, 0], 180]
 
 assemblies:
+  motion/collar_clamping_8mmREX:
+    desc: 2910 Series Aluminum Clamping Collar (8mm REX ID x 20mm OD, 9mm Length)
+    type: assy
+    vendor: gobilda
+    sku: 2910-0920-4008
+    requirements: {has_color: true, has_material: true, has_weight: true}
+    # https://www.gobilda.com/2910-series-aluminum-clamping-collar-8mm-rex-id-x-20mm-od-9mm-length/
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      8mmREX-thru-9.5:
+        # 8mm REX bore, 9.500mm deep
+        rex5-back: [[-28.855, -0.558, 18.819], [0, 0.707107, -0.707107], 180]
+        rex5-front: [[-28.855, -10.058, 18.819], [0, 0.707107, 0.707107], 180]
+  motion/collar_set_6mm:
+    desc: 2920 Series Steel Set-Screw Collar (6mm Bore) - 2 Pack
+    type: assy
+    vendor: gobilda
+    sku: 2920-0001-0006
+    count_per_sku: 2
+    requirements: {has_color: true, has_material: true, has_weight: true}
+    # https://www.gobilda.com/2920-series-steel-set-screw-collar-6mm-bore-2-pack/
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-threaded-hole;depth=3.743,size=5":
+        # 5.000mm tapped hole, 3.743mm deep
+        h3-bottom: [[-59.262, 9.43, 18.195], [0, 0, 1], 0]
+      "//pub/std/metric/m:m-thru-depth;depth=8.5,size=6":
+        # 6.000mm round hole, 8.500mm deep
+        h4-back: [[-59.262, 13.93, 24.695], [1, 0, 0], 90]
+        h4-front: [[-59.262, 5.43, 24.695], [-1, 0, 0], 90]
+  motion/coupler_hyper_8mm_8mmREX:
+    desc: 4007 Series Hyper Coupler (8mm Round Bore to 8mm REX Bore)
+    type: assy
+    vendor: gobilda
+    sku: 4007-0008-4008
+    requirements: {has_color: true, has_material: true, has_weight: true}
+    # https://www.gobilda.com/4007-series-hyper-coupler-8mm-round-bore-to-8mm-rex-bore/
+    # goBILDA lists 19g. The model weighs 15.3g, each piece at its own grade's
+    # density: lighter than any alloy of the metals goBILDA names would make it.
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=12.974,size=4":
+        # 4.200mm round hole, 12.974mm deep
+        h2-left: [[-31.804, -14.1, 10.97], [0.57735, 0.57735, 0.57735], 120]
+        h5-right: [[-12.556, -14.1, 23.57], [-0.57735, -0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m-hole;depth=13.123,size=4":
+        # 4.200mm round hole, 13.123mm deep
+        h4-top: [[-28.48, -2.3, 26.893], [1, 0, 0], 180]
+      "//pub/std/metric/m:m-hole;depth=13.124,size=4":
+        # 4.200mm round hole, 13.124mm deep
+        h3-bottom: [[-15.88, -2.3, 7.646], [0, 0, 1], 0]
+      8mmREX-thru-10.5:
+        # 8mm REX bore, 10.500mm deep
+        rex1-back: [[-22.18, 2.3, 17.27], [0, 0.707107, -0.707107], 180]
+        rex1-front: [[-22.18, -8.2, 17.27], [0, 0.707107, 0.707107], 180]
+  motion/hub_hyper_8mmREX:
+    desc: 1310 Series Hyper Hub (8mm REX Bore)
+    type: assy
+    vendor: gobilda
+    sku: 1310-0016-4008
+    requirements: {has_color: true, has_material: true, has_weight: true}
+    # https://www.gobilda.com/1310-series-hyper-hub-8mm-rex-bore/
+    # goBILDA lists 23g. The model weighs 20.1g, each piece at its own grade's
+    # density: lighter than any alloy of the metals goBILDA names would make it.
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=15.104,size=4":
+        # 4.020mm round hole, 15.104mm deep
+        h1-right: [[-4.576, -12.02, 18.63], [-0.57735, -0.57735, 0.57735], 120]
+        h2-left: [[-26.264, 0.58, 18.63], [0.57735, 0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m14-shaft-2":
+        # 14.000mm round shaft, 2.000mm long
+        s8-top: [[-15.42, -5.72, 3.03], [0, 0, 1], 0]
+      "//pub/std/metric/m:m4-hole-10":
+        # 4.020mm round hole, 10.000mm deep
+        h3-bottom: [[-7.42, 2.28, 3.03], [0, 0, 1], 0]
+        h4-bottom: [[-7.42, -13.72, 3.03], [0, 0, 1], 0]
+        h5-bottom: [[-23.42, -13.72, 3.03], [0, 0, 1], 0]
+        h6-bottom: [[-23.42, 2.28, 3.03], [0, 0, 1], 0]
+      8mmREX-thru-22:
+        # 8mm REX bore, 22.000mm deep
+        rex7-bottom: [[-15.42, -5.72, 1.03], [0, 0, 1], 120]
+        rex7-top: [[-15.42, -5.72, 23.03], [0.5, 0.866025, 0], 180]
+  motion/hub_sonic_5mm:
+    desc: 1309 Series Sonic Hub (5mm Bore)
+    type: assy
+    vendor: gobilda
+    sku: 1309-0016-0005
+    requirements: {has_color: true, has_material: true, has_weight: true}
+    # https://www.gobilda.com/1309-series-sonic-hub-5mm-bore/
+    # goBILDA lists 15g. The model weighs 12.2g, each piece at its own grade's
+    # density: lighter than any alloy of the metals goBILDA names would make it.
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=10.814,size=4":
+        # 4.020mm round hole, 10.814mm deep
+        h5-side: [[-18.746, 9.503, 4.11], [-0.862856, 0.357407, -0.357407], 98.421058]
+        h7-side: [[-10.381, -0.276, 4.11], [0.862856, -0.357407, -0.357407], 98.421058]
+      "//pub/std/metric/m:m-hole;depth=6.23,size=4":
+        # 4.040mm round hole, 6.230mm deep
+        h6-side: [[-18.016, 10.233, 4.11], [0.862856, -0.357407, -0.357407], 98.421058]
+        h8-side: [[-11.111, -1.007, 4.11], [-0.862856, 0.357407, -0.357407], 98.421058]
+      "//pub/std/metric/m:m4-thru-8":
+        # 4.020mm round hole, 8.000mm deep
+        h1-bottom: [[-6.56, -3.39, 0.11], [0, 0, 1], 0]
+        h1-top: [[-6.56, -3.39, 8.11], [1, 0, 0], 180]
+        h2-bottom: [[-22.56, -3.39, 0.11], [0, 0, 1], 0]
+        h2-top: [[-22.56, -3.39, 8.11], [1, 0, 0], 180]
+        h3-bottom: [[-6.56, 12.61, 0.11], [0, 0, 1], 0]
+        h3-top: [[-6.56, 12.61, 8.11], [1, 0, 0], 180]
+        h4-bottom: [[-22.56, 12.61, 0.11], [0, 0, 1], 0]
+        h4-top: [[-22.56, 12.61, 8.11], [1, 0, 0], 180]
+  motion/hub_sonic_8mmREX:
+    desc: 1309 Series Sonic Hub (8mm REX Bore)
+    type: assy
+    # goBILDA's model draws one of the pinch bolts 0.114 mm^3 into the hub, a
+    # thread drawn inside the thread it is screwed into. That is how the item is
+    # modelled, not how anything here is put together, so it is not reported.
+    interference:
+      minVolume: 0.2
+    vendor: gobilda
+    sku: 1309-0016-4008
+    requirements: {has_color: true, has_material: true, has_weight: true}
+    # https://www.gobilda.com/1309-series-sonic-hub-8mm-rex-bore/
+    # goBILDA lists 14g. The model weighs 11.6g, each piece at its own grade's
+    # density: lighter than any alloy of the metals goBILDA names would make it.
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=10.67,size=4":
+        # 4.020mm round hole, 10.670mm deep
+        h6-side: [[-8.014, 22.665, -10.38], [-0.862856, 0.357407, -0.357407], 98.421058]
+        h8-side: [[0.148, 12.682, -10.38], [0.862856, -0.357407, -0.357407], 98.421058]
+      "//pub/std/metric/m:m-hole;depth=6.223,size=4":
+        # 4.040mm round hole, 6.223mm deep
+        h7-side: [[-7.386, 23.293, -10.38], [0.862856, -0.357407, -0.357407], 98.421058]
+      "//pub/std/metric/m:m-hole;depth=6.237,size=4":
+        # 4.040mm round hole, 6.237mm deep
+        h9-side: [[-0.481, 12.053, -10.38], [-0.862856, 0.357407, -0.357407], 98.421058]
+      # The hub is 8mm thick (Z=-14.38 to Z=-6.38), with a 2mm tall ledge on
+      # top of it (Z=-6.38 to Z=-4.38) that the REX bore runs through as well.
+      4xM4-16mm-pattern-thru-8mm:
+        ledged: [[-3.93, 17.67, -6.38], [0, 1, 0], 180]
+        flat: [[-3.93, 17.67, -14.38], [0, 1, 0], 0]
+      8mmREX-thru-10:
+        ledged: [[-3.93, 17.67, -4.38], [0.382683, 0.92388, 0], 180]
+        flat: [[-3.93, 17.67, -14.38], [0, 0, 1], 15]
+      # The hub provides a ledge that can be used as a 14mm wide 2mm long shaft
+      "//pub/std/metric/m:m14-shaft-2": [[-3.93, 17.67, -6.38], [0, 1, 0], 180]
+      # The outer perimeter of the hub can be used as a 32m wide 8mm long shaft
+      "//pub/std/metric/m:m32-shaft-8":
+        ledged: [[-3.93, 17.67, -6.38], [0, 1, 0], 0]
+        flat: [[-3.93, 17.67, -14.38], [0, 1, 0], 180]
+  motion/worm_8mmREX:
+    desc: 2313 Series Stainless Steel, MOD 1.25 Worm (8mm REX Bore, 33mm Length)
+    type: assy
+    vendor: gobilda
+    sku: 2313-4008-0033
+    requirements: {has_color: true, has_material: true, has_weight: true}
+    # https://www.gobilda.com/2313-series-stainless-steel-mod-1-25-worm-8mm-rex-bore-33mm-length/
+    implements:
+      # The bore is 33mm long, from Y=-18.018 to Y=14.982.
+      8mmREX-thru-33:
+        side0: [[-5.257, -18.018, 33.934], [-0.57735, -0.57735, -0.57735], 120]
+        side1: [[-5.257, 14.982, 33.934], [0.57735, -0.57735, 0.57735], 120]
+      # The thread is single start, 3.927mm (pi times the module) a turn, and
+      # its teeth are where it crosses the plane through the axis on the +X
+      # side of it, on the pitch circle 6.25mm from the axis (one module below
+      # the tip of the thread): the four with a whole flank on either side of
+      # them, numbered from the 'side0' end. The gap a tooth has the number of
+      # is the one before it. +X is across the thread, towards -Z.
+      #
+      # A gear meshes with the worm on that side of it. Turning the worm moves
+      # them along: turned about +Y (from +Z towards +X), they move towards
+      # 'side1', 3.927mm a turn.
+      "gear-tooth;module=1.25":
+{% for y in [-6.39, -2.463, 1.464, 5.391] %}
+        "{{ loop.index }}": [[0.993, {{ y }}, 33.934], [0.707107, 0, -0.707107], 180]
+{% endfor %}
+      "gear-gap;module=1.25":
+{% for y in [-8.354, -4.427, -0.5, 3.427] %}
+        "{{ loop.index }}": [[0.993, {{ y }}, 33.934], [0.707107, 0, -0.707107], 180]
+{% endfor %}
+  structure/mount_servo_43mm_std:
+    desc: 1802 Series Servo Frame (43mm Width, for Standard Size Servos)
+    type: assy
+    vendor: gobilda
+    sku: 1802-0043-0001
+    requirements: {has_color: true, has_material: true, has_weight: true}
+    # https://www.gobilda.com/1802-series-servo-frame-43mm-width-for-standard-size-servos/
+    # goBILDA lists 24g. The model weighs 20.9g, each piece at its own grade's
+    # density: lighter than any alloy of the metals goBILDA names would make it.
+    implements:
+      # Deduced from the model by tools/deduce_ports.py
+      "//pub/std/metric/m:m-hole;depth=1.01,size=4":
+        # 4.000mm round hole, 1.010mm deep
+        h1-back: [[-6.7, -4.5, 20.55], [1, 0, 0], 90]
+        h11-back: [[-55.21, -4.5, 10.64], [1, 0, 0], 90]
+        h18-back: [[-6.71, -4.5, 10.64], [1, 0, 0], 90]
+        h5-back: [[-55.21, -4.5, 20.54], [1, 0, 0], 90]
+      "//pub/std/metric/m:m-hole;depth=1.26,size=3":
+        # 3.300mm round hole, 1.260mm deep
+        h31-left: [[-57.96, 1.24, 7.64], [0.57735, 0.57735, 0.57735], 120]
+        h33-left: [[-57.96, 1.24, 23.64], [0.57735, 0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m-shaft-length;length=1.01,size=8":
+        # 8.000mm round shaft, 1.010mm long
+        s13-back: [[-55.21, -4.5, 10.64], [-1, 0, 0], 90]
+        s13-front: [[-55.21, -5.51, 10.64], [1, 0, 0], 90]
+        s20-back: [[-6.71, -4.5, 10.64], [-1, 0, 0], 90]
+        s20-front: [[-6.71, -5.51, 10.64], [1, 0, 0], 90]
+        s3-back: [[-6.7, -4.5, 20.55], [-1, 0, 0], 90]
+        s3-front: [[-6.7, -5.51, 20.55], [1, 0, 0], 90]
+        s7-back: [[-55.21, -4.5, 20.54], [-1, 0, 0], 90]
+        s7-front: [[-55.21, -5.51, 20.54], [1, 0, 0], 90]
+      "//pub/std/metric/m:m4-hole-4.5":
+        # 4.020mm round hole, 4.500mm deep
+        h25-left: [[-62.46, 1.24, -0.36], [0.57735, 0.57735, 0.57735], 120]
+        h32-left: [[-62.46, 1.24, 7.64], [0.57735, 0.57735, 0.57735], 120]
+        h34-left: [[-62.46, 1.24, 23.64], [0.57735, 0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m4-thru-4.5":
+        # 4.020mm round hole, 4.500mm deep
+        h26-left: [[-62.46, 1.24, 31.64], [0.57735, 0.57735, 0.57735], 120]
+        h26-right: [[-57.96, 1.24, 31.64], [-0.57735, -0.57735, 0.57735], 120]
+      "//pub/std/metric/m:m4-thru-5":
+        # 4.020mm round hole, 5.000mm deep
+        h23-bottom: [[-56.96, 1.24, -5.86], [0, 0, 1], 0]
+        h23-top: [[-56.96, 1.24, -0.86], [1, 0, 0], 180]
+        h24-bottom: [[-56.96, 1.24, 32.14], [0, 0, 1], 0]
+        h24-top: [[-56.96, 1.24, 37.14], [1, 0, 0], 180]
+        h27-bottom: [[-24.96, 1.24, -5.86], [0, 0, 1], 0]
+        h27-top: [[-24.96, 1.24, -0.86], [1, 0, 0], 180]
+        h28-bottom: [[-24.96, 1.24, 32.14], [0, 0, 1], 0]
+        h28-top: [[-24.96, 1.24, 37.14], [1, 0, 0], 180]
+        h29-bottom: [[-8.96, 1.24, -5.86], [0, 0, 1], 0]
+        h29-top: [[-8.96, 1.24, -0.86], [1, 0, 0], 180]
+        h30-bottom: [[-8.96, 1.24, 32.14], [0, 0, 1], 0]
+        h30-top: [[-8.96, 1.24, 37.14], [1, 0, 0], 180]
+        h8-bottom: [[-32.96, 1.24, -5.86], [0, 0, 1], 0]
+        h8-top: [[-32.96, 1.24, -0.86], [1, 0, 0], 180]
+        h9-bottom: [[-32.96, 1.24, 32.14], [0, 0, 1], 0]
+        h9-top: [[-32.96, 1.24, 37.14], [1, 0, 0], 180]
+      "//pub/std/metric/m:m4-thru-6":
+        # 4.040mm round hole, 6.000mm deep
+        h10-back: [[-56.96, 4.24, -0.36], [1, 0, 0], 90]
+        h10-front: [[-56.96, -1.76, -0.36], [-1, 0, 0], 90]
+        h12-back: [[-55.21, 4.24, 10.64], [1, 0, 0], 90]
+        h12-front: [[-55.21, -1.76, 10.64], [-1, 0, 0], 90]
+        h14-back: [[-32.96, 4.24, -0.36], [1, 0, 0], 90]
+        h14-front: [[-32.96, -1.76, -0.36], [-1, 0, 0], 90]
+        h15-back: [[-56.96, 4.24, 31.64], [1, 0, 0], 90]
+        h15-front: [[-56.96, -1.76, 31.64], [-1, 0, 0], 90]
+        h16-back: [[-24.96, 4.24, -0.36], [1, 0, 0], 90]
+        h16-front: [[-24.96, -1.76, -0.36], [-1, 0, 0], 90]
+        h17-back: [[-8.96, 4.24, -0.36], [1, 0, 0], 90]
+        h17-front: [[-8.96, -1.76, -0.36], [-1, 0, 0], 90]
+        h19-back: [[-6.71, 4.24, 10.64], [1, 0, 0], 90]
+        h19-front: [[-6.71, -1.76, 10.64], [-1, 0, 0], 90]
+        h2-back: [[-6.7, 4.24, 20.55], [1, 0, 0], 90]
+        h2-front: [[-6.7, -1.76, 20.55], [-1, 0, 0], 90]
+        h21-back: [[-24.96, 4.24, 31.64], [1, 0, 0], 90]
+        h21-front: [[-24.96, -1.76, 31.64], [-1, 0, 0], 90]
+        h22-back: [[-8.96, 4.24, 31.64], [1, 0, 0], 90]
+        h22-front: [[-8.96, -1.76, 31.64], [-1, 0, 0], 90]
+        h4-back: [[-32.96, 4.24, 31.64], [1, 0, 0], 90]
+        h4-front: [[-32.96, -1.76, 31.64], [-1, 0, 0], 90]
+        h6-back: [[-55.21, 4.24, 20.54], [1, 0, 0], 90]
+        h6-front: [[-55.21, -1.76, 20.54], [-1, 0, 0], 90]
   examples/wormgear:
     type: assy
     desc: A sample assembly demonstrating some typical pattern applications.
