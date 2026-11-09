@@ -41,10 +41,12 @@ suppliers:
 # colour is how the part looks, and a part made of it names no colour of its
 # own. A plated part names the plating's colour, which hides the steel's.
 #
-# Where a part's computed weight is more than 10% off goBILDA's, it says so
-# in a comment, and why, and is weighed as modelled all the same: a bearing
-# modelled as a solid ring with no balls, or a hub whose steel pinch bolts
-# are weighed as its aluminium.
+# goBILDA's weight is authoritative. Where the model at its grade's density
+# is more than 10% off it, the part states goBILDA's weight
+# ('properties: physics: mass:'), and its inertia is the solid's scaled to it.
+# A comment says what the model weighs, how far that is off, and what could
+# account for it - or, for a model simplified on purpose (a bearing drawn as a
+# solid ring with no balls), just that.
 colors:
   Aluminum:
     desc: Bare aluminium, which is also how it looks under a clear anodised coat
@@ -581,10 +583,14 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1601-series-flanged-ball-bearing-5mm-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
-    # goBILDA lists 4g. The model weighs 5.1g at 52100's density: it is a solid
-    # ring between its shields, with no balls in it.
     parameters:
       material: {type: string, default: ":52100 Steel"}
+    properties:
+      physics:
+        # The model is a solid ring between its shields, with no balls in it,
+        # and weighs 5.1g at 52100's density. It is simplified on purpose, so
+        # the item's weight is goBILDA's: 4.0g.
+        mass: 0.004 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-shaft-length;length=3.76,size=14":
@@ -602,10 +608,14 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1611-series-flanged-ball-bearing-6mm-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
-    # goBILDA lists 3g. The model weighs 4.6g at 52100's density: it is a solid
-    # ring between its shields, with no balls in it.
     parameters:
       material: {type: string, default: ":52100 Steel"}
+    properties:
+      physics:
+        # The model is a solid ring between its shields, with no balls in it,
+        # and weighs 4.6g at 52100's density. It is simplified on purpose, so
+        # the item's weight is goBILDA's: 3g.
+        mass: 0.003 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=1.524,size=8":
@@ -629,10 +639,14 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1611-series-flanged-ball-bearing-8mm-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
-    # goBILDA lists 3g. The model weighs 3.8g at 52100's density: it is a solid
-    # ring between its shields, with no balls in it.
     parameters:
       material: {type: string, default: ":52100 Steel"}
+    properties:
+      physics:
+        # The model is a solid ring between its shields, with no balls in it,
+        # and weighs 3.8g at 52100's density. It is simplified on purpose, so
+        # the item's weight is goBILDA's: 3g.
+        mass: 0.003 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m14-shaft-4":
@@ -650,10 +664,14 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1611-series-flanged-ball-bearing-8mm-rex-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
-    # goBILDA lists 3.5g. The model weighs 4.1g at 52100's density: it is a
-    # solid ring between its shields, with no balls in it.
     parameters:
       material: {type: string, default: ":52100 Steel"}
+    properties:
+      physics:
+        # The model is a solid ring between its shields, with no balls in it,
+        # and weighs 4.1g at 52100's density. It is simplified on purpose, so
+        # the item's weight is goBILDA's: 3.5g.
+        mass: 0.0035 # kg
     implements:
       8mmREX-thru-5:
         clean-side: [[0, 0, 0], [1, 0, 0], -90]
@@ -667,11 +685,16 @@ parts:
     sku: 2910-0920-4008
     url: https://www.gobilda.com/2910-series-aluminum-clamping-collar-8mm-rex-id-x-20mm-od-9mm-length/
     type: step
-    # goBILDA lists 7.3g. The model weighs 6.1g at 6061-T6's density: its pinch
-    # bolt is steel, weighed here as the collar's aluminium.
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    properties:
+      physics:
+        # goBILDA lists 7.3g, and that is the weight here. The model weighs 6.1g
+        # at 6061-T6's density, with its pinch bolt weighed as aluminium; with
+        # the bolt as steel it is 7.3g, which accounts for all of the
+        # difference.
+        mass: 0.0073 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       8mmREX-thru-9.5:
@@ -706,12 +729,21 @@ parts:
     sku: 4007-0008-4008
     url: https://www.gobilda.com/4007-series-hyper-coupler-8mm-round-bore-to-8mm-rex-bore/
     type: step
-    # goBILDA lists 19g. The model weighs 12.6g at 6061-T6's density: its four
-    # pinch bolts are steel, weighed here as its aluminium, which accounts for
-    # some of that.
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    properties:
+      physics:
+        # goBILDA lists 19g, and that is the weight here. The model weighs 12.6g
+        # at 6061-T6's density, and 15.3g with its four pinch bolts as steel -
+        # the coupler would have to be 3.59 g/cm^3, which no aluminium alloy is
+        # (7075, the densest common one, is 2.81). Plausible reasons: the listed
+        # weight includes what the model leaves out (a set screw, washers, the
+        # bag it comes in); the material information is incomplete (a steel
+        # insert or bushing, or bolts heavier than the M4 drawn); or the model
+        # is lighter inside than the item, drawn with voids or pockets the item
+        # does not have.
+        mass: 0.019 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=12.974,size=4":
@@ -735,12 +767,21 @@ parts:
     sku: 1310-0016-4008
     url: https://www.gobilda.com/1310-series-hyper-hub-8mm-rex-bore/
     type: step
-    # goBILDA lists 23g. The model weighs 18.8g at 6061-T6's density: its two
-    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
-    # accounts for some of that.
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    properties:
+      physics:
+        # goBILDA lists 23g, and that is the weight here. The model weighs 18.8g
+        # at 6061-T6's density, and 20.1g with its two pinch bolts as steel -
+        # the hub would have to be 3.13 g/cm^3, which no aluminium alloy is
+        # (7075, the densest common one, is 2.81). Plausible reasons: the listed
+        # weight includes what the model leaves out (a set screw, washers, the
+        # bag it comes in); the material information is incomplete (a steel
+        # insert or bushing, or bolts heavier than the M4 drawn); or the model
+        # is lighter inside than the item, drawn with voids or pockets the item
+        # does not have.
+        mass: 0.023 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=15.104,size=4":
@@ -767,12 +808,21 @@ parts:
     sku: 1309-0016-0005
     url: https://www.gobilda.com/1309-series-sonic-hub-5mm-bore/
     type: step
-    # goBILDA lists 15g. The model weighs 10.8g at 6061-T6's density: its two
-    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
-    # accounts for some of that.
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    properties:
+      physics:
+        # goBILDA lists 15g, and that is the weight here. The model weighs 10.8g
+        # at 6061-T6's density, and 12.2g with its two pinch bolts as steel -
+        # the hub would have to be 3.45 g/cm^3, which no aluminium alloy is
+        # (7075, the densest common one, is 2.81). Plausible reasons: the listed
+        # weight includes what the model leaves out (a set screw, washers, the
+        # bag it comes in); the material information is incomplete (a steel
+        # insert or bushing, or bolts heavier than the M4 drawn); or the model
+        # is lighter inside than the item, drawn with voids or pockets the item
+        # does not have.
+        mass: 0.015 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=10.814,size=4":
@@ -800,12 +850,21 @@ parts:
     sku: 1309-0016-4008
     url: https://www.gobilda.com/1309-series-sonic-hub-8mm-rex-bore/
     type: step
-    # goBILDA lists 14g. The model weighs 10.3g at 6061-T6's density: its two
-    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
-    # accounts for some of that.
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    properties:
+      physics:
+        # goBILDA lists 14g, and that is the weight here. The model weighs 10.3g
+        # at 6061-T6's density, and 11.6g with its two pinch bolts as steel -
+        # the hub would have to be 3.37 g/cm^3, which no aluminium alloy is
+        # (7075, the densest common one, is 2.81). Plausible reasons: the listed
+        # weight includes what the model leaves out (a set screw, washers, the
+        # bag it comes in); the material information is incomplete (a steel
+        # insert or bushing, or bolts heavier than the M4 drawn); or the model
+        # is lighter inside than the item, drawn with voids or pockets the item
+        # does not have.
+        mass: 0.014 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=10.67,size=4":
@@ -865,12 +924,18 @@ parts:
     sku: 1906-0025-0032
     url: https://www.gobilda.com/1906-series-low-profile-servo-hub-25-tooth-spline-32mm-diameter/
     type: step
-    # goBILDA lists 4.7g. The model weighs 6.0g at 6061-T6's density: its two
-    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
-    # accounts for some of that.
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    properties:
+      physics:
+        # goBILDA lists 4.7g, and that is the weight here. The model weighs 6.0g
+        # at 6061-T6's density, 28% more - the hub would have to be 2.10 g/cm^3,
+        # lighter than any aluminium alloy (6061 is 2.70). Plausible reasons:
+        # the item has voids or pockets inside, or under its spline, that the
+        # model fills in; the material information is wrong (a magnesium or
+        # plastic part would be that light); or the listed weight is.
+        mass: 0.0047 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-shaft-length;length=1.6,size=14":
@@ -1533,16 +1598,24 @@ parts:
     sku: 1802-0043-0001
     url: https://www.gobilda.com/1802-series-servo-frame-43mm-width-for-standard-size-servos/
     type: step
-    # goBILDA lists 24g. The model weighs 17.4g at 6061-T6's density: it
-    # includes the four screws and four washers it is sold with, which are
-    # zinc-plated steel, weighed here as its aluminium, which accounts for some
-    # of that.
     # FreeCAD saved this file, and it coloured every face in its own default
     # grey. That is not goBILDA's colour, so the file's CMF is dropped.
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
       sourceCmf: {type: string, default: drop}
+    properties:
+      physics:
+        # goBILDA lists 24g, and that is the weight here. The model weighs 17.4g
+        # at 6061-T6's density, and 20.9g with the four screws and four washers
+        # it is sold with as steel - the frame would have to be 3.24 g/cm^3,
+        # which no aluminium alloy is (7075, the densest common one, is 2.81).
+        # Plausible reasons: the listed weight includes what the model leaves
+        # out (more hardware than the screws and washers drawn, or the bag it
+        # comes in); the material information is incomplete (steel where the
+        # model is aluminium); or the model is lighter inside than the item,
+        # drawn with voids or pockets the item does not have.
+        mass: 0.024 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=1.01,size=4":
