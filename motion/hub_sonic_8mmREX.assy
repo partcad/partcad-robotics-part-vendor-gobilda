@@ -1,8 +1,21 @@
-# The 1309 Series Sonic Hub (8mm REX Bore) as goBILDA sells it: the hub and its pinch bolts.
-# Each is taken out of goBILDA's model of the whole of it (see 'motion/hub_sonic_8mmREX_model' in partcad.yaml),
-# so each is where that model has it, and all of them are placed at the origin.
+# The 1309 Series Sonic Hub (8mm REX Bore) as goBILDA sells it: the hub and its two
+# pinch bolts. The hub is taken out of goBILDA's model of the whole of it (see
+# 'motion/hub_sonic_8mmREX_model' in partcad.yaml), and stays where that model has it.
+# Each pinch bolt is screwed into its hole: one is where the model has it, and the
+# other is where the model's second bolt would be if it were not tilted off its
+# hole's axis and into the hub.
 links:
   - part: motion/hub_sonic_8mmREX_hub
     name: hub
-  - part: motion/hub_sonic_8mmREX_pinch_bolts
-    name: pinch-bolts
+  - part: motion/hub_sonic_8mmREX_pinch_bolt
+    name: pinch-bolt-1
+    connect:
+      name: hub
+      to: "//pub/std/metric/m:m-thru-depth;depth=6.219,size=4"
+      toInstance: pinch-1
+  - part: motion/hub_sonic_8mmREX_pinch_bolt
+    name: pinch-bolt-2
+    connect:
+      name: hub
+      to: "//pub/std/metric/m:m-thru-depth;depth=6.219,size=4"
+      toInstance: pinch-2

@@ -68,8 +68,11 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
      the model without them.
    * Each piece says what it is made of, as a part does, and is `manufacturable: false` too: it comes in the item.
    * The assembly `<name>` links the pieces, all at the origin (each is where the model has it), and carries what
-     the part would have: `desc`, `vendor`, `sku`, `count_per_sku`, the requirements and the `implements:`. An
-     assembly takes no `url:`, so the product page is a comment. An ASSY file links it as `assembly:`.
+     the part would have: `desc`, `url`, `vendor`, `sku`, `count_per_sku`, the requirements and the `implements:`.
+     An ASSY file links it as `assembly:`.
+   * Where goBILDA's model has a piece out of place - the Sonic Hub's second pinch bolt is tilted into the hub -
+     take one good copy of it out (`<name>_pinch_bolt`), give it and the main piece the ports of the joint, and
+     place it in the assembly by `connect:`, once per place it goes, rather than as the model has it.
 
    `tools/deduce_ports.py --part <name>` reads such an assembly's model and checks it against the assembly's ports.
 

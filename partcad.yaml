@@ -916,22 +916,54 @@ parts:
     parameters:
       material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
+    implements:
+      # Where each pinch bolt goes: the floor of the counterbore its head sits
+      # in, +Z into the clearance hole through the near jaw of the clamp (the
+      # far jaw is tapped). The two are each other turned half a turn about the
+      # hub's axis, which is what the model's second bolt is not quite.
+      "//pub/std/metric/m:m-thru-depth;depth=6.219,size=4":
+        pinch-1: [[3.9167, 16.4508, -10.38], [0.357407, -0.862856, 0.357407], 98.421058]
+        pinch-2: [[-11.7767, 18.8892, -10.38], [-0.678598, -0.281085, -0.678598], 148.600285]
+  # The two pinch bolts as goBILDA's model has them, taken out of it only so that
+  # what is left is the hub. One of them is tilted 0.23 degrees off its hole's
+  # axis, and drawn 0.114 mm^3 into the hub, so the assembly places the other
+  # one twice, by its ports, instead.
   motion/hub_sonic_8mmREX_pinch_bolts:
-    desc: The two pinch bolts of the 1309 Series Sonic Hub (8mm REX Bore)
+    desc: The two pinch bolts of the 1309 Series Sonic Hub (8mm REX Bore), as goBILDA's model places them
     type: boolean
     operation: and
     parts: [motion/hub_sonic_8mmREX_model, motion/hub_sonic_8mmREX_pinch_bolts_box]
+    whole: true
+    manufacturable: false
+  motion/hub_sonic_8mmREX_pinch_bolts_box:
+    desc: Around the pinch bolts in goBILDA's model, and around nothing else whole
+    type: basic
+    cuboid: [26.41, 8.29, 7.69]
+    offset: [[-3.925, 17.675, -10.415], [0, 0, 1], 0]
+    manufacturable: false
+  motion/hub_sonic_8mmREX_pinch_bolt:
+    desc: >-
+      A pinch bolt of the 1309 Series Sonic Hub (8mm REX Bore): an M4 x 14mm
+      socket head screw (goBILDA's model names it 2800-0004-0014)
+    type: boolean
+    operation: and
+    parts: [motion/hub_sonic_8mmREX_model, motion/hub_sonic_8mmREX_pinch_bolt_box]
     whole: true
     manufacturable: false
     parameters:
       material: {type: string, default: ":4140 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
-  motion/hub_sonic_8mmREX_pinch_bolts_box:
-    desc: Around the pinch bolts in goBILDA's model, and around nothing else whole
+    implements:
+      # Under its head, +Z towards the head: where it sits in 'pinch-1' of the
+      # hub, in the model's frame, so that connected there it is where goBILDA
+      # put it.
+      "//pub/std/metric/m:m4-screw-14": [[3.9167, 16.4508, -10.38], [0.281085, 0.678598, 0.678598], 148.600285]
+  motion/hub_sonic_8mmREX_pinch_bolt_box:
+    desc: Around the pinch bolt goBILDA's model has on its hole's axis, and around nothing else whole
     type: basic
-    cuboid: [26.41, 8.29, 7.69]
-    offset: [[-3.925, 17.675, -10.415], [0, 0, 1], 0]
+    cuboid: [7.89, 7.89, 7.61]
+    offset: [[5.335, 17.875, -10.375], [0, 0, 1], 0]
     manufacturable: false
 
   motion/servo_attach_arm_25t:
@@ -2369,7 +2401,7 @@ assemblies:
     vendor: gobilda
     sku: 2910-0920-4008
     requirements: {has_color: true, has_material: true, has_weight: true}
-    # https://www.gobilda.com/2910-series-aluminum-clamping-collar-8mm-rex-id-x-20mm-od-9mm-length/
+    url: https://www.gobilda.com/2910-series-aluminum-clamping-collar-8mm-rex-id-x-20mm-od-9mm-length/
     implements:
       # Deduced from the model by tools/deduce_ports.py
       8mmREX-thru-9.5:
@@ -2383,7 +2415,7 @@ assemblies:
     sku: 2920-0001-0006
     count_per_sku: 2
     requirements: {has_color: true, has_material: true, has_weight: true}
-    # https://www.gobilda.com/2920-series-steel-set-screw-collar-6mm-bore-2-pack/
+    url: https://www.gobilda.com/2920-series-steel-set-screw-collar-6mm-bore-2-pack/
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-threaded-hole;depth=3.743,size=5":
@@ -2399,7 +2431,7 @@ assemblies:
     vendor: gobilda
     sku: 4007-0008-4008
     requirements: {has_color: true, has_material: true, has_weight: true}
-    # https://www.gobilda.com/4007-series-hyper-coupler-8mm-round-bore-to-8mm-rex-bore/
+    url: https://www.gobilda.com/4007-series-hyper-coupler-8mm-round-bore-to-8mm-rex-bore/
     properties:
       physics:
         # goBILDA lists 19g, and that is the weight here. The model weighs
@@ -2433,7 +2465,7 @@ assemblies:
     vendor: gobilda
     sku: 1310-0016-4008
     requirements: {has_color: true, has_material: true, has_weight: true}
-    # https://www.gobilda.com/1310-series-hyper-hub-8mm-rex-bore/
+    url: https://www.gobilda.com/1310-series-hyper-hub-8mm-rex-bore/
     properties:
       physics:
         # goBILDA lists 23g, and that is the weight here. The model weighs
@@ -2471,7 +2503,7 @@ assemblies:
     vendor: gobilda
     sku: 1309-0016-0005
     requirements: {has_color: true, has_material: true, has_weight: true}
-    # https://www.gobilda.com/1309-series-sonic-hub-5mm-bore/
+    url: https://www.gobilda.com/1309-series-sonic-hub-5mm-bore/
     properties:
       physics:
         # goBILDA lists 15g, and that is the weight here. The model weighs
@@ -2506,15 +2538,10 @@ assemblies:
   motion/hub_sonic_8mmREX:
     desc: 1309 Series Sonic Hub (8mm REX Bore)
     type: assy
-    # goBILDA's model draws one of the pinch bolts 0.114 mm^3 into the hub, a
-    # thread drawn inside the thread it is screwed into. That is how the item is
-    # modelled, not how anything here is put together, so it is not reported.
-    interference:
-      minVolume: 0.2
     vendor: gobilda
     sku: 1309-0016-4008
     requirements: {has_color: true, has_material: true, has_weight: true}
-    # https://www.gobilda.com/1309-series-sonic-hub-8mm-rex-bore/
+    url: https://www.gobilda.com/1309-series-sonic-hub-8mm-rex-bore/
     properties:
       physics:
         # goBILDA lists 14g, and that is the weight here. The model weighs
@@ -2558,7 +2585,7 @@ assemblies:
     vendor: gobilda
     sku: 2313-4008-0033
     requirements: {has_color: true, has_material: true, has_weight: true}
-    # https://www.gobilda.com/2313-series-stainless-steel-mod-1-25-worm-8mm-rex-bore-33mm-length/
+    url: https://www.gobilda.com/2313-series-stainless-steel-mod-1-25-worm-8mm-rex-bore-33mm-length/
     implements:
       # The bore is 33mm long, from Y=-18.018 to Y=14.982.
       8mmREX-thru-33:
@@ -2588,7 +2615,7 @@ assemblies:
     vendor: gobilda
     sku: 1802-0043-0001
     requirements: {has_color: true, has_material: true, has_weight: true}
-    # https://www.gobilda.com/1802-series-servo-frame-43mm-width-for-standard-size-servos/
+    url: https://www.gobilda.com/1802-series-servo-frame-43mm-width-for-standard-size-servos/
     properties:
       physics:
         # goBILDA lists 24g, and that is the weight here. The model weighs
