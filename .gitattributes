@@ -1,1 +1,32 @@
-*.png binary
+# The same rules as PartCAD's own '.gitattributes' (partcad/partcad), which
+# says at length why each of them is there. In short:
+#
+# Every text file is LF in the index and in the working tree, on every
+# platform, whatever 'core.autocrlf' says locally. 'text=auto' sniffs a file's
+# content before calling it text; every binary kind here is named below
+# anyway, so what happens to it is declared rather than guessed.
+#
+# The STEP files are what every part is read from - build inputs - and so are
+# kept in git itself, never in LFS: PartCAD fetches a package with a plain
+# 'git clone', which fetches no LFS object, and a part read from a pointer file
+# is a part that fails to build.
+#
+# What PartCAD renders - the drawings in 'examples/' that the README shows -
+# is output that nothing reads back, rewritten in full whenever a model or the
+# renderer changes. That is what LFS is for: kept in git, every revision of
+# every drawing would stay in the history whole. A clone without LFS gets a
+# pointer file there, which nothing here opens.
+#
+# Committing an image needs git-lfs installed and 'git lfs install' run in the
+# clone. Without it git stores the file as it is, raw bytes at a path declared
+# to hold a pointer, and says nothing (see AGENTS.md).
+* text=auto eol=lf
+*.step binary
+*.stp binary
+*.stl binary
+*.3mf binary
+*.pdf binary
+**/*.jpg filter=lfs diff=lfs merge=lfs -text
+**/*.png filter=lfs diff=lfs merge=lfs -text
+**/*.svg filter=lfs diff=lfs merge=lfs -text
+**/*.pdf filter=lfs diff=lfs merge=lfs -text

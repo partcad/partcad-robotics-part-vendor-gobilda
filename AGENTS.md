@@ -34,17 +34,21 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
 
    ```yaml
        parameters:
-         material: {type: string, default: ":Aluminum"}       # the page's "Material"
-         color: {type: string, default: ":Aluminum"}          # its "Color", or what its finish looks like
-         finish: {type: string, default: ":Clear Anodized"}   # its "Finish", if it states one
+         material: {type: string, default: ":6061-T6 Aluminum"}  # the grade of the page's "Material"
+         finish: {type: string, default: ":Clear Anodized"}      # its "Finish", if it states one
+         color: {type: string, default: ":Zinc-Plated"}          # only where the material's own colour is hidden
    ```
 
-   Name the colour even where the material claims it: a drawing reads the `color` alone. Add a declaration for a
-   material, colour or finish the page names and the package does not have yet, named as the page names it.
-   Then compare the mass `pc info` reports with the page's "Weight". If they are more than 10% apart, state the
-   page's weight under `properties: physics: mass:` (in kg), with a comment saying why. Common reasons: the part is
-   several pieces in different materials (a hub and its steel pinch bolts), or the model is simplified (a bearing
-   with no balls in it).
+   The page names a metal ("Aluminum", "Steel"), never a grade, so a material here is a guess at the grade, named
+   the way the grade is specified (`6061-T6 Aluminum`, `303 Stainless Steel`): the grade such an item is usually
+   made of, checked against the page's "Weight". A material claims the colour it looks, so a part made of it names
+   no colour unless something covers the metal: a plating, or a colour the page states ("Color: Black"). Add a
+   declaration for a grade, colour or finish the package does not have yet.
+   Then compare the mass `pc info` reports with the page's "Weight". If they are more than 10% apart, try the
+   grades the page's metal could be before anything else. If none accounts for it, do not state a weight: say in
+   a comment what goBILDA lists, what the model weighs, and why they differ, for example a part that is several
+   pieces in different materials (a hub and its steel pinch bolts), or a simplified model (a bearing with no balls
+   in it). Only something that is no one material, a servo, states its weight under `properties: physics: mass:`.
 
 4. Deduce its ports:
 
@@ -57,7 +61,11 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
    what the script saw and could not name - a spline, a D-bore, a size no standard names - and are for you to
    declare by hand, or to leave out.
 
-5. Check it: `pc test` and `pc render`, and `pc lint`. All three have to pass.
+5. Check it: `pc test` and `pc render`, and `pc lint`. All three have to pass. `pc render` redraws the drawings in
+   `examples/` that the README shows, and those are kept in Git LFS, as PartCAD keeps its own (see
+   `.gitattributes`): install `git-lfs` and run `git lfs install` in the clone before committing one. Without it
+   git stores the drawing as it is where a pointer belongs, and says nothing. The STEP files stay in git itself:
+   PartCAD clones a package without fetching LFS, and a part has to be read from a real file.
 
 ## The conventions
 

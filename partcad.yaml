@@ -32,28 +32,19 @@ suppliers:
 # They come from the spec table on the item's product page, which states a
 # "Material", a "Finish" or a "Color", and a "Weight".
 #
-# The declarations are named as those pages name things: "Aluminum",
-# "Stainless Steel", "Clear Anodized", "Zinc-Plated". The pages never name an
-# alloy, a temper or a grade, so neither does a declaration here. Each states
-# the density of the usual grade of it, which is what a part's mass, centre of
-# mass and inertia are worked out from. Each 'display' is how the colour or the
-# finish looks, so that a part is drawn as it looks out of the box; it is a
-# hint, not a specification.
+# The pages name a metal, never an alloy or a grade ("Aluminum",
+# "Stainless Steel", "Steel"), so each material below is a guess at the grade,
+# named the way that grade is specified. Each guess is the grade such an item
+# is usually made of, checked against the weight goBILDA publishes: the
+# model's volume at the grade's density comes within 6% of that weight for
+# every part made of one piece of one material. A material that claims a
+# colour is how the part looks, and a part made of it names no colour of its
+# own. A plated part names the plating's colour, which hides the steel's.
 #
-# A part names its colour even where its material claims that colour already
-# (bare aluminium, stainless steel, brass). PartCAD reads the material's claim
-# for the part's CMF, but a drawing takes a part's colour from its 'color'
-# alone. Without it, the hubs, shafts, bearings and gears are drawn in the
-# default goldenrod.
-#
-# A part made of more than one thing - a hub and its zinc-plated pinch bolts -
-# is one STEP solid per piece but one part here. A part's parameters apply to
-# every solid it has, so the bolts are drawn and weighed as the hub's
-# aluminium. Where that, or a model simplified from the real item (a bearing
-# with no balls in it), puts the computed mass more than 10% off the weight
-# goBILDA publishes, the part states that weight instead
-# ('properties: physics: mass:'). Its inertia is then the solid's, scaled to
-# that weight.
+# Where a part's computed weight is more than 10% off goBILDA's, it says so
+# in a comment, and why, and is weighed as modelled all the same: a bearing
+# modelled as a solid ring with no balls, or a hub whose steel pinch bolts
+# are weighed as its aluminium.
 colors:
   Aluminum:
     desc: Bare aluminium, which is also how it looks under a clear anodised coat
@@ -61,8 +52,8 @@ colors:
   Stainless Steel:
     desc: Stainless steel, as machined
     display: "#A8ABAF"
-  High-Carbon Steel:
-    desc: Bearing steel, as ground
+  Bearing Steel:
+    desc: Through-hardened bearing steel, as ground
     display: "#9A9DA1"
   Brass:
     desc: Brass, as machined
@@ -78,41 +69,64 @@ colors:
     display: "#1C1C1C"
 
 materials:
-  Aluminum:
+  6061-T6 Aluminum:
     desc: >-
-      Aluminium, as goBILDA's pages say it, naming no alloy. Its density is
-      6061's, at which all but one of the single-piece aluminium parts here
-      come within 6% of the weights goBILDA publishes.
+      The pages say "Aluminum". 6061-T6 is what machined and extruded
+      aluminium robot structure is made of, and at its density the channels,
+      beams, brackets, mounts and standoffs come within 6% of their published
+      weights: 2.70 g/cm^3 between them, where 7075 would be 2.81.
+    url: https://en.wikipedia.org/wiki/6061_aluminium_alloy
     density: 2700 # kg/m^3
     color: ":Aluminum"
-  Steel:
+  303 Stainless Steel:
     desc: >-
-      Steel, as goBILDA's pages say it, naming no grade: the screws, nuts,
-      spacers, plates and collars, all plated, which is what their colour is.
-    density: 7850
-  Stainless Steel:
-    desc: Stainless steel, as goBILDA's pages say it, naming no grade
+      The pages say "Stainless Steel". AISI 303 is the free-machining grade
+      turned shafts are made of, and the shafts weigh what it weighs to within
+      2%. The REX shafts' E-clip is taken to be the same steel as the shaft.
+    url: https://en.wikipedia.org/wiki/SAE_steel_grades#Stainless_steel
     density: 8000
     color: ":Stainless Steel"
-  High-Carbon Steel:
-    desc: The bearings' steel, as goBILDA's pages say it
-    density: 7810
-    color: ":High-Carbon Steel"
-  Brass:
+  52100 Steel:
     desc: >-
-      Brass. The worm gear's page says it is "machined from H59 hardened brass"
-      (CuZn40), and this is H59's density.
+      The bearings' pages say "High-Carbon Steel". AISI 52100 is the
+      high-carbon chromium steel ball bearings are made of.
+    url: https://en.wikipedia.org/wiki/SAE_52100_steel
+    density: 7810
+    color: ":Bearing Steel"
+  H59 Brass:
+    desc: >-
+      The worm gear's page says it is "machined from H59 hardened brass"
+      (GB/T 5231 H59, CuZn40: Muntz metal).
+    url: https://en.wikipedia.org/wiki/Muntz_metal
     density: 8400
     color: ":Brass"
-  Acetal:
+  1018 Steel:
     desc: >-
-      Acetal (POM), which the plastic sprocket is named for. Its spec table
-      says only "Plastic".
+      The pages say "Steel", zinc-plated. AISI 1018 is the low-carbon steel
+      nuts, spacers, plates and set-screw collars are commonly made of; plated,
+      so it claims no colour.
+    url: https://en.wikipedia.org/wiki/SAE_steel_grades
+    density: 7870
+  1045 Steel:
+    desc: >-
+      The steel sprocket's page says "Steel". AISI 1045 is the medium-carbon
+      steel roller-chain sprockets are made of, for teeth that can be hardened.
+    url: https://en.wikipedia.org/wiki/SAE_steel_grades
+    density: 7870
+  4140 Steel:
+    desc: >-
+      The button head screws' page says "Steel". A socket button head screw
+      (ISO 7380) is property class 10.9, a quenched and tempered alloy steel:
+      AISI 4140 or its like.
+    url: https://en.wikipedia.org/wiki/41xx_steel
+    density: 7850
+  POM:
+    desc: >-
+      Acetal (polyoxymethylene). The plastic sprocket is named for it, though
+      its spec table says only "Plastic"; the plastic spacers are taken to be
+      the same, which the 8mm one's weight agrees with.
+    url: https://en.wikipedia.org/wiki/Polyoxymethylene
     density: 1410
-  Plastic:
-    desc: >-
-      Plastic, as goBILDA's pages say it, naming no polymer. It states no
-      density, so a part made of it states its weight.
 
 finishes:
   Clear Anodized:
@@ -459,7 +473,7 @@ parts:
     url: https://www.gobilda.com/2811-series-zinc-plated-steel-hex-nut-m4-x-0-7mm-7mm-hex-25-pack/
     type: step
     parameters:
-      material: {type: string, default: ":Steel"}
+      material: {type: string, default: ":1018 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
     implements:
@@ -477,7 +491,7 @@ parts:
     url: https://www.gobilda.com/steel-channel-connector-plate-2-pack/
     type: step
     parameters:
-      material: {type: string, default: ":Steel"}
+      material: {type: string, default: ":1018 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
     implements:
@@ -501,7 +515,7 @@ parts:
     url: https://www.gobilda.com/2802-series-zinc-plated-steel-button-head-screw-m4-x-0-7mm-12mm-length-25-pack/
     type: step
     parameters:
-      material: {type: string, default: ":Steel"}
+      material: {type: string, default: ":4140 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
     implements:
@@ -515,12 +529,8 @@ parts:
     url: https://www.gobilda.com/1500-series-plastic-spacer-5mm-id-x-7mm-od-1mm-thickness-12-pack/
     type: step
     parameters:
-      material: {type: string, default: ":Plastic"}
+      material: {type: string, default: ":POM"}
       color: {type: string, default: ":Black"}
-    properties:
-      physics:
-        # goBILDA names no polymer, so its material states no density.
-        mass: 0.00003 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m5-thru-1":
@@ -536,12 +546,8 @@ parts:
     url: https://www.gobilda.com/1500-series-plastic-spacer-8mm-id-x-10mm-od-1mm-thickness-12-pack/
     type: step
     parameters:
-      material: {type: string, default: ":Plastic"}
+      material: {type: string, default: ":POM"}
       color: {type: string, default: ":Black"}
-    properties:
-      physics:
-        # goBILDA names no polymer, so its material states no density.
-        mass: 0.00004 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m10-shaft-1":
@@ -560,7 +566,7 @@ parts:
     url: https://www.gobilda.com/1522-series-8mm-id-spacer-10mm-od-4mm-length-4-pack/
     type: step
     parameters:
-      material: {type: string, default: ":Steel"}
+      material: {type: string, default: ":1018 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
     implements:
@@ -575,13 +581,10 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1601-series-flanged-ball-bearing-5mm-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
+    # goBILDA lists 4g. The model weighs 5.1g at 52100's density: it is a solid
+    # ring between its shields, with no balls in it.
     parameters:
-      material: {type: string, default: ":High-Carbon Steel"}
-      color: {type: string, default: ":High-Carbon Steel"}
-    properties:
-      physics:
-        # The model is 28% heavier: it is a solid ring, with no balls in it.
-        mass: 0.004 # kg
+      material: {type: string, default: ":52100 Steel"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-shaft-length;length=3.76,size=14":
@@ -599,13 +602,10 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1611-series-flanged-ball-bearing-6mm-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
+    # goBILDA lists 3g. The model weighs 4.6g at 52100's density: it is a solid
+    # ring between its shields, with no balls in it.
     parameters:
-      material: {type: string, default: ":High-Carbon Steel"}
-      color: {type: string, default: ":High-Carbon Steel"}
-    properties:
-      physics:
-        # The model is 54% heavier: it is a solid ring, with no balls in it.
-        mass: 0.003 # kg
+      material: {type: string, default: ":52100 Steel"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=1.524,size=8":
@@ -629,13 +629,10 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1611-series-flanged-ball-bearing-8mm-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
+    # goBILDA lists 3g. The model weighs 3.8g at 52100's density: it is a solid
+    # ring between its shields, with no balls in it.
     parameters:
-      material: {type: string, default: ":High-Carbon Steel"}
-      color: {type: string, default: ":High-Carbon Steel"}
-    properties:
-      physics:
-        # The model is 27% heavier: it is a solid ring, with no balls in it.
-        mass: 0.003 # kg
+      material: {type: string, default: ":52100 Steel"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m14-shaft-4":
@@ -653,13 +650,10 @@ parts:
     count_per_sku: 2
     url: https://www.gobilda.com/1611-series-flanged-ball-bearing-8mm-rex-id-x-14mm-od-5mm-thickness-2-pack/
     type: step
+    # goBILDA lists 3.5g. The model weighs 4.1g at 52100's density: it is a
+    # solid ring between its shields, with no balls in it.
     parameters:
-      material: {type: string, default: ":High-Carbon Steel"}
-      color: {type: string, default: ":High-Carbon Steel"}
-    properties:
-      physics:
-        # The model is 18% heavier: it is a solid ring, with no balls in it.
-        mass: 0.0035 # kg
+      material: {type: string, default: ":52100 Steel"}
     implements:
       8mmREX-thru-5:
         clean-side: [[0, 0, 0], [1, 0, 0], -90]
@@ -673,15 +667,11 @@ parts:
     sku: 2910-0920-4008
     url: https://www.gobilda.com/2910-series-aluminum-clamping-collar-8mm-rex-id-x-20mm-od-9mm-length/
     type: step
+    # goBILDA lists 7.3g. The model weighs 6.1g at 6061-T6's density: its pinch
+    # bolt is steel, weighed here as the collar's aluminium.
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    properties:
-      physics:
-        # The model is 16% lighter at aluminium's density, which its pinch bolt
-        # being steel accounts for.
-        mass: 0.0073 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       8mmREX-thru-9.5:
@@ -697,7 +687,7 @@ parts:
     url: https://www.gobilda.com/2920-series-steel-set-screw-collar-6mm-bore-2-pack/
     type: step
     parameters:
-      material: {type: string, default: ":Steel"}
+      material: {type: string, default: ":1018 Steel"}
       color: {type: string, default: ":Zinc-Plated"}
       finish: {type: string, default: ":Zinc-Plated"}
     implements:
@@ -716,15 +706,12 @@ parts:
     sku: 4007-0008-4008
     url: https://www.gobilda.com/4007-series-hyper-coupler-8mm-round-bore-to-8mm-rex-bore/
     type: step
+    # goBILDA lists 19g. The model weighs 12.6g at 6061-T6's density: its four
+    # pinch bolts are steel, weighed here as its aluminium, which accounts for
+    # some of that.
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    properties:
-      physics:
-        # The model is 34% lighter at aluminium's density, its four pinch bolts
-        # counted as aluminium too.
-        mass: 0.019 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=12.974,size=4":
@@ -748,15 +735,12 @@ parts:
     sku: 1310-0016-4008
     url: https://www.gobilda.com/1310-series-hyper-hub-8mm-rex-bore/
     type: step
+    # goBILDA lists 23g. The model weighs 18.8g at 6061-T6's density: its two
+    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
+    # accounts for some of that.
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    properties:
-      physics:
-        # The model is 18% lighter at aluminium's density. Its two pinch bolts
-        # are zinc-plated steel, which accounts for some of that.
-        mass: 0.023 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=15.104,size=4":
@@ -783,15 +767,12 @@ parts:
     sku: 1309-0016-0005
     url: https://www.gobilda.com/1309-series-sonic-hub-5mm-bore/
     type: step
+    # goBILDA lists 15g. The model weighs 10.8g at 6061-T6's density: its two
+    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
+    # accounts for some of that.
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    properties:
-      physics:
-        # The model is 28% lighter at aluminium's density. Its two pinch bolts
-        # are zinc-plated steel, which accounts for some of that.
-        mass: 0.015 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=10.814,size=4":
@@ -819,15 +800,12 @@ parts:
     sku: 1309-0016-4008
     url: https://www.gobilda.com/1309-series-sonic-hub-8mm-rex-bore/
     type: step
+    # goBILDA lists 14g. The model weighs 10.3g at 6061-T6's density: its two
+    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
+    # accounts for some of that.
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    properties:
-      physics:
-        # The model is 27% lighter at aluminium's density. Its two pinch bolts
-        # are zinc-plated steel, which accounts for some of that.
-        mass: 0.014 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=10.67,size=4":
@@ -862,8 +840,7 @@ parts:
     url: https://www.gobilda.com/1900-series-single-servo-arm-25-tooth-spline-32mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -888,14 +865,12 @@ parts:
     sku: 1906-0025-0032
     url: https://www.gobilda.com/1906-series-low-profile-servo-hub-25-tooth-spline-32mm-diameter/
     type: step
+    # goBILDA lists 4.7g. The model weighs 6.0g at 6061-T6's density: its two
+    # pinch bolts are zinc-plated steel, weighed here as its aluminium, which
+    # accounts for some of that.
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
-    properties:
-      physics:
-        # The model is 28% heavier at aluminium's density.
-        mass: 0.0047 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-shaft-length;length=1.6,size=14":
@@ -937,8 +912,7 @@ parts:
     url: https://www.gobilda.com/2101-series-stainless-steel-d-shaft-6mm-diameter-70mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Stainless Steel"}
-      color: {type: string, default: ":Stainless Steel"}
+      material: {type: string, default: ":303 Stainless Steel"}
 
   motion/shaft_8mmREX_56mm:
     desc: 2106 Series Stainless Steel REX Shaft (8mm Diameter, 56mm Length)
@@ -947,8 +921,7 @@ parts:
     url: https://www.gobilda.com/2106-series-stainless-steel-rex-shaft-8mm-diameter-56mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Stainless Steel"}
-      color: {type: string, default: ":Stainless Steel"}
+      material: {type: string, default: ":303 Stainless Steel"}
     # This model comes with its E-clip already in the groove.
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -967,8 +940,7 @@ parts:
     url: https://www.gobilda.com/2106-series-stainless-steel-rex-shaft-8mm-diameter-64mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Stainless Steel"}
-      color: {type: string, default: ":Stainless Steel"}
+      material: {type: string, default: ":303 Stainless Steel"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-threaded-hole;depth=11.9,size=4":
@@ -986,8 +958,7 @@ parts:
     url: https://www.gobilda.com/2106-series-stainless-steel-rex-shaft-8mm-diameter-72mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Stainless Steel"}
-      color: {type: string, default: ":Stainless Steel"}
+      material: {type: string, default: ":303 Stainless Steel"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-threaded-hole;depth=11.9,size=4":
@@ -1005,8 +976,7 @@ parts:
     url: https://www.gobilda.com/2106-series-stainless-steel-rex-shaft-8mm-diameter-80mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Stainless Steel"}
-      color: {type: string, default: ":Stainless Steel"}
+      material: {type: string, default: ":303 Stainless Steel"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-threaded-hole;depth=11.9,size=4":
@@ -1022,9 +992,11 @@ parts:
   motion/shaft_8mmREX_clip:
     desc: 2106 Series Stainless Steel REX Shaft (8mm Diameter) E-Clip
     type: step
+    # No goBILDA page says what the clip is made of: it is taken to be the
+    # shaft's steel.
+    parameters:
+      material: {type: string, default: ":303 Stainless Steel"}
     manufacturable: false
-    # No colour, material or finish: no goBILDA page says what the clip is
-    # made of.
     # Modelled in the frame of the REX shafts, seated in the groove.
     implements:
       8mmREX-thru-0.7:
@@ -1064,7 +1036,7 @@ parts:
     url: https://www.gobilda.com/8mm-pitch-acetal-hub-mount-sprocket-14mm-bore-16-tooth/
     type: step
     parameters:
-      material: {type: string, default: ":Acetal"}
+      material: {type: string, default: ":POM"}
       color: {type: string, default: ":Black"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -1098,7 +1070,7 @@ parts:
     url: https://www.gobilda.com/8mm-pitch-steel-hub-mount-sprocket-14mm-bore-14-tooth/
     type: step
     parameters:
-      material: {type: string, default: ":Steel"}
+      material: {type: string, default: ":1045 Steel"}
       color: {type: string, default: ":Black Zinc-Plated"}
       finish: {type: string, default: ":Black Zinc-Plated"}
     implements:
@@ -1139,8 +1111,7 @@ parts:
     url: https://www.gobilda.com/2313-series-stainless-steel-mod-1-25-worm-8mm-rex-bore-33mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Stainless Steel"}
-      color: {type: string, default: ":Stainless Steel"}
+      material: {type: string, default: ":303 Stainless Steel"}
     implements:
       # The bore is 33mm long, from Y=-18.018 to Y=14.982.
       8mmREX-thru-33:
@@ -1172,8 +1143,7 @@ parts:
     url: https://www.gobilda.com/2314-series-brass-mod-1-25-hub-mount-worm-gear-14mm-bore-28-tooth/
     type: step
     parameters:
-      material: {type: string, default: ":Brass"}
-      color: {type: string, default: ":Brass"}
+      material: {type: string, default: ":H59 Brass"}
     # The hub side of the gear is X=0.5 ("inner") to X=4.5 ("outer").
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -1212,8 +1182,7 @@ parts:
     url: https://www.gobilda.com/1106-series-square-beam-15-hole-120mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -1293,8 +1262,7 @@ parts:
     url: https://www.gobilda.com/1108-series-flat-pattern-bracket-1-2/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -1374,8 +1342,7 @@ parts:
     url: https://www.gobilda.com/1108-series-flat-pattern-bracket-2-3/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -1485,8 +1452,7 @@ parts:
     url: https://www.gobilda.com/1201-series-quad-block-pattern-mount-43-2/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       # Through the corner bosses, from each side into the pocket: 8.5mm.
@@ -1567,19 +1533,16 @@ parts:
     sku: 1802-0043-0001
     url: https://www.gobilda.com/1802-series-servo-frame-43mm-width-for-standard-size-servos/
     type: step
+    # goBILDA lists 24g. The model weighs 17.4g at 6061-T6's density: it
+    # includes the four screws and four washers it is sold with, which are
+    # zinc-plated steel, weighed here as its aluminium, which accounts for some
+    # of that.
     # FreeCAD saved this file, and it coloured every face in its own default
     # grey. That is not goBILDA's colour, so the file's CMF is dropped.
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
       sourceCmf: {type: string, default: drop}
-    properties:
-      physics:
-        # The model is 28% lighter at aluminium's density. It includes the four
-        # screws and four washers it is sold with, which are zinc-plated steel
-        # and account for some of that.
-        mass: 0.024 # kg
     implements:
       # Deduced from the model by tools/deduce_ports.py
       "//pub/std/metric/m:m-hole;depth=1.01,size=4":
@@ -1664,8 +1627,7 @@ parts:
     url: https://www.gobilda.com/1501-series-m4-x-0-7mm-standoff-6mm-od-43mm-length-4-pack/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -1780,8 +1742,7 @@ parts:
     url: https://www.gobilda.com/1120-series-u-channel-2-hole-72mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       "//pub/std/metric/m:m14-thru-2.5": {{ channel[2].m14 | tojson }}
@@ -1797,8 +1758,7 @@ parts:
     url: https://www.gobilda.com/1120-series-u-channel-5-hole-144mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       "//pub/std/metric/m:m14-thru-2.5": {{ channel[5].m14 | tojson }}
@@ -1814,8 +1774,7 @@ parts:
     url: https://www.gobilda.com/1120-series-u-channel-7-hole-192mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       "//pub/std/metric/m:m14-thru-2.5": {{ channel[7].m14 | tojson }}
@@ -1831,8 +1790,7 @@ parts:
     url: https://www.gobilda.com/1120-series-u-channel-9-hole-240mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       "//pub/std/metric/m:m14-thru-2.5": {{ channel[9].m14 | tojson }}
@@ -1848,8 +1806,7 @@ parts:
     url: https://www.gobilda.com/1121-series-low-side-u-channel-3-hole-96mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
@@ -2005,8 +1962,7 @@ parts:
     url: https://www.gobilda.com/1121-series-low-side-u-channel-7-hole-192mm-length/
     type: step
     parameters:
-      material: {type: string, default: ":Aluminum"}
-      color: {type: string, default: ":Aluminum"}
+      material: {type: string, default: ":6061-T6 Aluminum"}
       finish: {type: string, default: ":Clear Anodized"}
     implements:
       # Deduced from the model by tools/deduce_ports.py
