@@ -45,10 +45,13 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
    no colour unless something covers the metal: a plating, or a colour the page states ("Color: Black"). Add a
    declaration for a grade, colour or finish the package does not have yet.
    Then compare the mass `pc info` reports with the page's "Weight". If they are more than 10% apart, try the
-   grades the page's metal could be before anything else. If none accounts for it, do not state a weight: say in
-   a comment what goBILDA lists, what the model weighs, and why they differ, for example a simplified model (a
-   bearing with no balls in it). Only something that is no one material, a servo, states its weight under
-   `properties: physics: mass:`.
+   grades the page's metal could be before anything else. If none accounts for it, goBILDA's weight is the one
+   that counts: state it under `properties: physics: mass:` (in kg), and say in a comment what the model weighs,
+   how far that is off, and the plausible reasons - the material information is incomplete or wrong, the model
+   has voids the item does not (or the other way round), the listed weight includes something the model leaves
+   out. Where the model is simplified on purpose (a bearing drawn as a solid ring with no balls), say just that.
+   Something that is no one material, a servo, states goBILDA's weight too, and so does an assembly whose pieces
+   do not add up to it.
 
    Last, require it: `requirements: {has_color: true, has_material: true, has_weight: true}` (only `has_weight` for
    what is no one material), which `pc test` checks.
