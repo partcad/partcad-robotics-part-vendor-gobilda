@@ -56,8 +56,8 @@ suppliers:
 # item has.
 #
 # Every item bought requires what this says of it ('has_color',
-# 'has_material', 'has_weight'), and 'pc test' holds it to that: a reference
-# that resolves to nothing, or a colour that is only a picture, fails.
+# 'has_material', 'has_weight'), and 'pc qual test' holds it to that: a
+# reference that resolves to nothing, or a colour that is only a picture, fails.
 colors:
   Aluminum:
     desc: Bare aluminium, which is also how it looks under a clear anodised coat
