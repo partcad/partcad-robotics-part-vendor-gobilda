@@ -1,0 +1,8 @@
+# The 2920 Series Steel Set-Screw Collar (6mm Bore) - 2 Pack as goBILDA sells it: the collar and its set screw.
+# Each is taken out of goBILDA's model of the whole of it (see 'motion/collar_set_6mm_model' in partcad.yaml),
+# so each is where that model has it, and all of them are placed at the origin.
+links:
+  - part: motion/collar_set_6mm_collar
+    name: collar
+  - part: motion/collar_set_6mm_set_screw
+    name: set-screw

@@ -29,7 +29,54 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
    comes with every shaft length) is declared once for its geometry, and once more per set as an `alias` naming
    that set's SKU: see `motion/shaft_8mmREX_clip` and the aliases after it.
 
-3. Deduce its ports:
+3. Say what it is made of. The STEP file has no colour or material in it, so take them from the spec table on the
+   product page, using the `colors:`, `materials:` and `finishes:` declared at the top of `partcad.yaml`:
+
+   ```yaml
+       parameters:
+         material: {type: string, default: ":6061-T6 Aluminum"}  # the grade of the page's "Material"
+         finish: {type: string, default: ":Clear Anodized"}      # its "Finish", if it states one
+   ```
+
+   The page names a metal ("Aluminum", "Steel"), never a grade, so a material here is a guess at the grade, named
+   the way the grade is specified (`6061-T6 Aluminum`, `303 Stainless Steel`): the grade such an item is usually
+   made of, checked against the page's "Weight". A material claims the colour it looks, so a part made of it names
+   no colour unless something covers the metal: a plating, or a colour the page states ("Color: Black"). A
+   zinc-plated steel part does, with `color: {type: string, default: ":Zinc-Plated"}` beside its material. Add a
+   declaration for a grade, colour or finish the package does not have yet. Then compare the mass `pc info` reports
+   with the page's "Weight". The page weighs what the SKU sells: of an item in a set (`item_in_sku`), compare the
+   set's items added up, and never state the set's weight as one item's. If they are more than 10% apart, try the
+   grades the page's metal could be before anything else. If none accounts for it, goBILDA's weight is the one that
+   counts: state it under `properties: physics: mass:` (in kg), and say in a comment what the model weighs, how far
+   that is off, and the plausible reasons - the material information is incomplete or wrong, the model has voids the
+   item does not (or the other way round), the listed weight includes something the model leaves out. Where the
+   model is simplified on purpose (a bearing drawn as a solid ring with no balls), say just that. Something that is
+   no one material, a servo, states goBILDA's weight too, and so does an assembly whose pieces do not add up to it.
+
+   Last, require it: `requirements: {has_color: true, has_material: true, has_weight: true}` (only `has_weight` for
+   what is no one material), which `pc qual test` checks.
+
+   **A model that is pieces of different materials** - a hub and its steel pinch bolts, one solid each in one STEP
+   file - is an assembly of those pieces. See `motion/hub_sonic_8mmREX` and its `.assy` file:
+
+   * `<name>_model` reads the file as it is (`path:` it), and is `manufacturable: false`: it is no item.
+   * Each kind of piece but the main one is `<name>_<piece>`, a `boolean` part: `operation: and` of the model and
+     `<name>_<piece>_box`, with `whole: true`, which keeps the model's solids that lie wholly inside the box. The
+     box is a `basic` cuboid around those solids, a few tenths of a millimetre clear of them, that holds no other
+     solid whole.
+   * The main piece is `<name>_<body>`: the model `xor` the other pieces, `whole: true`, which is what is left of
+     the model without them.
+   * Each piece says what it is made of, as a part does, and is `manufacturable: false` too: it comes in the item.
+   * The assembly `<name>` links the pieces, all at the origin (each is where the model has it), and carries what
+     the part would have: `desc`, `url`, `vendor`, `sku`, `count_per_sku`, the requirements and the `implements:`.
+     An ASSY file links it as `assembly:`.
+   * Where goBILDA's model has a piece out of place - the Sonic Hub's second pinch bolt is tilted into the hub -
+     take one good copy of it out (`<name>_pinch_bolt`), give it and the main piece the ports of the joint, and
+     place it in the assembly by `connect:`, once per place it goes, rather than as the model has it.
+
+   `tools/deduce_ports.py --part <name>` reads such an assembly's model and checks it against the assembly's ports.
+
+4. Deduce its ports:
 
    ```shell
    poetry run python tools/deduce_ports.py --part motion/hub_sonic_8mmREX
@@ -40,7 +87,11 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
    what the script saw and could not name - a spline, a D-bore, a size no standard names - and are for you to
    declare by hand, or to leave out.
 
-4. Check it: `pc qual test` and `pc render`, and `pc lint`. All three have to pass.
+5. Check it: `pc qual test` and `pc render`, and `pc lint`. All three have to pass. `pc render` redraws the drawings in
+   `examples/` that the README shows, and those are kept in Git LFS, as PartCAD keeps its own (see
+   `.gitattributes`): install `git-lfs` and run `git lfs install` in the clone before committing one. Without it
+   git stores the drawing as it is where a pointer belongs, and says nothing. The STEP files stay in git itself:
+   PartCAD clones a package without fetching LFS, and a part has to be read from a real file.
 
 ## The conventions
 
@@ -77,6 +128,8 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
   `slot7-left`). Rename them to something a person connecting the part would recognise - `ledged` and `flat` on
   a hub - where there are few enough of them to be worth it; keep them as they are on a channel with hundreds.
 
+A port counts as declared when one is at the same place facing the same way (+Z): the script does not compare the
+interface, its size or the direction of +X, so read what `--all` prints against the declaration for those.
 To check a declaration against the model, `--all` prints everything the model says whether it is declared or not,
 and `tools/deduce_ports.py <file>.step` does the same for a STEP file that is not a part of the package yet.
 `--every` runs it over every part of the package.

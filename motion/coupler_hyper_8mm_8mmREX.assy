@@ -1,0 +1,8 @@
+# The 4007 Series Hyper Coupler (8mm Round Bore to 8mm REX Bore) as goBILDA sells it: the coupler and its pinch bolts.
+# Each is taken out of goBILDA's model of the whole of it (see 'motion/coupler_hyper_8mm_8mmREX_model' in partcad.yaml),
+# so each is where that model has it, and all of them are placed at the origin.
+links:
+  - part: motion/coupler_hyper_8mm_8mmREX_coupler
+    name: coupler
+  - part: motion/coupler_hyper_8mm_8mmREX_pinch_bolts
+    name: pinch-bolts
