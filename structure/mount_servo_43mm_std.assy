@@ -1,0 +1,10 @@
+# The 1802 Series Servo Frame (43mm Width, for Standard Size Servos) as goBILDA sells it: the frame and its screws and its washers.
+# Each is taken out of goBILDA's model of the whole of it (see 'structure/mount_servo_43mm_std_model' in partcad.yaml),
+# so each is where that model has it, and all of them are placed at the origin.
+links:
+  - part: structure/mount_servo_43mm_std_frame
+    name: frame
+  - part: structure/mount_servo_43mm_std_screws
+    name: screws
+  - part: structure/mount_servo_43mm_std_washers
+    name: washers

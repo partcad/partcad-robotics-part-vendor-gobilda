@@ -1,0 +1,8 @@
+# The 2313 Series Stainless Steel, MOD 1.25 Worm (8mm REX Bore, 33mm Length) as goBILDA sells it: the worm and its set screws.
+# Each is taken out of goBILDA's model of the whole of it (see 'motion/worm_8mmREX_model' in partcad.yaml),
+# so each is where that model has it, and all of them are placed at the origin.
+links:
+  - part: motion/worm_8mmREX_worm
+    name: worm
+  - part: motion/worm_8mmREX_set_screws
+    name: set-screws

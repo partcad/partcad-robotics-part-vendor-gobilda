@@ -50,7 +50,31 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
    how far that is off, and the plausible reasons - the material information is incomplete or wrong, the model
    has voids the item does not (or the other way round), the listed weight includes something the model leaves
    out. Where the model is simplified on purpose (a bearing drawn as a solid ring with no balls), say just that.
-   Something that is no one material, a servo, states goBILDA's weight too.
+   Something that is no one material, a servo, states goBILDA's weight too, and so does an assembly whose pieces
+   do not add up to it.
+
+   Last, require it: `requirements: {has_color: true, has_material: true, has_weight: true}` (only `has_weight` for
+   what is no one material), which `pc test` checks.
+
+   **A model that is pieces of different materials** - a hub and its steel pinch bolts, one solid each in one STEP
+   file - is an assembly of those pieces. See `motion/hub_sonic_8mmREX` and its `.assy` file:
+
+   * `<name>_model` reads the file as it is (`path:` it), and is `manufacturable: false`: it is no item.
+   * Each kind of piece but the main one is `<name>_<piece>`, a `boolean` part: `operation: and` of the model and
+     `<name>_<piece>_box`, with `whole: true`, which keeps the model's solids that lie wholly inside the box. The
+     box is a `basic` cuboid around those solids, a few tenths of a millimetre clear of them, that holds no other
+     solid whole.
+   * The main piece is `<name>_<body>`: the model `xor` the other pieces, `whole: true`, which is what is left of
+     the model without them.
+   * Each piece says what it is made of, as a part does, and is `manufacturable: false` too: it comes in the item.
+   * The assembly `<name>` links the pieces, all at the origin (each is where the model has it), and carries what
+     the part would have: `desc`, `url`, `vendor`, `sku`, `count_per_sku`, the requirements and the `implements:`.
+     An ASSY file links it as `assembly:`.
+   * Where goBILDA's model has a piece out of place - the Sonic Hub's second pinch bolt is tilted into the hub -
+     take one good copy of it out (`<name>_pinch_bolt`), give it and the main piece the ports of the joint, and
+     place it in the assembly by `connect:`, once per place it goes, rather than as the model has it.
+
+   `tools/deduce_ports.py --part <name>` reads such an assembly's model and checks it against the assembly's ports.
 
 4. Deduce its ports:
 

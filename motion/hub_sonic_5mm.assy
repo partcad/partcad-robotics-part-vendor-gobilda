@@ -1,0 +1,8 @@
+# The 1309 Series Sonic Hub (5mm Bore) as goBILDA sells it: the hub and its pinch bolts.
+# Each is taken out of goBILDA's model of the whole of it (see 'motion/hub_sonic_5mm_model' in partcad.yaml),
+# so each is where that model has it, and all of them are placed at the origin.
+links:
+  - part: motion/hub_sonic_5mm_hub
+    name: hub
+  - part: motion/hub_sonic_5mm_pinch_bolts
+    name: pinch-bolts

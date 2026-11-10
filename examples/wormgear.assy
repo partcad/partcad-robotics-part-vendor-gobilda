@@ -14,7 +14,7 @@ links:
       to: 8mmREX-shaft
       toInstance: groove
 
-  - part: motion/hub_sonic_8mmREX
+  - assembly: motion/hub_sonic_8mmREX
     name: gear-hub
     connect:
       with: 8mmREX-thru-10
@@ -118,7 +118,7 @@ links:
 
   # Its ledge against that spacer, which keeps it clear of the head of the
   # screw holding the mount below it
-  - part: motion/hub_sonic_8mmREX
+  - assembly: motion/hub_sonic_8mmREX
     name: gear-drive-hub
     connect:
       with: 8mmREX-thru-10
@@ -170,7 +170,7 @@ links:
       toInstance: flange-side
 
   # Against that spacer, which centres it on the gear
-  - part: motion/worm_8mmREX
+  - assembly: motion/worm_8mmREX
     name: worm
     connect:
       with: 8mmREX-thru-33
@@ -288,7 +288,7 @@ links:
       toInstance: clean-side
 
   # Against that spacer
-  - part: motion/hub_sonic_8mmREX
+  - assembly: motion/hub_sonic_8mmREX
     name: gear-drive-worm-hub
     connect:
       with: 8mmREX-thru-10

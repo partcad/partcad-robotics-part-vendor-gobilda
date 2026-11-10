@@ -16,7 +16,11 @@ What the script saw and could not name goes to stderr, prefixed with '#', so
 that it is read rather than lost.
 
 With '--part', the part is read from this package - its STEP file, and the ports
-it already declares - and only what is not declared yet is printed: a port that
+it already declares - and only what is not declared yet is printed. An item
+goBILDA models as pieces of different materials in one file is an assembly of
+those pieces here, and '--part' takes its name all the same: its geometry is
+the file its '<name>_model' part reads, and its ports are the assembly's. In
+short: a port that
 lands where one of the part's own ports already is, facing the same way, is
 already declared. '--all' prints everything the geometry says regardless, which
 is how to check a declaration by hand against the model. '--part' needs PartCAD
@@ -767,7 +771,16 @@ def _fmt(v):
 
 
 class Package:
-    """This package, as PartCAD reads it: its parts and the ports they declare."""
+    """This package, as PartCAD reads it: its parts and the ports they declare.
+
+    An item that is pieces of different materials is an assembly of them, and
+    the pieces are taken out of goBILDA's model of the whole, the part named
+    after the assembly with '_model' after it (see 'partcad.yaml'). Here such an
+    item is the model's file, with the assembly's ports: the assembly is where
+    its ports are declared, and the model part has none of its own.
+    """
+
+    MODEL = "_model"
 
     def __init__(self, path):
         os.environ.setdefault("PC_TELEMETRY_TYPE", "none")
@@ -777,13 +790,30 @@ class Package:
         self.ctx = pc.init(path)
         self.project = self.ctx.get_project(self.ctx.current_project_path)
 
+    def _modelled(self, name):
+        """Whether 'name' is an assembly of pieces taken out of a model part of its own."""
+        return name in self.project.assemblies and name + self.MODEL in self.project.parts
+
     def step_parts(self):
-        """The parts read from a STEP file, aliases included, by name."""
-        return sorted(
-            name for name, part in self.project.parts.items() if (part.config or {}).get("type") in ("step", "alias")
-        )
+        """The parts read from a STEP file, aliases included, by name; an assembly modelled as one, by its own."""
+        names = set()
+        for name, part in self.project.parts.items():
+            if (part.config or {}).get("type") not in ("step", "alias"):
+                continue
+            if name.endswith(self.MODEL) and self._modelled(name[: -len(self.MODEL)]):
+                name = name[: -len(self.MODEL)]
+            names.add(name)
+        return sorted(names)
+
+    def _shape(self, name):
+        if self._modelled(name):
+            return self.project.get_assembly(name)
+        return self.project.get_part(name)
 
     def step_file(self, part_name):
+        if self._modelled(part_name):
+            model = self.project.get_part(part_name + self.MODEL)
+            return os.path.join(self.path, (model.config or {}).get("path") or part_name + ".step")
         part = self.project.get_part(part_name)
         if part is None:
             raise Exception("No part '%s' in %s" % (part_name, self.path))
@@ -799,7 +829,7 @@ class Package:
         from partcad.shape_ports import own_ports
 
         result = []
-        for record in own_ports(self.project.get_part(part_name)):
+        for record in own_ports(self._shape(part_name)):
             loc = record.location
             result.append((list(loc.translation), list(loc.rotate_vector((0, 0, 1)))))
         return result
