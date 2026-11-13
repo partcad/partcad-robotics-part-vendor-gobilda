@@ -93,6 +93,10 @@ materials:
       weights: 2.70 g/cm^3 between them, where 7075 would be 2.81.
     url: https://en.wikipedia.org/wiki/6061_aluminium_alloy
     density: 2700 # kg/m^3
+    youngsModulus: 6.89e+10 # Pa, 6061-T6; T6, typical. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MA6061T6
+    poissonsRatio: 0.33 # 6061-T6; T6, typical. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MA6061T6
+    yieldStrength: 2.76e+8 # Pa, 6061-T6; T6, typical; typical (AA), not a specification minimum. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MA6061T6
+    thermalConductivity: 167 # W/(m*K), 6061-T6; T6, typical; at 77 F (25 C). https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MA6061T6
     color: ":Aluminum"
   303 Stainless Steel:
     desc: >-
@@ -101,6 +105,10 @@ materials:
       2%. The REX shafts' E-clip is taken to be the same steel as the shaft.
     url: https://en.wikipedia.org/wiki/SAE_steel_grades#Stainless_steel
     density: 8000
+    youngsModulus: 1.93e+11 # Pa, AISI 303; annealed bar. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MQ303G
+    poissonsRatio: 0.25 # AISI 303; annealed bar. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MQ303G
+    yieldStrength: 2.4e+8 # Pa, AISI 303; annealed bar, tested at room temperature; typical. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MQ303G
+    thermalConductivity: 16.2 # W/(m*K), AISI 303; at 100 C. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MQ303G
     color: ":Stainless Steel"
   52100 Steel:
     desc: >-
@@ -108,6 +116,7 @@ materials:
       high-carbon chromium steel ball bearings are made of.
     url: https://en.wikipedia.org/wiki/SAE_52100_steel
     density: 7810
+    youngsModulus: 2.0e+11 # Pa, AISI 52100 (100Cr6 / 1.3505); hardened (61.8-67 HRC). https://www.skt-gmbh.de/wp-content/uploads/2025/09/Datasheet_balls_1.3505.pdf
     color: ":Bearing Steel"
   H59 Brass:
     desc: >-
@@ -115,20 +124,25 @@ materials:
       (GB/T 5231 H59, CuZn40: Muntz metal).
     url: https://en.wikipedia.org/wiki/Muntz_metal
     density: 8400
+    youngsModulus: 1.02e+11 # Pa, H59 / CuZn40 (CW509L, Muntz metal); room temperature reference value. https://www.wieland.com/de/content/download/9959/file/Z20_RP_EN.pdf
+    poissonsRatio: 0.34 # H59 / CuZn40 (CW509L, Muntz metal); room temperature reference value. https://www.wieland.com/de/content/download/9959/file/Z20_RP_EN.pdf
+    thermalConductivity: 117 # W/(m*K), H59 / CuZn40 (CW509L, Muntz metal); room temperature (soft). https://www.wieland.com/de/content/download/9959/file/Z20_RP_EN.pdf
     color: ":Brass"
   1018 Steel:
+    type: alias
+    source: "//pub/std/manufacturing/material/metal:steel-1018"
     desc: >-
       The pages say "Steel", zinc-plated. AISI 1018 is the low-carbon steel
       nuts, spacers, plates and set-screw collars are commonly made of; plated,
       so it claims no colour.
-    url: https://en.wikipedia.org/wiki/SAE_steel_grades
-    density: 7870
+    # The standard AISI 1018: the same 7870 kg/m^3, and the analysis values with their sources.
   1045 Steel:
+    type: alias
+    source: "//pub/std/manufacturing/material/metal:steel-1045"
     desc: >-
       The steel sprocket's page says "Steel". AISI 1045 is the medium-carbon
       steel roller-chain sprockets are made of, for teeth that can be hardened.
-    url: https://en.wikipedia.org/wiki/SAE_steel_grades
-    density: 7870
+    # The standard AISI 1045: the same 7870 kg/m^3, and the analysis values with their sources.
   4140 Steel:
     desc: >-
       The button head screws' page says "Steel". A socket button head screw
@@ -136,13 +150,18 @@ materials:
       AISI 4140 or its like.
     url: https://en.wikipedia.org/wiki/41xx_steel
     density: 7850
+    youngsModulus: 2.05e+11 # Pa, AISI 4140, ISO 898-1 property class 10.9; quenched and tempered (modulus insensitive to temper). https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Alloy-Steel-Grade-4140-Fact-Sheet_Elgin-Website.pdf
+    poissonsRatio: 0.29 # AISI 4140, ISO 898-1 property class 10.9; Q&T. https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Alloy-Steel-Grade-4140-Fact-Sheet_Elgin-Website.pdf
+    yieldStrength: 9.4e+8 # Pa, AISI 4140, ISO 898-1 property class 10.9; property class 10.9, quenched and tempered; specification minimum. ISO 898-1:2013, Mechanical properties of fasteners made of carbon steel and alloy steel - Part 1, Table 3: property class 10.9, stress at 0.2% non-proportional elongation Rp0.2, minimum 940 MPa
+    thermalConductivity: 42.6 # W/(m*K), AISI 4140, ISO 898-1 property class 10.9; at 100 C (normalized data). https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Alloy-Steel-Grade-4140-Fact-Sheet_Elgin-Website.pdf
   POM:
+    type: alias
+    source: "//pub/std/manufacturing/material/plastic:pom"
     desc: >-
       Acetal (polyoxymethylene). The plastic sprocket is named for it, though
       its spec table says only "Plastic"; the plastic spacers are taken to be
       the same, which the 8mm one's weight agrees with.
-    url: https://en.wikipedia.org/wiki/Polyoxymethylene
-    density: 1410
+    # The standard POM (Delrin 100): the same 1410 kg/m^3, and the analysis values with their sources.
 
 finishes:
   Clear Anodized:
