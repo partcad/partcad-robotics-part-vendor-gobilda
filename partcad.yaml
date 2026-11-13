@@ -1,9 +1,15 @@
 name: //pub/robotics/parts/gobilda
 desc: goBILDA® is a modern build system designed for educators and students.
 url: "https://gobilda.com/"
-# 0.9.0 is the release that reads 'colors:', 'materials:' and 'finishes:' and
-# applies a part's 'color', 'material' and 'finish' to its geometry.
-partcad: ">=0.9.0"
+# 0.10.21 is the first release with partcad/partcad's parametric-materials
+# change, which the materials below are written against: each is a
+# 'type: enrich' of a grade in the standard catalogues, which need that release
+# too. An older PartCAD does not know an enrich and would read every material
+# here as one with no density and no analysis values, so no part would weigh
+# anything; it is refused here instead. (0.9.0 was the first to read 'colors:',
+# 'materials:' and 'finishes:' and apply a part's 'color', 'material' and
+# 'finish' to its geometry.)
+partcad: ">=0.10.21"
 # Everything in this package can be bought from goBILDA (see 'suppliers'
 # below). Some SKUs are sets of more than one kind of item - a REX shaft comes
 # with its E-clip - and each item of a set is a part of its own, naming the
@@ -40,6 +46,16 @@ suppliers:
 # every part made of one piece of one material. A material that claims a
 # colour is how the part looks, and a part made of it names no colour of its
 # own. A plated part names the plating's colour, which hides the steel's.
+#
+# Each material is made ('type: enrich') from the grade it is guessed to be in
+# PartCAD's standard catalogues, //pub/std/manufacturing/material/metal and
+# //pub/std/manufacturing/material/plastic, and takes that grade's density and
+# analysis values from there, where the source of each is given. What it
+# states itself is goBILDA's: its name, which is what the parts name; why its
+# grade is the guess; and the colour it claims, where this package draws the
+# metal in a colour of its own. The steels claim the standard catalogue's bare
+# steel, which no part here shows: each is plated or blackened and names that
+# colour instead.
 #
 # goBILDA's weight is authoritative. Where the model at its grade's density
 # is more than 10% off it, the part states goBILDA's weight
@@ -86,82 +102,82 @@ colors:
 
 materials:
   6061-T6 Aluminum:
+    type: enrich
+    source: "//pub/std/manufacturing/material/metal:al-6061-t6"
     desc: >-
       The pages say "Aluminum". 6061-T6 is what machined and extruded
       aluminium robot structure is made of, and at its density the channels,
       beams, brackets, mounts and standoffs come within 6% of their published
-      weights: 2.70 g/cm^3 between them, where 7075 would be 2.81.
-    url: https://en.wikipedia.org/wiki/6061_aluminium_alloy
-    density: 2700 # kg/m^3
-    youngsModulus: 6.89e+10 # Pa, 6061-T6; T6, typical. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MA6061T6
-    poissonsRatio: 0.33 # 6061-T6; T6, typical. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MA6061T6
-    yieldStrength: 2.76e+8 # Pa, 6061-T6; T6, typical; typical (AA), not a specification minimum. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MA6061T6
-    thermalConductivity: 167 # W/(m*K), 6061-T6; T6, typical; at 77 F (25 C). https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MA6061T6
+      weights: 2.70 g/cm^3 between them, where 7075 would be 2.81. Its density
+      and analysis values are the standard 6061-T6's.
     color: ":Aluminum"
   303 Stainless Steel:
+    type: enrich
+    source: "//pub/std/manufacturing/material/metal:ss-303"
     desc: >-
       The pages say "Stainless Steel". AISI 303 is the free-machining grade
       turned shafts are made of, and the shafts weigh what it weighs to within
       2%. The REX shafts' E-clip is taken to be the same steel as the shaft.
-    url: https://en.wikipedia.org/wiki/SAE_steel_grades#Stainless_steel
-    density: 8000
-    youngsModulus: 1.93e+11 # Pa, AISI 303; annealed bar. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MQ303G
-    poissonsRatio: 0.25 # AISI 303; annealed bar. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MQ303G
-    yieldStrength: 2.4e+8 # Pa, AISI 303; annealed bar, tested at room temperature; typical. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MQ303G
-    thermalConductivity: 16.2 # W/(m*K), AISI 303; at 100 C. https://asm.matweb.com/search/SpecificMaterial.asp?bassnum=MQ303G
+      Its density and analysis values are the standard AISI 303's.
     color: ":Stainless Steel"
   52100 Steel:
+    type: enrich
+    source: "//pub/std/manufacturing/material/metal:steel-52100"
     desc: >-
       The bearings' pages say "High-Carbon Steel". AISI 52100 is the
-      high-carbon chromium steel ball bearings are made of.
-    url: https://en.wikipedia.org/wiki/SAE_52100_steel
-    density: 7810
-    youngsModulus: 2.0e+11 # Pa, AISI 52100 (100Cr6 / 1.3505); hardened (61.8-67 HRC). https://www.skt-gmbh.de/wp-content/uploads/2025/09/Datasheet_balls_1.3505.pdf
+      high-carbon chromium steel ball bearings are made of. Its density and
+      analysis values are the standard AISI 52100's, through hardened.
     color: ":Bearing Steel"
   H59 Brass:
+    type: enrich
+    source: "//pub/std/manufacturing/material/metal:brass-c280"
     desc: >-
-      The worm gear's page says it is "machined from H59 hardened brass"
-      (GB/T 5231 H59, CuZn40: Muntz metal).
-    url: https://en.wikipedia.org/wiki/Muntz_metal
-    density: 8400
-    youngsModulus: 1.02e+11 # Pa, H59 / CuZn40 (CW509L, Muntz metal); room temperature reference value. https://www.wieland.com/de/content/download/9959/file/Z20_RP_EN.pdf
-    poissonsRatio: 0.34 # H59 / CuZn40 (CW509L, Muntz metal); room temperature reference value. https://www.wieland.com/de/content/download/9959/file/Z20_RP_EN.pdf
-    thermalConductivity: 117 # W/(m*K), H59 / CuZn40 (CW509L, Muntz metal); room temperature (soft). https://www.wieland.com/de/content/download/9959/file/Z20_RP_EN.pdf
+      The worm gear's page says it is "machined from H59 hardened brass".
+      GB/T 5231 H59 is the Chinese equivalent of CuZn40 (CW509L), Muntz metal,
+      and its density and analysis values are the standard catalogue's Muntz
+      metal's: the Copper Development Association's for C28000, which differ
+      from what Wieland publishes for CuZn40 by about 5% at most (8390 kg/m^3
+      against 8400, 103 GPa against 102, 123 W/(m*K) against 117). Its yield
+      strength is C28000's annealed, which a hardened gear's exceeds.
     color: ":Brass"
   1018 Steel:
-    type: alias
+    type: enrich
     source: "//pub/std/manufacturing/material/metal:steel-1018"
     desc: >-
       The pages say "Steel", zinc-plated. AISI 1018 is the low-carbon steel
-      nuts, spacers, plates and set-screw collars are commonly made of; plated,
-      so it claims no colour.
-    # The standard AISI 1018: the same 7870 kg/m^3, and the analysis values with their sources.
+      nuts, spacers, plates and set-screw collars are commonly made of. Its
+      density and analysis values are the standard AISI 1018's, and so is the
+      colour it claims, bare steel's: every part here made of it is
+      zinc-plated, and names the plating's colour.
   1045 Steel:
-    type: alias
+    type: enrich
     source: "//pub/std/manufacturing/material/metal:steel-1045"
     desc: >-
       The steel sprocket's page says "Steel". AISI 1045 is the medium-carbon
       steel roller-chain sprockets are made of, for teeth that can be hardened.
-    # The standard AISI 1045: the same 7870 kg/m^3, and the analysis values with their sources.
+      Its density and analysis values are the standard AISI 1045's, and so is
+      the colour it claims, bare steel's: the sprocket is black zinc-plated,
+      and names that colour.
   4140 Steel:
+    type: enrich
+    source: "//pub/std/manufacturing/material/metal:steel-4140-iso898"
+    with: {propertyClass: 10.9}
     desc: >-
       The button head screws' page says "Steel". A socket button head screw
       (ISO 7380) is property class 10.9, a quenched and tempered alloy steel:
-      AISI 4140 or its like.
-    url: https://en.wikipedia.org/wiki/41xx_steel
-    density: 7850
-    youngsModulus: 2.05e+11 # Pa, AISI 4140, ISO 898-1 property class 10.9; quenched and tempered (modulus insensitive to temper). https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Alloy-Steel-Grade-4140-Fact-Sheet_Elgin-Website.pdf
-    poissonsRatio: 0.29 # AISI 4140, ISO 898-1 property class 10.9; Q&T. https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Alloy-Steel-Grade-4140-Fact-Sheet_Elgin-Website.pdf
-    yieldStrength: 9.4e+8 # Pa, AISI 4140, ISO 898-1 property class 10.9; property class 10.9, quenched and tempered; specification minimum. ISO 898-1:2013, Mechanical properties of fasteners made of carbon steel and alloy steel - Part 1, Table 3: property class 10.9, stress at 0.2% non-proportional elongation Rp0.2, minimum 940 MPa
-    thermalConductivity: 42.6 # W/(m*K), AISI 4140, ISO 898-1 property class 10.9; at 100 C (normalized data). https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Alloy-Steel-Grade-4140-Fact-Sheet_Elgin-Website.pdf
+      AISI 4140 or its like. Its density and analysis values are the standard
+      4140's in property class 10.9, its yield strength the class's
+      specification minimum. It claims bare steel's colour, which no part here
+      made of it shows: each is zinc-plated or black-oxided, and names that
+      colour.
   POM:
-    type: alias
+    type: enrich
     source: "//pub/std/manufacturing/material/plastic:pom"
     desc: >-
       Acetal (polyoxymethylene). The plastic sprocket is named for it, though
       its spec table says only "Plastic"; the plastic spacers are taken to be
-      the same, which the 8mm one's weight agrees with.
-    # The standard POM (Delrin 100): the same 1410 kg/m^3, and the analysis values with their sources.
+      the same, which the 8mm one's weight agrees with. Its density and
+      analysis values are the standard POM's: the homopolymer, Delrin 100.
 
 finishes:
   Clear Anodized:
