@@ -129,26 +129,20 @@ materials:
     thermalConductivity: 117 # W/(m*K), H59 / CuZn40 (CW509L, Muntz metal); room temperature (soft). https://www.wieland.com/de/content/download/9959/file/Z20_RP_EN.pdf
     color: ":Brass"
   1018 Steel:
+    type: alias
+    source: "//pub/std/manufacturing/material/metal:steel-1018"
     desc: >-
       The pages say "Steel", zinc-plated. AISI 1018 is the low-carbon steel
       nuts, spacers, plates and set-screw collars are commonly made of; plated,
       so it claims no colour.
-    url: https://en.wikipedia.org/wiki/SAE_steel_grades
-    density: 7870
-    youngsModulus: 2.0e+11 # Pa, AISI 1018; cold drawn. https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Carbon-Steel-Grade-1018-Data-Sheet_Elgin.pdf
-    poissonsRatio: 0.29 # AISI 1018; cold drawn. https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Carbon-Steel-Grade-1018-Data-Sheet_Elgin.pdf
-    yieldStrength: 3.7e+8 # Pa, AISI 1018; cold drawn (catalogue states no condition; cold-drawn bar assumed as the usual 1018 stock). https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Carbon-Steel-Grade-1018-Data-Sheet_Elgin.pdf
-    thermalConductivity: 51.9 # W/(m*K), AISI 1018; room temperature. https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Carbon-Steel-Grade-1018-Data-Sheet_Elgin.pdf
+    # The standard AISI 1018: the same 7870 kg/m^3, and the analysis values with their sources.
   1045 Steel:
+    type: alias
+    source: "//pub/std/manufacturing/material/metal:steel-1045"
     desc: >-
       The steel sprocket's page says "Steel". AISI 1045 is the medium-carbon
       steel roller-chain sprockets are made of, for teeth that can be hardened.
-    url: https://en.wikipedia.org/wiki/SAE_steel_grades
-    density: 7870
-    youngsModulus: 2.0e+11 # Pa, AISI 1045; any (insensitive to condition). https://kmac-distribution.com/technical/1045-carbon-steel.htm
-    poissonsRatio: 0.29 # AISI 1045; any. https://kmac-distribution.com/technical/1045-carbon-steel.htm
-    yieldStrength: 5.17e+8 # Pa, AISI 1045; cold finished (cold drawn) bar, 'as supplied'; typical; ASSUMED for the sprocket (its hardened teeth are not represented). https://www.myalro.com/gradeinfo/Metals_Gridpt.aspx?gp=0004
-    thermalConductivity: 51.9 # W/(m*K), AISI 1045; room temperature (temperature not stated by source). https://kmac-distribution.com/technical/1045-carbon-steel.htm
+    # The standard AISI 1045: the same 7870 kg/m^3, and the analysis values with their sources.
   4140 Steel:
     desc: >-
       The button head screws' page says "Steel". A socket button head screw
@@ -158,19 +152,16 @@ materials:
     density: 7850
     youngsModulus: 2.05e+11 # Pa, AISI 4140, ISO 898-1 property class 10.9; quenched and tempered (modulus insensitive to temper). https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Alloy-Steel-Grade-4140-Fact-Sheet_Elgin-Website.pdf
     poissonsRatio: 0.29 # AISI 4140, ISO 898-1 property class 10.9; Q&T. https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Alloy-Steel-Grade-4140-Fact-Sheet_Elgin-Website.pdf
-    yieldStrength: 9.4e+8 # Pa, AISI 4140, ISO 898-1 property class 10.9; property class 10.9, quenched and tempered; SPECIFICATION MINIMUM Rp0.2 per ISO 898-1. ISO 898-1:2013 Mechanical properties of fasteners made of carbon steel and alloy steel - Part 1, Table 3 (value as given in the task brief; standard not fetched)
+    yieldStrength: 9.4e+8 # Pa, AISI 4140, ISO 898-1 property class 10.9; property class 10.9, quenched and tempered; specification minimum. ISO 898-1:2013, Mechanical properties of fasteners made of carbon steel and alloy steel - Part 1, Table 3: property class 10.9, stress at 0.2% non-proportional elongation Rp0.2, minimum 940 MPa
     thermalConductivity: 42.6 # W/(m*K), AISI 4140, ISO 898-1 property class 10.9; at 100 C (normalized data). https://www.mwcomponents.com/uploads/Resource-Center/Elgin-Material-Sheets/Alloy-Steel-Grade-4140-Fact-Sheet_Elgin-Website.pdf
   POM:
+    type: alias
+    source: "//pub/std/manufacturing/material/plastic:pom"
     desc: >-
       Acetal (polyoxymethylene). The plastic sprocket is named for it, though
       its spec table says only "Plastic"; the plastic spacers are taken to be
       the same, which the 8mm one's weight agrees with.
-    url: https://en.wikipedia.org/wiki/Polyoxymethylene
-    density: 1410
-    youngsModulus: 3.15e+9 # Pa, DuPont Delrin 100 NC010 (POM homopolymer); ISO 527-2, injection-moulded, 23 C. DuPont, Delrin 100 NC010 datasheet (UL Prospector copy), https://sushengpolymer.com/media/pdf/L1RBhh_Delrin-100-NC010.pdf
-    poissonsRatio: 0.35 # Acetal (handbook); 23 C. Machinery's Handbook, 31st ed. (Industrial Press, 2020), 'Stress and Strain in Plastics', Table 1 'Poisson's Ratio at 23 C for Resins and Compounds', p. 566; viewed at https://online.flippingbook.com/view/954192180/629/
-    yieldStrength: 7.2e+7 # Pa, DuPont Delrin 100 NC010 (POM homopolymer); ISO 527-2 tensile stress at yield, 23 C. DuPont, Delrin 100 NC010 datasheet (UL Prospector copy), https://sushengpolymer.com/media/pdf/L1RBhh_Delrin-100-NC010.pdf
-    thermalConductivity: 0.36 # W/(m*K), Quadrant EPP Delrin acetal (stock shape); ASTM F433. Quadrant Engineering Plastic Products, Quadrant EPP Delrin Acetal datasheet (UL Prospector copy), https://sushengpolymer.com/media/pdf/mstbvC_Quadrant-EPP-Delrin-Acetal.pdf
+    # The standard POM (Delrin 100): the same 1410 kg/m^3, and the analysis values with their sources.
 
 finishes:
   Clear Anodized:
