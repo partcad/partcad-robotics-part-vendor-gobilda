@@ -1,7 +1,7 @@
 name: //pub/robotics/parts/gobilda
 desc: goBILDA® is a modern build system designed for educators and students.
 url: "https://gobilda.com/"
-# 0.10.21 is the first release with partcad/partcad's parametric-materials
+# 0.10.23 is the first release with partcad/partcad's parametric-materials
 # change, which the materials below are written against: each is a
 # 'type: enrich' of a grade in the standard catalogues, which need that release
 # too. An older PartCAD does not know an enrich and would read every material
@@ -9,7 +9,7 @@ url: "https://gobilda.com/"
 # anything; it is refused here instead. (0.9.0 was the first to read 'colors:',
 # 'materials:' and 'finishes:' and apply a part's 'color', 'material' and
 # 'finish' to its geometry.)
-partcad: ">=0.10.21"
+partcad: ">=0.10.23"
 # Everything in this package can be bought from goBILDA (see 'suppliers'
 # below). Some SKUs are sets of more than one kind of item - a REX shaft comes
 # with its E-clip - and each item of a set is a part of its own, naming the
