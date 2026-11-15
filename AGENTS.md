@@ -109,6 +109,11 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
   tooth goes in any gap of a gear of the same module. A round gear implements `gear-<teeth>t;module=<m>,shift=<x>`
   once, on its axis, and gets every tooth and gap, numbered: see `motion/worm_gear_28t`, and `motion/worm_8mmREX`
   for a worm.
+* Every mating says how its two ends are put together, with a `how:` (`pushForceMax`, `snapIn`, or a thread the
+  interfaces carry): `pc qual test` fails a step of an assembly that nothing says that of. A step that is not what
+  its mating says - an E-clip snapped into a groove - says so itself, in the ASSY file. Name an interface of
+  another package the way it is declared, not by an alias of it (`m-thru;size=8`, not `m8-thru`): PartCAD 0.10.17
+  finds no mating declared against an alias (partcad/partcad#965 fixes that).
 * Holes and shafts are the interfaces of `//pub/std/metric/m`: `m4-thru-8` where the standard names the size and
   the depth, `m-thru-depth;depth=8.5,size=4` where it does not. Write the parameters of such a reference in
   alphabetical order: that is how PartCAD names it, and an ASSY file's `to:` is matched against that name.
