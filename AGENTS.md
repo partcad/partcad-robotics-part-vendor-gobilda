@@ -43,8 +43,11 @@ that has PartCAD and OpenCASCADE (`OCP`) in it. Pass `--no-ansi` to `pc` when re
    made of, checked against the page's "Weight". A material claims the colour it looks, so a part made of it names
    no colour unless something covers the metal: a plating, or a colour the page states ("Color: Black"). A
    zinc-plated steel part does, with `color: {type: string, default: ":Zinc-Plated"}` beside its material. Add a
-   declaration for a grade, colour or finish the package does not have yet. Then compare the mass `pc info` reports
-   with the page's "Weight". The page weighs what the SKU sells: of an item in a set (`item_in_sku`), compare the
+   declaration for a grade, colour or finish the package does not have yet. A grade is a `type: enrich` of that
+   grade in the standard catalogues, `//pub/std/manufacturing/material/metal` and `.../plastic`, which have its
+   density and analysis values with their sources: state only why it is the guess (`desc`) and, for a metal this
+   package draws in a colour of its own, `color:`. Then compare the mass `pc info` reports with the page's
+   "Weight". The page weighs what the SKU sells: of an item in a set (`item_in_sku`), compare the
    set's items added up, and never state the set's weight as one item's. If they are more than 10% apart, try the
    grades the page's metal could be before anything else. If none accounts for it, goBILDA's weight is the one that
    counts: state it under `properties: physics: mass:` (in kg), and say in a comment what the model weighs, how far
