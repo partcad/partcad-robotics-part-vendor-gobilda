@@ -13,6 +13,8 @@ links:
       name: shaft
       to: 8mmREX-shaft
       toInstance: groove
+      # Pushed onto the shaft's groove until it springs shut in it
+      how: {snapIn: true, pushForceMax: 30}
 
   - assembly: motion/hub_sonic_8mmREX
     name: gear-hub
@@ -93,6 +95,8 @@ links:
         turnZ: 300
       name: bearing-gear-1
       to: "//pub/std/metric/m:m14-shaft-4"
+      # Its hole over the bearing's 14mm outer race, which is a snug fit in it
+      how: {pushForceMax: 20}
 
   # In the other wall of the channel: 48mm further along the shaft than the
   # first one, whose flange is 1mm past the clip
@@ -141,6 +145,8 @@ links:
       name: channel
       to: "//pub/std/metric/m:m14-thru-2.5"
       toInstance: top-inner-1
+      # Its outer race pushed into the channel's 14mm hole, up to its flange
+      how: {pushForceMax: 20}
 
   - part: motion/shaft_8mmREX_72mm
     name: worm-shaft
@@ -159,6 +165,7 @@ links:
       name: worm-shaft
       to: 8mmREX-shaft
       toInstance: groove
+      how: {snapIn: true, pushForceMax: 30}
 
   - part: hardware/spacer_steel_8mm_4mm
     name: spacer-steel
@@ -201,6 +208,8 @@ links:
       name: spacer-plastic-1
       to: "//pub/std/metric/m:m8-thru-1"
       toInstance: side1
+      # Slid along the shaft up against it
+      how: {pushForceMax: 5}
 
   # Screwed to both walls of the channel, near the open side of it
   - part: structure/mount_quad_block

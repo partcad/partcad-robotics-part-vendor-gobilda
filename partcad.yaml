@@ -327,14 +327,20 @@ interfaces:
         max: 360
         default: 0
     mates:
-      - "//pub/std/metric/m:m8-thru"
+      # Two things on one shaft, the second slid along it up against the first:
+      # a spacer against a bearing, or a hub. By hand, so a few newtons.
+      # Named as the interface 'm8-thru' is an alias of: PartCAD 0.10.17 finds
+      # no mating declared against an alias (partcad/partcad#965 fixes that).
+      "//pub/std/metric/m:m-thru;size=8":
+        how: {pushForceMax: 5}
   {% for depth in [0.7, 5, 8, 9.5, 10, 10.5, 22, 32, 33] %}
   8mmREX-thru-{{ depth }}:
     desc: Through hole of {{ depth }}mm depth for 8mm REX shaft
     inherits:
       8mmREX-thru: {{ depth }}mm
     mates:
-      - 8mmREX-thru
+      8mmREX-thru:
+        how: {pushForceMax: 5}
   {% endfor %}
   8mmREX-shaft:
     desc: 8mm REX shaft interface
@@ -350,8 +356,14 @@ interfaces:
         # The longest 8mm REX shaft goBILDA sells
         max: 624
     mates:
-      - 8mmREX-thru
-      - "//pub/std/metric/m:m8-thru"
+      # Whatever has a REX bore - a hub, a bearing, a spacer, a worm - is slid
+      # onto the shaft by hand: a sliding fit, a few newtons at most. Pushed
+      # through a bearing, the shaft goes the same way. An E-clip, which snaps
+      # into the groove, says so where it is connected ('snapIn').
+      8mmREX-thru:
+        how: {pushForceMax: 10}
+      "//pub/std/metric/m:m-thru;size=8":
+        how: {pushForceMax: 10}
 
   ### Patterns ###
   # 16mm pattern
@@ -369,7 +381,9 @@ interfaces:
       4xM4-16mm-pattern: thru
       "//pub/std/metric/m:m4-thru": {{ pattern_4xM4_16mm | tojson }}
     mates:
-      - 4xM4-16mm-pattern
+      # Laid against the other pattern and held there for its screws.
+      4xM4-16mm-pattern:
+        how: {pushForceMax: 5}
   # 4xM4-16mm-pattern-thru-threaded:
   #   desc: 4 x M4 at 16mm pattern, thru, threaded
   #   inherits:
@@ -380,21 +394,24 @@ interfaces:
       4xM4-16mm-pattern: 1.5mm
       "//pub/std/metric/m:m4-thru-1.5": {{ pattern_4xM4_16mm | tojson }}
     mates:
-      - 4xM4-16mm-pattern
+      4xM4-16mm-pattern:
+        how: {pushForceMax: 5}
   4xM4-16mm-pattern-thru-8mm:
     desc: 4 x M4 at 16mm pattern, thru, 8mm thick
     inherits:
       4xM4-16mm-pattern: thru-8mm
       "//pub/std/metric/m:m4-thru-8": {{ pattern_4xM4_16mm | tojson }}
     mates:
-      - 4xM4-16mm-pattern
+      4xM4-16mm-pattern:
+        how: {pushForceMax: 5}
   4xM4-16mm-pattern-threaded-thru-4mm:
     desc: 4 x M4 at 16mm pattern, threaded, 4mm thick
     inherits:
       4xM4-16mm-pattern: threaded-thru-4mm
       "//pub/std/metric/m:m4-threaded-thru-4": {{ pattern_4xM4_16mm | tojson }}
     mates:
-      - 4xM4-16mm-pattern
+      4xM4-16mm-pattern:
+        how: {pushForceMax: 5}
 
   ### Gears ###
   # Every tooth of a gear is a port, and so is every gap between two teeth. Two
@@ -427,7 +444,9 @@ interfaces:
         location: [[0, 0, 0], [0, 0, 1], -45]
         sketch: "gear-tooth-boundary;module=%module%"
     mates:
-      - "gear-gap;module=%module%"
+      # Brought into mesh across the other gear's axis, by hand.
+      "gear-gap;module=%module%":
+        how: {pushForceMax: 5}
   gear-gap:
     desc: The gap between two teeth of a MOD %module% gear
     parameters:
@@ -437,7 +456,8 @@ interfaces:
         location: [[0, 0, 0], [0, 0, 1], -45]
         sketch: "gear-tooth-boundary;module=%module%"
     mates:
-      - "gear-tooth;module=%module%"
+      "gear-tooth;module=%module%":
+        how: {pushForceMax: 5}
 
   # One pitch of a round gear: a tooth, and the gap before it. Its +Z is the
   # axis of the gear, on the plane halfway across the teeth, and its +X is the
