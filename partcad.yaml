@@ -6,9 +6,11 @@ url: "https://gobilda.com/"
 # 'type: enrich' of a grade in the standard catalogues, which need that release
 # too. An older PartCAD does not know an enrich and would read every material
 # here as one with no density and no analysis values, so no part would weigh
-# anything; it is refused here instead. (0.9.0 was the first to read 'colors:',
-# 'materials:' and 'finishes:' and apply a part's 'color', 'material' and
-# 'finish' to its geometry.)
+# anything; it is refused here instead. 0.10.17 was the first release with the
+# rest of what this package is built of: the 'boolean' parts the items of
+# several materials are taken apart with, the 'has_color', 'has_material' and
+# 'has_weight' requirements every item states, 'url' on the assemblies, and a
+# part drawn in its material's colour.
 partcad: ">=0.10.23"
 # Everything in this package can be bought from goBILDA (see 'suppliers'
 # below). Some SKUs are sets of more than one kind of item - a REX shaft comes
